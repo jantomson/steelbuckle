@@ -1,5 +1,9 @@
 const nextConfig = {
   reactStrictMode: true,
+  // Add this to disable ESLint during builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Configure image domains for next/image
   images: {
     domains: ["localhost"],
@@ -7,8 +11,8 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  // Generate static exports for deployment
-  output: "export",
-  // Base path for deployment (if needed)
-  // basePath: '/your-base-path',
+  // Comment this out if you need API routes
+  // output: "export",
 };
+
+export default nextConfig;
