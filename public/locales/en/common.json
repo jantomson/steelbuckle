@@ -1,0 +1,265 @@
+{
+  "nav": {
+    "services": "Services",
+    "completed_works": "Projects",
+    "about": "About Us",
+    "contact": "Contact"
+  },
+  "services": {
+    "title": "Offered services",
+    "railway_maintenance": "Railway Maintenance",
+    "repair_renovation": "Repair and Renovation",
+    "railway_construction": "Railway Construction",
+    "design": "Design"
+  },
+  "contact": {
+    "title": "Get in touch",
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Enter your name"
+      },
+      "phone": {
+        "label": "Phone number",
+        "placeholder": "Enter your phone number"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "subject": {
+        "label": "Subject",
+        "placeholder": "Enter subject"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Enter your message"
+      },
+      "response_time": "We will respond within a few days.",
+      "submit": "Send"
+    }
+  },
+  "footer": {
+    "contact": "Contact",
+    "office": "Office",
+    "services": "Services",
+    "general_phone": "General Phone"
+  },
+  "hero": {
+    "title_start": "Railroad",
+    "title_span": "building and",
+    "title_end": "upkeep",
+    "subtitle": "More than 35 years of experience.",
+    "cta": "Get in touch with us",
+    "video": "https://player.vimeo.com/video/1073950156?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+  },
+  "about": {
+    "text_1": "Depending on the condition of the facility, we offer individually selected repair work volumes to the client, starting from ongoing maintenance and ending with railway overhaul or new railway construction.",
+    "text_2": "Timely performed quality railway repair is a guarantee of railway transport safety and trouble-free operation.",
+    "read_more": "Read more",
+    "title": "What we do?"
+  },
+  "about_page": {
+    "title": "About Company",
+    "services": {
+      "title": "We provide the following services",
+      "list": {
+        "maintenance": "Railway and track maintenance",
+        "repair": "Railway repair and renovation",
+        "construction": "Railway construction",
+        "design": "Design"
+      }
+    },
+    "content": {
+      "intro": "Steel Buckle OÜ (formerly known as OÜ Renome) is a railway construction company providing railway construction, repair, and maintenance services.",
+      "history": "The company was founded in 1993 based on a cooperative established four years earlier (1989). From the beginning, we have been engaged in the construction, repair, and maintenance of railways, including branch lines, crane tracks, and other railway infrastructure facilities.",
+      "materials": "We also supply certified railway materials that meet the requirements of AS Eesti Raudtee.",
+      "staff": "The company has continuously trained professional employees for years. Training is conducted by the best construction engineers and railway transport specialists. The presence of trained, experienced engineering and technical staff allows organizing work at a high level, ensuring high quality and traffic safety.",
+      "locations": "Steel Buckle OÜ's production bases are located in Tallinn, Maardu and Paldiski, with the head office in Tallinn. Our project geography is quite extensive. The company has dozens of permanent clients in Estonia, and since 2007, we have been working steadily in the Latvian market. In Latvia, we carry out works in close cooperation with many local partners. Since 2014, we also have railway construction experience in Lithuania. New markets and interesting projects await us.",
+      "invitation": "We invite you to become our client or partner!"
+    }
+  },
+  "benefits": {
+    "title": "Why choose us?",
+    "subtitle": "Advantages of working with our company",
+    "intro": "Our specialists take into account client wishes, specific features of the business operation, and regional characteristics.",
+    "items": [
+      {
+        "id": "01",
+        "title": "Quality and professionalism",
+        "description": "We have 35 years of successful experience in railway repair and construction."
+      },
+      {
+        "id": "02",
+        "title": "Reasonable prices",
+        "description": "The cost of work is calculated individually for each client. We create an efficient service package for railway construction and repair depending on the client's budget and capabilities."
+      },
+      {
+        "id": "03",
+        "title": "Individual approach",
+        "description": "All work is carried out according to the specifics of the company, terrain features, freight traffic intensity, etc."
+      },
+      {
+        "id": "04",
+        "title": "Comprehensive assistance",
+        "description": "Our specialists prepare a complete package of project and implementation documentation and ensure the commissioning of the railway. After completion of repair work, we are ready to take over the ongoing maintenance of the branch line."
+      },
+      {
+        "id": "05",
+        "title": "Reliability",
+        "description": "We offer at least a two-year warranty on all works."
+      },
+      {
+        "id": "06",
+        "title": "Licensed and certified specialists",
+        "description": "Work is guaranteed to be performed in accordance with all railway construction standards."
+      },
+      {
+        "id": "07",
+        "title": "Modern equipment",
+        "description": "We have a complete set of tools and equipment necessary for railway-related work. If needed, we rent large specialized railway machines and equipment (track laying cranes, motor draisines, etc.)"
+      }
+    ]
+  },
+  "services_slider": {
+    "title": "Services",
+    "read_more": "Read more",
+    "items": [
+      {
+        "id": 1,
+        "title": "Railway and Infrastructure Maintenance",
+        "description": "Our main task in providing maintenance services is systematic monitoring of railways and railway equipment to prevent failures, extend infrastructure element life, increase safety levels, and ensure smooth wagon delivery and removal.",
+        "image": "/foto_jooksev.jpg"
+      },
+      {
+        "id": 2,
+        "title": "Repair and Renovation",
+        "description": "We provide comprehensive repair and renovation services for railway infrastructure, ensuring quality and durability.",
+        "image": "/thumbnail_Lumetorje_1.jpg"
+      },
+      {
+        "id": 3,
+        "title": "Railway Construction",
+        "description": "Complete railway construction services from planning to implementation, including new track laying and infrastructure development.",
+        "image": "/Kazlu_Ruda_2.jpg"
+      },
+      {
+        "id": 4,
+        "title": "Design and Engineering",
+        "description": "Professional design and engineering services for railway projects, including technical documentation and project planning.",
+        "image": "/Skriveri_1.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "title_start": "Together we create",
+    "title_span": "solutions",
+    "title_end": "that lead forward",
+    "description": "We invite you to become our client or partner!",
+    "button": "Contact Us"
+  },
+  "railway_maintenance_page": {
+    "title": "Railway and Facilities Ongoing Maintenance",
+    "intro": "In providing ongoing maintenance services, our main task is systematic supervision of railways and railway facilities to prevent malfunctions, extend the service life of railway infrastructure elements, and ensure safe vehicle traffic.",
+    "maintenance_includes": {
+      "title": "Ongoing maintenance includes",
+      "items": {
+        "1": "Regular visual inspections of tracks, sleepers, switches, subgrade, and other railway facilities and equipment",
+        "2": "Measurements using specialized equipment",
+        "3": "Defectoscopy",
+        "4": "Technological maintenance and adjustment of railway equipment, including bolt tightening, joint bar installation, elimination of vertical steps in rail locks, welding seam grinding, rail spike re-nailing, trackside area mowing, lock gap adjustment, and switch cleaning and lubrication, etc.",
+        "5": "Running repairs, during which individual elements of railway equipment are replaced"
+      }
+    },
+    "middle_text": "Railway maintenance is carried out year-round. During maintenance, causes of malfunctions are investigated and necessary work is performed to eliminate them. This ensures the minimum required condition of the railway in accordance with current legislation, the Railway Act, and Railway Technical Operating Rules.",
+    "branch_owners": {
+      "title": "For Branch Line Owners",
+      "paragraphs": {
+        "1": "Section 39 of the Estonian Railway Act stipulates that all railway facility owners or operators must maintain railway facilities in good condition, depending on traffic load, but at least once during the specified period in accordance with Railway Technical Operating Rules.",
+        "2": "If a company lacks qualified personnel for these tasks, it is recommended to use professional services.",
+        "3": "Our team, together with our sister company, provides assistance in the maintenance of branch lines and tracks.",
+        "4": "Check the condition of your branch line with us. We perform repairs and maintenance to ensure safe traffic."
+      }
+    },
+    "cta": "Contact Us"
+  },
+  "repair_renovation_page": {
+    "title": "Repair and Renovation",
+    "intro": "We offer comprehensive railway repair and renovation services that ensure long-term durability and safety of railway infrastructure.",
+    "services": {
+      "title": "Our services include",
+      "items": {
+        "1": "Replacement of rails and sleepers",
+        "2": "Repair and replacement of switches",
+        "3": "Repair of railway earthworks",
+        "4": "Repair of railway crossings",
+        "5": "Repair of railway superstructure"
+      }
+    },
+    "quality": {
+      "title": "Capital Repair and Renovation",
+      "description": "All repair and renovation works are carried out according to current standards and requirements. We use only certified materials and modern technologies."
+    },
+    "capital_repair": {
+      "intro": "We offer complete capital repair and renovation services for railways. Our work includes:",
+      "items": {
+        "1": "Replacement of old rails and sleepers with new ones",
+        "2": "Cleaning or replacement of ballast",
+        "3": "Renovation of switches and earthworks when necessary",
+        "4": "Complete railway repair with full documentation"
+      }
+    },
+    "bottom_sections": {
+      "section1": "During repair work, we take into account the age of the rail, the type of repair, and specific standards. All work is carried out in strict accordance with technical documentation and regulations for railways.",
+      "section2": "Our employees have acquired long and practical experience in the field of railway construction, so our clients can be assured that regardless of their field of activity, our managers have extensive experience with railways.",
+      "section3": "Upon completion of repair work, we can take over the maintenance of branch lines.",
+      "section4": "Contact our professionals for more information or request a license via email at info@rdt.ee"
+    },
+    "cta": "Contact Us",
+    "alt_text": {
+      "construction": "Railway construction",
+      "equipment": "Railway equipment"
+    }
+  },
+  "railway_infrastructure_page": {
+    "title": "Railway Infrastructure Construction",
+    "intro": "Railway construction is a rather complex and expensive undertaking. Therefore, it is very important to choose a reliable partner with a successful track record in the field of railway construction.",
+    "services": {
+      "title": "Our Services",
+      "items": {
+        "1": "Preparation of project documentation",
+        "2": "Preparation of financial calculations, reports, etc.",
+        "3": "Preparation of technical conditions for railway construction",
+        "4": "Construction of railway infrastructure according to specified conditions and projects",
+        "5": "Participation in commissioning the facility"
+      }
+    },
+    "bottom_sections": {
+      "section1": "We ensure adherence to construction tasks, quality of work, and timely commissioning of the facility.",
+      "section2": "You can request additional construction information by writing to steelbuckle@steelbuckle.ee"
+    },
+    "cta": "Contact Us",
+    "alt_text": {
+      "construction": "Railway construction"
+    }
+  },
+  "railway_design_page": {
+    "title": "Design",
+    "services": {
+      "title": "You can order from us",
+      "items": {
+        "1": "Preparation and formalization of technical documentation for railway infrastructure changes (track closure, relocation, etc.)",
+        "2": "Preparation of permit-related documentation and completion documentation for renovation and construction works"
+      }
+    },
+    "bottom_section": "Steel Buckle OÜ specialists take into account the client's wishes, the specifics of the company's operations, and regional characteristics. The result is optimal solutions to fulfill your objectives.",
+    "cta": "Contact Us",
+    "alt_text": {
+      "design": "Railway design"
+    }
+  },
+  "projects_page": {
+    "page_title": "Projects",
+    "page_subtitle": "Creating the best solutions in collaboration with partners"
+  }
+}

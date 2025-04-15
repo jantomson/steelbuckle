@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Default color scheme (Yellow & Black) */
+  --primary-background: #fde047;
+  --primary-text: #000000;
+  --primary-border: #000000;
+  --primary-line: #000000;
+  --primary-accent: #6b7280;
+}
+
+/* For components that need special handling with line or logo changes */
+img[src^="/logo_"],
+img[src^="/line"] {
+  transition: all 0.3s ease;
+}
+
+/* Helper class for elements that need to invert color when in white/dark mode */
+.invert-in-white-mode {
+  filter: none;
+}
+
+[data-color-scheme="white"] .invert-in-white-mode {
+  filter: invert(1);
+}
+
+/* Automatic hover effects with themed colors */
+.themed-hover {
+  transition: all 0.3s ease;
+}
+
+.themed-hover:hover {
+  background-color: var(--primary-text);
+  color: var(--primary-background);
+}
+
+/* Admin editing specifics */
+.edit-indicator {
+  pointer-events: none;
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  background: var(--primary-accent);
+  border-radius: 3px;
+  color: white;
+  padding: 2px 6px;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.editable-element:hover .edit-indicator {
+  opacity: 1;
+}
+
+@layer base {
+  /* Set Libre Baskerville as default font */
+  html {
+    font-family: var(--font-libre), serif;
+  }
+
+  /* Apply Inter (substitute for Mona Sans) to smaller text elements */
+  .text-xs,
+  .text-sm,
+  .text-base,
+  small,
+  .small-text {
+    font-family: var(--font-mona), sans-serif;
+  }
+}
+
+/* Add a utility class for explicitly using the sans-serif font when needed */
+.font-mona {
+  font-family: var(--font-mona), sans-serif;
+}

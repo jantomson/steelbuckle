@@ -1,0 +1,265 @@
+{
+  "nav": {
+    "services": "Pakalpojumi",
+    "completed_works": "Pabeigtie darbi",
+    "about": "Par mums",
+    "contact": "Kontakti"
+  },
+  "services": {
+    "title": "Piedāvātie pakalpojumi",
+    "railway_maintenance": "Dzelzceļa uzturēšana",
+    "repair_renovation": "Remonts un renovācija",
+    "railway_construction": "Dzelzceļa būvniecība",
+    "design": "Projektēšana"
+  },
+  "contact": {
+    "title": "Sazinies ar mums",
+    "form": {
+      "name": {
+        "label": "Vārds",
+        "placeholder": "Ievadiet savu vārdu"
+      },
+      "phone": {
+        "label": "Tālruņa numurs",
+        "placeholder": "Ievadiet savu tālruņa numuru"
+      },
+      "email": {
+        "label": "E-pasts",
+        "placeholder": "Ievadiet savu e-pastu"
+      },
+      "subject": {
+        "label": "Temats",
+        "placeholder": "Ievadiet tematu"
+      },
+      "message": {
+        "label": "Ziņojums",
+        "placeholder": "Ievadiet savu ziņojumu"
+      },
+      "response_time": "Mēs atbildēsim dažu dienu laikā.",
+      "submit": "Sūtīt"
+    }
+  },
+  "footer": {
+    "contact": "Kontakti",
+    "office": "Birojs",
+    "services": "Pakalpojumi",
+    "general_phone": "Vispārējais tālrunis"
+  },
+  "hero": {
+    "title_start": "Dzelzceļa",
+    "title_span": "būvniecība un",
+    "title_end": "uzturēšana",
+    "subtitle": "Vairāk nekā 35 gadu veiksmīgas darbības tirgū.",
+    "cta": "Sazinies ar mums",
+    "video": "https://player.vimeo.com/video/1073950156?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+  },
+  "about": {
+    "text_1": "Atkarībā no objekta stāvokļa mēs piedāvājam klientam individuāli izvēlētus remontdarbu apjomus, sākot no regulāras uzturēšanas līdz dzelzceļa kapitālajam remontam vai jauna dzelzceļa būvniecībai.",
+    "text_2": "Savlaicīgi veikts kvalitatīvs dzelzceļa remonts ir dzelzceļa transporta drošības un netraucētas darbības garantija.",
+    "read_more": "Uzzināt vairāk",
+    "title": "Ar ko mēs nodarbojamies?"
+  },
+  "about_page": {
+    "title": "Par uzņēmumu",
+    "services": {
+      "title": "Mēs veicam sekojošus darbus",
+      "list": {
+        "maintenance": "Dzelzceļu un sliežu ceļu uzturēšana",
+        "repair": "Dzelzceļu remonts un renovācija",
+        "construction": "Dzelzceļa būvniecība",
+        "design": "Projektēšana"
+      }
+    },
+    "content": {
+      "intro": "Steel Buckle OÜ (agrāk OÜ Renome) ir dzelzceļa būvniecības uzņēmums, kas sniedz dzelzceļa būvniecības, remonta un uzturēšanas pakalpojumus.",
+      "history": "Uzņēmums tika dibināts 1993. gadā uz kooperatīva bāzes, kas tika izveidots četrus gadus agrāk (1989). Kopš paša sākuma mēs nodarbojamies ar dzelzceļu, tostarp pievedceļu un celtņu ceļu, kā arī citu dzelzceļa infrastruktūras objektu būvniecību, remontu un uzturēšanu.",
+      "materials": "Mēs arī piegādājam sertificētus dzelzceļa materiālus, kas atbilst AS Eesti Raudtee prasībām.",
+      "staff": "Uzņēmums gadiem ilgi pastāvīgi apmāca profesionālus darbiniekus. Apmācību veic labākie būvinženieri un dzelzceļa transporta speciālisti. Apmācītu, pieredzējušu inženiertehnisku darbinieku esamība ļauj organizēt darbu augstā līmenī, nodrošinot augstu kvalitāti un satiksmes drošību.",
+      "locations": "Steel Buckle OÜ ražošanas bāze atrodas Tallinā, Mārdū un Paldiskī, bet galvenais birojs - Tallinā. Mūsu objektu ģeogrāfija ir diezgan plaša. Uzņēmumam ir desmitiem pastāvīgo klientu Igaunijā, un kopš 2007. gada mēs stabili strādājam arī Latvijas tirgū. Latvijā mēs veicam darbus ciešā sadarbībā ar daudziem vietējiem partneriem. Kopš 2014. gada mums ir dzelzceļa būvniecības pieredze arī Lietuvā. Priekšā mūs gaida jauni tirgi un interesanti projekti.",
+      "invitation": "Aicinām jūs kļūt par mūsu klientu vai partneri!"
+    }
+  },
+  "benefits": {
+    "title": "Kāpēc izvēlēties tieši mūs?",
+    "subtitle": "Priekšrocības, ko sniedz sadarbība ar mūsu uzņēmumu",
+    "intro": "Mūsu speciālisti ņem vērā pasūtītāja vēlmes, uzņēmuma darbības īpatnības un reģiona specifiku.",
+    "items": [
+      {
+        "id": "01",
+        "title": "Kvalitāte un profesionalitāte",
+        "description": "Mums ir 35 gadu veiksmīga pieredze dzelzceļu remonta un būvniecības jomā."
+      },
+      {
+        "id": "02",
+        "title": "Saprātīgas cenas",
+        "description": "Darbu izmaksas tiek aprēķinātas individuāli katram klientam. Mēs izveidojam efektīvu dzelzceļa būvniecības un remonta pakalpojumu paketi atkarībā no klienta budžeta un iespējām."
+      },
+      {
+        "id": "03",
+        "title": "Individuāla pieeja",
+        "description": "Visi darbi tiek veikti atbilstoši uzņēmuma specifikai, reljefa īpatnībām, kravu pārvadājumu intensitātei utt."
+      },
+      {
+        "id": "04",
+        "title": "Vispusīga palīdzība",
+        "description": "Mūsu speciālisti sagatavo pilnu projekta un izpilddokumentācijas paketi un nodrošina ceļa nodošanu ekspluatācijā. Pēc remontdarbu pabeigšanas esam gatavi uzņemties atzarojuma līnijas uzturēšanu."
+      },
+      {
+        "id": "05",
+        "title": "Uzticamība",
+        "description": "Mēs piedāvājam vismaz divu gadu garantiju visiem darbiem."
+      },
+      {
+        "id": "06",
+        "title": "Licencēti un sertificēti speciālisti",
+        "description": "Tiek nodrošināta darbu izpilde saskaņā ar visiem dzelzceļa būvniecības standartiem."
+      },
+      {
+        "id": "07",
+        "title": "Mūsdienīgas iekārtas",
+        "description": "Mums ir pilns komplekts instrumentu un iekārtu, kas nepieciešami darbiem saistībā ar dzelzceļu. Nepieciešamības gadījumā mēs nomājam lielas specializētas dzelzceļa mašīnas un aprīkojumu (sliežu ceļu ieklāšanas celtņus, drezīnas utt.)"
+      }
+    ]
+  },
+  "services_slider": {
+    "title": "Pakalpojumi",
+    "read_more": "Lasīt vairāk",
+    "items": [
+      {
+        "id": 1,
+        "title": "Dzelzceļu un iekārtu regulāra uzturēšana",
+        "description": "Veicot uzturēšanas pakalpojumus, mūsu galvenais uzdevums ir sistemātiska dzelzceļu un dzelzceļa iekārtu uzraudzība ar mērķi novērst bojājumus, pagarināt dzelzceļa infrastruktūras elementu kalpošanas laiku, paaugstināt drošības līmeni un nodrošināt vagonu netraucētu piegādi un aizvešanu.",
+        "image": "/foto_jooksev.jpg"
+      },
+      {
+        "id": 2,
+        "title": "Remonts un renovācija",
+        "description": "Mēs piedāvājam visaptverošus remonta un renovācijas darbus dzelzceļa infrastruktūrai, nodrošinot kvalitāti un izturību.",
+        "image": "/thumbnail_Lumetorje_1.jpg"
+      },
+      {
+        "id": 3,
+        "title": "Dzelzceļa būvniecība",
+        "description": "Pilni dzelzceļa būvniecības pakalpojumi no plānošanas līdz izpildei, ieskaitot jaunu sliežu uzstādīšanu un infrastruktūras attīstību.",
+        "image": "/Kazlu_Ruda_2.jpg"
+      },
+      {
+        "id": 4,
+        "title": "Projektēšana",
+        "description": "Profesionāli projektēšanas un inženieru pakalpojumi dzelzceļa projektiem, tostarp tehniskās dokumentācijas un projekta plānošana.",
+        "image": "/Skriveri_1.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "title_start": "Kopā veidojam",
+    "title_span": "risinājumus",
+    "title_end": "kas ved uz priekšu",
+    "description": "Aicinām jūs kļūt par mūsu klientu vai partneri!",
+    "button": "Sazinies ar mums"
+  },
+  "railway_maintenance_page": {
+    "title": "Dzelzceļu un būvju tekošā uzturēšana",
+    "intro": "Sniedzot tekošās uzturēšanas pakalpojumus, mūsu galvenais uzdevums ir sistemātiska dzelzceļa un dzelzceļa būvju uzraudzība, lai novērstu bojājumus, pagarinātu dzelzceļa infrastruktūras elementu kalpošanas laiku un nodrošinātu transportlīdzekļu drošu kustību.",
+    "maintenance_includes": {
+      "title": "Tekošā uzturēšana ietver",
+      "items": {
+        "1": "Regulāras sliežu ceļu, gulšņu, pārmiju, zemes klātnes un citu dzelzceļa būvju un iekārtu vizuālās apskates",
+        "2": "Mērījumus ar speciālām ierīcēm",
+        "3": "Defektoskopiju",
+        "4": "Dzelzceļa iekārtu tehnoloģisko apkopi un regulēšanu, ieskaitot skrūvju pievilkšanu, savienojumu plākšņu uzstādīšanu, vertikālo pakāpienu novēršanu sliežu slēdzenēs, metināto šuvju slīpēšanu, sliežu naglu papildus iedzīšanu, sliežu ceļa malu pļaušanu, slēdzeņu spraugu regulēšanu un pārmiju tīrīšanu un eļļošanu utt.",
+        "5": "Tekošo remontu, kura laikā tiek nomainīti atsevišķi dzelzceļa iekārtu elementi"
+      }
+    },
+    "middle_text": "Dzelzceļa tekošā uzturēšana tiek veikta visu gadu. Uzturēšanas laikā tiek pētīti bojājumu cēloņi un veikti nepieciešamie darbi to novēršanai. Ar to tiek nodrošināts dzelzceļa minimālais nepieciešamais stāvoklis atbilstoši spēkā esošajiem tiesību aktiem, Dzelzceļa likumam un Dzelzceļa tehniskās ekspluatācijas noteikumiem.",
+    "branch_owners": {
+      "title": "Pievedceļu īpašniekiem",
+      "paragraphs": {
+        "1": "Igaunijas Dzelzceļa likuma 39. pants nosaka, ka visiem dzelzceļa būvju īpašniekiem vai valdītājiem jāuztur dzelzceļa būves labā stāvoklī atkarībā no satiksmes slodzes, bet ne retāk kā reizi noteiktajā periodā atbilstoši dzelzceļa tehniskās ekspluatācijas noteikumu prasībām.",
+        "2": "Ja uzņēmumam nav kvalificēta darbinieka minēto uzdevumu veikšanai, ieteicams izmantot profesionālos pakalpojumus.",
+        "3": "Mūsu komanda kopā ar māsas uzņēmumu sniedz palīdzību pievedceļu un sliežu ceļu uzturēšanas jomā.",
+        "4": "Pārbaudiet kopā ar mums sava pievedceļa stāvokli. Mēs veicam remontdarbus un apkopi, lai nodrošinātu drošu satiksmi."
+      }
+    },
+    "cta": "Sazināties"
+  },
+  "repair_renovation_page": {
+    "title": "Remonts un renovācija",
+    "intro": "Mēs piedāvājam visaptverošus dzelzceļa remonta un renovācijas pakalpojumus, kas nodrošina dzelzceļa infrastruktūras ilgtermiņa izturību un drošību.",
+    "services": {
+      "title": "Mūsu pakalpojumi ietver",
+      "items": {
+        "1": "Sliežu un gulšņu nomaiņu",
+        "2": "Pārmiju remontu un nomaiņu",
+        "3": "Dzelzceļa uzbēruma remontu",
+        "4": "Dzelzceļa pārbrauktuvju remontu",
+        "5": "Dzelzceļa virsbūves remontu"
+      }
+    },
+    "quality": {
+      "title": "Kapitālais remonts un renovācija",
+      "description": "Visi remonta un renovācijas darbi tiek veikti saskaņā ar spēkā esošajiem standartiem un prasībām. Mēs izmantojam tikai sertificētus materiālus un mūsdienīgas tehnoloģijas."
+    },
+    "capital_repair": {
+      "intro": "Mēs piedāvājam pilnīgu ceļu kapitālo remontu un renovācijas pakalpojumu. Mūsu darbs ietver:",
+      "items": {
+        "1": "Veco sliežu un gulšņu aizstāšanu ar jauniem",
+        "2": "Balasta tīrīšanu vai nomaiņu",
+        "3": "Nepieciešamības gadījumā pārmiju un uzbēruma renovāciju",
+        "4": "Pilnīgu sliežu ceļu remontu ar pilnu dokumentāciju"
+      }
+    },
+    "bottom_sections": {
+      "section1": "Veicot remontdarbus, mēs ņemam vērā sliedes vecumu, remonta veidu un normatīvu īpatnības. Visus darbus veicam stingrā saskaņā ar sliežu ceļu un normatīvu tehnisko dokumentāciju.",
+      "section2": "Mūsu darbinieki ir ieguvuši ilgstošu un praktisku pieredzi dzelzceļa būvniecības jomā, tāpēc mūsu klienti var būt droši, ka neatkarīgi no viņu darbības jomas, pieredze ar dzelzceļiem ir mūsu vadītāju rīcībā.",
+      "section3": "Pēc remontdarbu pabeigšanas mēs varam uzņemties pievedceļu uzturēšanu.",
+      "section4": "Sazinieties ar mūsu profesionāļiem, lai iegūtu vairāk informācijas vai pieprasītu licenci, rakstot uz e-pastu info@rdt.ee"
+    },
+    "cta": "Sazināties ar mums",
+    "alt_text": {
+      "construction": "Dzelzceļa būvniecība",
+      "equipment": "Dzelzceļa aprīkojums"
+    }
+  },
+  "railway_infrastructure_page": {
+    "title": "Dzelzceļa infrastruktūras būvniecība",
+    "intro": "Dzelzceļa būvniecība ir samērā sarežģīts un dārgs pasākums. Tāpēc ir ļoti svarīgi izvēlēties uzticamu partneri ar veiksmīgu pieredzi dzelzceļa būvniecības jomā.",
+    "services": {
+      "title": "Mūsu pakalpojumi",
+      "items": {
+        "1": "Projekta dokumentācijas sagatavošana",
+        "2": "Finanšu aprēķinu, pārskatu utt. sagatavošana",
+        "3": "Dzelzceļa būvniecības tehnisko noteikumu sagatavošana",
+        "4": "Dzelzceļa infrastruktūras būvniecība atbilstoši noteiktajiem nosacījumiem un projektiem",
+        "5": "Piedalīšanās objekta nodošanā ekspluatācijā"
+      }
+    },
+    "bottom_sections": {
+      "section1": "Mēs nodrošinām būvniecības uzdevumu ievērošanu, darbu kvalitāti un savlaicīgu objekta nodošanu ekspluatācijā.",
+      "section2": "Papildu informāciju par būvniecību varat pieprasīt, rakstot uz e-pastu steelbuckle@steelbuckle.ee"
+    },
+    "cta": "Sazināties ar mums",
+    "alt_text": {
+      "construction": "Dzelzceļa būvniecība"
+    }
+  },
+  "railway_design_page": {
+    "title": "Projektēšana",
+    "services": {
+      "title": "Jūs varat pasūtīt no mums",
+      "items": {
+        "1": "Tehniskās dokumentācijas sagatavošanu un noformēšanu dzelzceļa infrastruktūras izmaiņu gadījumā (ceļu slēgšana, pārvietošana utt.)",
+        "2": "Ar atļaujām saistītās dokumentācijas un izpilddokumentācijas noformēšanu renovācijas un būvniecības darbu gadījumā"
+      }
+    },
+    "bottom_section": "Steel Buckle OÜ speciālisti ņem vērā klienta vēlmes, uzņēmuma darbības īpatnības un reģiona specifiku. Rezultāts ir optimāli risinājumi jūsu mērķu sasniegšanai.",
+    "cta": "Sazināties ar mums",
+    "alt_text": {
+      "design": "Dzelzceļa projektēšana"
+    }
+  },
+  "projects_page": {
+    "page_title": "Projekti",
+    "page_subtitle": "Radot labākos risinājumus sadarbībā ar partneriem"
+  }
+}

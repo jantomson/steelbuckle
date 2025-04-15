@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  role      String   @default("editor")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// Available languages
+model Language {
+  code                String               @id @db.VarChar(5)
+  name                String               @db.VarChar(50)
+  translations        Translation[]
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  projectTranslations ProjectTranslation[]
+  seoTranslations     SeoTranslation[]  
+  @@map("languages")
+}
+
+// Translation keys
+model TranslationKey {
+  id           Int           @id @default(autoincrement())
+  keyPath      String        @unique @map("key_path") @db.VarChar(255)
+  description  String?       @db.Text
+  translations Translation[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@map("translation_keys")
+}
+
+// Actual translations
+model Translation {
+  id           Int            @id @default(autoincrement())
+  keyId        Int            @map("key_id")
+  languageCode String         @map("language_code") @db.VarChar(5)
+  value        String         @db.Text
+  key          TranslationKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
+  language     Language       @relation(fields: [languageCode], references: [code], onDelete: Cascade)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  @@unique([keyId, languageCode])
+  @@map("translations")
+}
+
+// Projects model
+model Project {
+  id           String               @id @default(cuid())
+  image        String               @db.VarChar(255)
+  year         String               @db.VarChar(50)
+  displayOrder Int                  @default(0) @map("display_order")
+  translations ProjectTranslation[]
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+
+// Project translations
+model ProjectTranslation {
+  id           Int      @id @default(autoincrement())
+  projectId    String   @map("project_id")
+  languageCode String   @map("language_code") @db.VarChar(5)
+  title        String   @db.VarChar(255)
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  language     Language @relation(fields: [languageCode], references: [code], onDelete: Cascade)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@unique([projectId, languageCode])
+  @@map("project_translations")
+}
+
+// Media assets
+model Media {
+  id              Int              @id @default(autoincrement())
+  filename        String           @db.VarChar(255)
+  path            String           @unique @db.VarChar(512)
+  mediaType       String?          @map("media_type") @db.VarChar(50)
+  altText         String?          @map("alt_text") @db.VarChar(255)
+  mediaReferences MediaReference[]
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  @@map("media")
+}
+
+// Media references
+model MediaReference {
+  id           Int      @id @default(autoincrement())
+  referenceKey String   @unique @map("reference_key") @db.VarChar(255)
+  mediaId      Int?     @map("media_id")
+  media        Media?   @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("media_references")
+}
+
+// Contact info
+model ContactInfo {
+  id           Int           @id @default(autoincrement())
+  email        String        @db.VarChar(255)
+  officeCity   String        @map("office_city") @db.VarChar(100)
+  officePostal String        @map("office_postal") @db.VarChar(20)
+  officeStreet String        @map("office_street") @db.VarChar(255)
+  officeRoom   String?       @map("office_room") @db.VarChar(100)
+  phones       PhoneNumber[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@map("contact_info")
+}
+
+// Phone numbers
+model PhoneNumber {
+  id            Int         @id @default(autoincrement())
+  contactInfoId Int         @map("contact_info_id")
+  contactInfo   ContactInfo @relation(fields: [contactInfoId], references: [id], onDelete: Cascade)
+  number        String      @db.VarChar(50)
+  label         String      @db.VarChar(100)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@map("phone_numbers")
+}
+
+// SEO metadata for pages
+model SeoMetadata {
+  id           Int              @id @default(autoincrement())
+  pageKey      String           @unique @map("page_key") @db.VarChar(100)
+  translations SeoTranslation[]
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@map("seo_metadata")
+}
+
+// SEO translations for multilingual support
+model SeoTranslation {
+  id              Int         @id @default(autoincrement())
+  seoId           Int         @map("seo_id")
+  languageCode    String      @map("language_code") @db.VarChar(5)
+  title           String      @db.VarChar(255)
+  metaDescription String      @map("meta_description") @db.Text
+  keywords        String?     @db.Text
+  ogTitle         String?     @map("og_title") @db.VarChar(255)
+  ogDescription   String?     @map("og_description") @db.Text
+  seo             SeoMetadata @relation(fields: [seoId], references: [id], onDelete: Cascade)
+  language        Language    @relation(fields: [languageCode], references: [code], onDelete: Cascade)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@unique([seoId, languageCode])
+  @@map("seo_translations")
+}

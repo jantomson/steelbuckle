@@ -1,0 +1,265 @@
+{
+  "nav": {
+    "services": "Teenused",
+    "completed_works": "Tehtud tööd",
+    "about": "Ettevõttest",
+    "contact": "Kontakt"
+  },
+  "services": {
+    "title": "Pakutavad teenused",
+    "railway_maintenance": "Raudteede jooksev korrashoid",
+    "repair_renovation": "Remont ja renoveerimine",
+    "railway_construction": "Raudtee-ehitus",
+    "design": "Projekteerimine"
+  },
+  "contact": {
+    "title": "Võta meiega ühendust",
+    "form": {
+      "name": {
+        "label": "Nimi",
+        "placeholder": "Sisesta oma nimi"
+      },
+      "phone": {
+        "label": "Telefoni number",
+        "placeholder": "Sisesta oma telefoni number"
+      },
+      "email": {
+        "label": "E-post",
+        "placeholder": "Sisesta oma e-post"
+      },
+      "subject": {
+        "label": "Pealkiri",
+        "placeholder": "Sisesta pealkiri"
+      },
+      "message": {
+        "label": "Sõnum",
+        "placeholder": "Sisesta oma sõnum"
+      },
+      "response_time": "Vastame paari päeva jooksul.",
+      "submit": "Saada"
+    }
+  },
+  "footer": {
+    "contact": "Kontakt",
+    "office": "Kontor",
+    "services": "Teenused",
+    "general_phone": "Üldtelefon"
+  },
+  "hero": {
+    "title_start": "Raudteede",
+    "title_span": "ehitus ja",
+    "title_end": "remont",
+    "subtitle": "Enam kui 35 aastat edukat tegevust turul.",
+    "cta": "Võta meiega ühendust",
+    "video": "https://player.vimeo.com/video/1073950156?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+  },
+  "about": {
+    "text_1": "Sõltuvalt objekti seisukorrast pakume klientidele individuaalselt valitud remonditööde mahtusid, alustades jooksvast korrahoiust ja lõpetades raudtee kapitaalremondiga või uue raudtee ehitamisega.",
+    "text_2": "Õigeaegselt teostatud kvaliteetne raudteeremont on raudteetranspordi turvalisuse ja tõrgeteta toimimise tagatis.",
+    "read_more": "Loe lähemalt",
+    "title": "Millega me tegeleme?"
+  },
+  "about_page": {
+    "title": "Ettevõttest",
+    "services": {
+      "title": "Teostame järgmisi töid",
+      "list": {
+        "maintenance": "Raudteede ja radade jooksev korrashoid",
+        "repair": "Raudteede remont ja renoveerimine",
+        "construction": "Raudtee-ehitus",
+        "design": "Projekteerimine"
+      }
+    },
+    "content": {
+      "intro": "Steel Buckle OÜ (endine ärinimi OÜ Renome) on raudtee-ehitusettevõte, mis pakub raudtee-ehituse, -remondi ja -hoolduse teenuseid.",
+      "history": "Ettevõttele pandi alus 1993. aastal kooperatiivi baasil, mis oli loodud nell aastat varem (1989). Algusest peale tegeleme raudteede, sealhulgas haruteede ja kraanateede ning teiste raudteeinfrastruktuuri objektide ehitamise, remondi ja hooldamisega.",
+      "materials": "Samuti tarnime sertifitseeritud raudteematerjale, mis vastavad AS-i Eesti Raudtee nõudmistele.",
+      "staff": "Ettevõte on aastaid pidevalt koolitanud professionaalseid töötajaid. Koolitust viivad läbi parimad ehitusinsenerid ja raudteetranspordi spetsialistid. Koolitatud, kogemustega inseneri-tehniliste töötajate olemasolu võimaldab korraldada tööd kõrgel tasemel, tagades kõrge kvaliteedi ja liikumisohutuse.",
+      "locations": "Steel Buckle OÜ tootmisbaasid asuvad Tallinnas, Maardus ja Paldiskis ja peakontor asub Tallinnas. Meie objektide geograafia on küllaltki lai. Ettevõttel on Eestis kümnetel alalisi kliente, aastast 2007 töötame stabiilselt ka Läti turul. Lätis teostame töid paljude tegutsejatega kaup ja tihedas koostöös sealsete koostööpartneritega. Alates 2014. aastast omame raudtee-ehituse kogemust ka Leedus. Ees on ootamas uued turud ja huvitavad projektid.",
+      "invitation": "Kutsume Teid oma tellijaks või partneriks!"
+    }
+  },
+  "benefits": {
+    "title": "Miks valida just meid?",
+    "subtitle": "Eelised, mida pakub koostöö meie ettevõttega",
+    "intro": "Meie spetsialistid võtavad arvesse tellija soove, ettevõtte töötaaseid iseärasusi ja piirkonna spetsiifiliat.",
+    "items": [
+      {
+        "id": "01",
+        "title": "Kvaliteet ja professionaalsus",
+        "description": "Meil on 35 aastat edukat kogemust raudteede remondi ja ehituse valdkonnas."
+      },
+      {
+        "id": "02",
+        "title": "Mõistlikud hinnad",
+        "description": "Tööde maksumus arvutatakse igale tellijale individuaalselt. Koostame  raudtee-ehituseks ja -remondiks efektiivse teenustepaketi sõltuvalt  kliendi eelarvest ja võimalustest."
+      },
+      {
+        "id": "03",
+        "title": "Individuaalne lähenemine",
+        "description": "Kõik tööd teostatakse vastavalt ettevõtte eripärale, reljeefi iseärasustele, kaubaveo intensiivusele jne."
+      },
+      {
+        "id": "04",
+        "title": "Igakülgne abi",
+        "description": "Meie spetsialistid valmistavad ette projekt- ja täitedokumentatsiooni täieliku paketi ning kindlustavad tee andmise ekspluatatsiooni. Remonditööde lõpetamise järel oleme valmis võtma enda peale harutee  jooksva korrashoiu."
+      },
+      {
+        "id": "05",
+        "title": "Usaldusväärsus",
+        "description": "Pakume vähemalt kaheaastast garantiid kõikidele töödele."
+      },
+      {
+        "id": "06",
+        "title": "Litsentseeritud ja sertifitseeritud spetsialistid",
+        "description": "Tagatakse tööde teostamine kooskõlas kõikide raudtee-ehituse alaste standarditega."
+      },
+      {
+        "id": "07",
+        "title": "Kaasaegsed seadmed",
+        "description": "Meil on olemas täielik komplekt raudteega seotud töödeks vajalikke tööriistu ja seadmeid. Vajaduse korral võtame rendile suuri spetsiaalseid raudteemasinaid ja varustust (teepaigalduskraanad, dresiinid jne)"
+      }
+    ]
+  },
+  "services_slider": {
+    "title": "Teenused",
+    "read_more": "Loe edasi",
+    "items": [
+      {
+        "id": 1,
+        "title": "Raudteede ja rajatiste jooksev korrashoid",
+        "description": "Jooksva korrashoiu teenuste osutamisel on meie peamine ülesanne süstemaatiline järelevalve raudteede ja raudteeseadmete üle eesmärgiga ennetada rikkeid, pikendada raudteeinfrastruktuuri elementide kasutusiga, tõsta turvalisuse taset ning tagada vagunite tõrgeteta etteandmine ja äraviimine.",
+        "image": "/foto_jooksev.jpg"
+      },
+      {
+        "id": 2,
+        "title": "Remont ja renoveerimine",
+        "description": "Pakume põhjalikke remondi- ja renoveerimistöid raudteeinfrastruktuurile, tagades kvaliteedi ja vastupidavuse.",
+        "image": "/thumbnail_Lumetorje_1.jpg"
+      },
+      {
+        "id": 3,
+        "title": "Raudtee-ehitus",
+        "description": "Täielikud raudtee-ehitusteenused planeerimisest teostuseni, sealhulgas uute rööbaste paigaldamine ja infrastruktuuri arendamine.",
+        "image": "/Kazlu_Ruda_2.jpg"
+      },
+      {
+        "id": 4,
+        "title": "Projekteerimine",
+        "description": "Professionaalsed projekteerimis- ja inseneriteenused raudteeprojektidele, sealhulgas tehnilise dokumentatsiooni ja projekti planeerimine.",
+        "image": "/Skriveri_1.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "title_start": "Koos loome",
+    "title_span": "lahendused",
+    "title_end": "mis viivad edasi",
+    "description": "Kutsume Teid oma tellijaks või partneriks!",
+    "button": "Võta ühendust"
+  },
+  "railway_maintenance_page": {
+    "title": "Raudteede ja rajatiste jooksev korrashoid",
+    "intro": "Jooksva korrashoiu teenuste osutamisel on meie peamine ülesanne süstemaatiline järelevalve raudtee ja raudteerajatiste üle, eesmärgiga ennetada rikkeid, pikendada raudteeinfrastruktuuri elementide kasutusiga ning tagada liiklusvahendite turvaline liiklemine.",
+    "maintenance_includes": {
+      "title": "Jooksev korrashoid hõlmab",
+      "items": {
+        "1": "Rööbasteede, liiprite, pöörmetе, muldkeha ning muude raudteerajatiste ja -seadmete regulaarseid visuaalseid vaatlusi",
+        "2": "Mõõtmisi spetsiaalsete seadmete abil",
+        "3": "Defektoskoopiat",
+        "4": "Raudteeseadmete tehnoloogilist hooldust ja reguleerimist sealhulgas poltide pingutamist, sidelappide paigaldamist, vertikaalaстmete kõrvaldamist rööpalukkudes, keevisõmbluste lihvimist, rööpanaelte järelnaeluтust, raudteeäärsete alade niitmist, lukupilude reguleerimist ning pöörmeтe puhastamist ja õlitamist jne",
+        "5": "Jooksvat remonti, mille käigus vahetatakse välja raudteeseadmete üksikud elemendid"
+      }
+    },
+    "middle_text": "Raudtee jooksvat hooldust teostatakse aastaringselt. Hoolduse käigus uuritakse mittekorrasoleku põhjusi ja teostatakse vajalikke töid nende kõrvaldamiseks. Sellega tagatakse raudtee minimaalne nõuetekohane seisukord vastavalt kehtivatele õigusaktidele, Raudteeseadusele ja Raudtee tehnokasutuseeskirjale.",
+    "branch_owners": {
+      "title": "Haruteede omanikele",
+      "paragraphs": {
+        "1": "Eesti raudteeseaduse paragrahv 39 sätestab, et kõik raudteerajatiste omanikud või valdajad peavad hoidma raudteerajatisi heas seisukorras, sõltuvalt liikluskoormusest, kuid vähemalt kord määratud perioodi jooksul vastavalt raudtee tehnokasutuseeskirja nõuetele.",
+        "2": "Kui ettevõttel puudub nimetatud ülesanneteks pädev töötaja, on soovitatav kasutada professionaalseid teenuseid.",
+        "3": "Meie meeskond koos oma sõsarettevõttega pakub abi haruteede ja rööbasteede korrashoiu valdkonnas.",
+        "4": "Kontrollige koos meiega oma harutee seisukorda. Teostame remonditöid ja hooldust, et tagada ohutu liiklus."
+      }
+    },
+    "cta": "Võta ühendust"
+  },
+  "repair_renovation_page": {
+    "title": "Remont ja renoveerimine",
+    "intro": "Pakume põhjalikke raudteede remondi- ja renoveerimistöid, mis tagavad raudteeinfrastruktuuri pikaajalise vastupidavuse ja ohutuse.",
+    "services": {
+      "title": "Meie teenused hõlmavad",
+      "items": {
+        "1": "Rööbaste ja liiprite vahetust",
+        "2": "Pöörmete remonti ja vahetust",
+        "3": "Raudtee muldkeha remonti",
+        "4": "Raudtee ülesõidukohtade remonti",
+        "5": "Raudtee pealisehitise remonti"
+      }
+    },
+    "quality": {
+      "title": "Kapitaalremont ja renoveerimine",
+      "description": "Kõik remondi- ja renoveerimistööd teostatakse vastavalt kehtivatele standarditele ja nõuetele. Kasutame ainult sertifitseeritud materjale ja kaasaegseid tehnoloogiaid."
+    },
+    "capital_repair": {
+      "intro": "Pakume täielikku teede kapitaalremonti ja renoveerimise teenust. Meie töö hõlmab:",
+      "items": {
+        "1": "Vanade rööbaste ja liiprite asendamist uutega",
+        "2": "Ballasti puhastamist või vahetamist",
+        "3": "Vajadusel pöörmete ja muldkeha renoveerimist",
+        "4": "Kogu rööbastee remont kuni täieliku dokumentatsiooniga"
+      }
+    },
+    "bottom_sections": {
+      "section1": "Remonditööde teostamisel võtame arvesse rööpa vanuse, rööbasted remonditüübi ja piirnormi iseärasused. Kõik tööd teostame ranges kooskõlas rööpateede ja normatiivide tehnilise dokumentatsiooniga.",
+      "section2": "Meie töötajatel on raudtee-ehituse valdkonnas omandatud pikk ja praktiline kogemus, mistõttu võivad meie kliendid arvestada, et sõltumata nende tegevusalast, kogemust raudtatel on meie juhtide käsutuses.",
+      "section3": "Remonditööde lõpetamisel jääb olema vahetu võtmas endale igade harune pikkus korrashoidu.",
+      "section4": "Leppige meie professionaalidega kokku rohkemate teavet olevaole või küsige litsentsi e-posti teel aadressilt info@rdt.ee"
+    },
+    "cta": "Võta ühendust",
+    "alt_text": {
+      "construction": "Raudtee konstrueerimine",
+      "equipment": "Raudtee seadmed"
+    }
+  },
+  "railway_infrastructure_page": {
+    "title": "Raudteeinfrastruktuuri ehitus",
+    "intro": "Raudtee-ehitus on küllalt keeruline ja kallis ettevõtmine. Seetõttu on väga oluline valida usaldusväärne partner, kellel on raudtee-ehituse valdkonnas ette näidata edukas kogemus.",
+    "services": {
+      "title": "Meie teenused",
+      "items": {
+        "1": "Projektdokumentatsiooni ettevalmistamine",
+        "2": "Finantskalkulatsioonide, aruannete jms koostamine",
+        "3": "Raudtee-ehituse tehniliste tingimuste ettevalmistamine",
+        "4": "Raudteeinfrastruktuuri ehitamine vastavalt etteantud tingimustele ja projektidele",
+        "5": "Osalemine objekti võtmisel ekspluatatsiooni"
+      }
+    },
+    "bottom_sections": {
+      "section1": "Tagame ehitusülesannetes kinnipidamise, tööde kvaliteedi ja objekti õigeaegse vastuvõtmise ekspluatatsiooni.",
+      "section2": "Täiendavat ehitusalast teavet võite küsida, kirjutades e-posti aadressil steelbuckle@steelbuckle.ee"
+    },
+    "cta": "Võta ühendust",
+    "alt_text": {
+      "construction": "Raudtee ehitus"
+    }
+  },
+  "railway_design_page": {
+    "title": "Projekteerimine",
+    "services": {
+      "title": "Meilt võite tellida",
+      "items": {
+        "1": "Tehnilise dokumentatsiooni ettevalmistamise ja vormistamise raudteeinfrastruktuuri muutmise korral (teede sulgemine, ümberöstmine jne)",
+        "2": "Lubadega seotud dokumentatsiooni ja täitedokumentatsiooni vormistamine renoveerimis- ja ehitustööde korral"
+      }
+    },
+    "bottom_section": "Steel Buckle OÜ spetsialistid võtavad arvesse tellija soove, ettevõtte töötaaseid iseärasusi ja piiirkonra spetsiifikat. Selle tulemuseks on optimaalsed lahendused Teie eesmärkide täitmiseks.",
+    "cta": "Võta ühendust",
+    "alt_text": {
+      "design": "Raudtee projekteerimine"
+    }
+  },
+  "projects_page": {
+    "page_title": "Projektid",
+    "page_subtitle": "Koostöös partneritega loome parimad lahendused"
+  }
+}

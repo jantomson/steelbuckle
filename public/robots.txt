@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+
+# Allow sitemap API
+Allow: /api/sitemap
+
+# Sitemap
+Sitemap: https://steelbuckle.ee/api/sitemap
