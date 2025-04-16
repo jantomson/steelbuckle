@@ -5,7 +5,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/", "/_next/", "/*.json$"],
+      disallow: [
+        "/admin/",
+        "/api/",
+        "/_next/",
+        "/*.json$",
+        "/*/projects/cm*",
+        "/*/proekty/cm*",
+        "/*/projekti/cm*",
+        "/*/tehtud-tood/cm*",
+      ],
     },
     sitemap: "https://steelbuckle.ee/sitemap.xml",
   };

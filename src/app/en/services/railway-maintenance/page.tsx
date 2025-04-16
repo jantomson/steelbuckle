@@ -8,9 +8,11 @@ import { usePageMedia, invalidateMediaCache } from "@/hooks/usePageMedia";
 import Link from "next/link";
 import SubpageHeader from "@/components/SubpageHeader";
 import SEOMetadata from "@/components/SEOMetadata";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 const RailwayMaintenancePage = () => {
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
   const [imageKey, setImageKey] = useState(Date.now().toString());
   const lastRefreshRef = useRef(Date.now());
 
@@ -251,7 +253,10 @@ const RailwayMaintenancePage = () => {
                 ))}
                 <div className="pt-5 flex justify-center md:justify-start">
                   <Link
-                    href="/kontakt"
+                    href={buildLocalizedUrl(
+                      "contact",
+                      currentLang as SupportedLanguage
+                    )}
                     className="inline-flex items-center bg-black text-white px-6 py-3 rounded-full w-fit hover:bg-gray-600 transition-colors group"
                   >
                     {t("railway_maintenance_page.cta")}
@@ -309,7 +314,7 @@ const RailwayMaintenancePage = () => {
               </div>
             </div>
 
-            <div className="space-y-6 max-w-md mx-auto md:mx-0 pb-20">
+            <div className="space-y-6 max-w-md mx-auto md:mx-0 ">
               {[1, 2, 3, 4].map((num) => (
                 <p
                   key={num}
@@ -323,7 +328,10 @@ const RailwayMaintenancePage = () => {
 
               <div className="flex justify-center md:justify-start">
                 <Link
-                  href="/kontakt"
+                  href={buildLocalizedUrl(
+                    "contact",
+                    currentLang as SupportedLanguage
+                  )}
                   className="inline-flex items-center bg-black text-white px-6 py-3 rounded-full w-fit hover:bg-gray-600 transition-colors group"
                 >
                   {t("railway_maintenance_page.cta")}

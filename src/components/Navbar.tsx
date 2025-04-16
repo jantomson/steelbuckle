@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import LanguageSelector from "./LanguageSelector";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 interface ColorSchemeEventDetail {
   logoVariant: "dark" | "white";
@@ -14,10 +16,11 @@ interface ColorSchemeEventDetail {
 
 const Navbar = () => {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
   const [isTeenusedOpen, setIsTeenusedOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { contactInfo, isLoading, getMainPhone } = useContactInfo();
+  const [isClient, setIsClient] = useState(false);
 
   // State for logo variant
   const [logoVariant, setLogoVariant] = useState<"dark" | "white">("dark");
@@ -28,8 +31,15 @@ const Navbar = () => {
   // Dynamic logo URL based on logoVariant
   const logoUrl = `/logo_${logoVariant}.svg`;
 
+  // Set isClient to true after component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Load logo variant from localStorage on component mount
   useEffect(() => {
+    if (!isClient) return;
+
     const loadLogoVariant = () => {
       const savedLogoVariant = localStorage.getItem("site.logoVariant");
       if (savedLogoVariant === "dark" || savedLogoVariant === "white") {
@@ -71,7 +81,7 @@ const Navbar = () => {
         handleColorSchemeChange as EventListener
       );
     };
-  }, []);
+  }, [isClient]);
 
   const toggleTeenused = () => {
     setIsTeenusedOpen(!isTeenusedOpen);
@@ -89,6 +99,8 @@ const Navbar = () => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
+    if (!isClient) return;
+
     const handleClickOutside = (event: MouseEvent): void => {
       const target = event.target as Element;
       if (isTeenusedOpen && target && !target.closest(".teenused-dropdown")) {
@@ -100,10 +112,12 @@ const Navbar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isTeenusedOpen]);
+  }, [isTeenusedOpen, isClient]);
 
   // Prevent scrolling when mobile menu is open
   useEffect(() => {
+    if (!isClient) return;
+
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -112,13 +126,15 @@ const Navbar = () => {
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, isClient]);
 
   // Function to handle navigation in edit mode
   const handleAdminNavigation = (
     e: React.MouseEvent<HTMLAnchorElement>,
     path: string
   ) => {
+    if (!isClient) return;
+
     // Check for admin edit mode using URL or other method if needed
     const isAdminMode = window.location.pathname.includes("/admin");
 
@@ -128,25 +144,63 @@ const Navbar = () => {
       // Extract the page identifier from the path
       let pageId = "";
 
-      if (path === "/") {
+      if (path === "/" || path.endsWith("/")) {
         pageId = "home";
-      } else if (path === "/ettevottest") {
+      } else if (
+        path.includes("/ettevottest") ||
+        path.includes("/about") ||
+        path.includes("/o-nas") ||
+        path.includes("/par-mums")
+      ) {
         pageId = "about";
-      } else if (path === "/tehtud-tood") {
+      } else if (
+        path.includes("/tehtud-tood") ||
+        path.includes("/projects") ||
+        path.includes("/proekty") ||
+        path.includes("/projekti")
+      ) {
         pageId = "projects";
-      } else if (path === "/kontakt") {
+      } else if (
+        path.includes("/kontakt") ||
+        path.includes("/contact") ||
+        path.includes("/kontakty") ||
+        path.includes("/kontakti")
+      ) {
         pageId = "contact";
-      } else if (path.includes("/teenused/")) {
+      } else if (
+        path.includes("/teenused/") ||
+        path.includes("/services/") ||
+        path.includes("/uslugi/") ||
+        path.includes("/pakalpojumi/")
+      ) {
         // Handle service subpages
-        const service = path.split("/").pop() || "";
-
-        if (service === "raudteede-jooksev-korrashoid") {
+        if (
+          path.includes("raudteede-jooksev-korrashoid") ||
+          path.includes("railway-maintenance") ||
+          path.includes("obsluzhivanie-zheleznykh-dorog") ||
+          path.includes("dzelzcela-apkope")
+        ) {
           pageId = "railway-maintenance";
-        } else if (service === "remont-ja-renoveerimine") {
+        } else if (
+          path.includes("remont-ja-renoveerimine") ||
+          path.includes("repair-renovation") ||
+          path.includes("remont-i-renovatsiya") ||
+          path.includes("remonts-un-renovacija")
+        ) {
           pageId = "railway-repair";
-        } else if (service === "raudtee-ehitus") {
+        } else if (
+          path.includes("raudtee-ehitus") ||
+          path.includes("railway-construction") ||
+          path.includes("stroitelstvo-zheleznykh-dorog") ||
+          path.includes("dzelzcela-buvnieciba")
+        ) {
           pageId = "railway-infrastructure";
-        } else if (service === "projekteerimine") {
+        } else if (
+          path.includes("projekteerimine") ||
+          path.includes("design") ||
+          path.includes("proektirovanie") ||
+          path.includes("projektesana")
+        ) {
           pageId = "railway-design";
         }
       }
@@ -171,19 +225,56 @@ const Navbar = () => {
     className = "",
     onClick,
   }) => {
+    // Get the localized URL if needed (skip admin URLs)
+    const localizedHref = href.includes("/admin")
+      ? href
+      : getLocalizedUrl(href);
+
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-      const isAdminMode = window.location.pathname.includes("/admin");
-      if (isAdminMode) {
-        handleAdminNavigation(e, href);
+      if (isClient) {
+        const isAdminMode = window.location.pathname.includes("/admin");
+        if (isAdminMode) {
+          handleAdminNavigation(e, href);
+        }
       }
       if (onClick) onClick(e);
     };
 
     return (
-      <Link href={href} className={className} onClick={handleClick}>
+      <Link href={localizedHref} className={className} onClick={handleClick}>
         {children}
       </Link>
     );
+  };
+
+  // Helper function to convert a static URL to a localized one
+  const getLocalizedUrl = (staticUrl: string) => {
+    // Map static URLs to route keys
+    let routeKey;
+
+    if (staticUrl === "/") {
+      routeKey = "home";
+    } else if (staticUrl === "/ettevottest") {
+      routeKey = "about";
+    } else if (staticUrl === "/tehtud-tood") {
+      routeKey = "projects";
+    } else if (staticUrl === "/kontakt") {
+      routeKey = "contact";
+    } else if (staticUrl === "/teenused/raudteede-jooksev-korrashoid") {
+      routeKey = "railway-maintenance";
+    } else if (staticUrl === "/teenused/remont-ja-renoveerimine") {
+      routeKey = "repair-renovation";
+    } else if (staticUrl === "/teenused/raudtee-ehitus") {
+      routeKey = "railway-construction";
+    } else if (staticUrl === "/teenused/projekteerimine") {
+      routeKey = "design";
+    } else {
+      // If not a recognized path, return the original URL
+      return staticUrl;
+    }
+
+    // Build localized URL using the routeTranslations utility
+    return buildLocalizedUrl(routeKey as any, currentLang as SupportedLanguage);
   };
 
   return (
@@ -248,7 +339,9 @@ const Navbar = () => {
         {mobileMenuOpen && (
           <div
             className={`fixed inset-0 bg-primary-background z-50 flex flex-col px-6 py-4 ${
-              window.location.pathname.includes("/admin") ? "pt-20" : ""
+              isClient && window.location.pathname.includes("/admin")
+                ? "pt-20"
+                : ""
             }`}
           >
             <div className="flex justify-between items-center">
@@ -289,7 +382,6 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Rest of mobile menu content unchanged */}
             {/* Mobile Menu Items */}
             <div className="flex-1 flex flex-col mt-8">
               <div className="mb-1">
@@ -319,72 +411,80 @@ const Navbar = () => {
                   <div className="bg-white mt-2 p-4 teenused-dropdown">
                     <ul>
                       <li className="py-2 text-gray-600 font-bold">
-                        <Link
+                        <AdminLink
                           href="/teenused/raudteede-jooksev-korrashoid"
                           onClick={(e) => {
                             closeAllMenus();
-                            const isAdminMode =
-                              window.location.pathname.includes("/admin");
-                            if (isAdminMode) {
-                              e.preventDefault();
-                              router.push(
-                                "/admin/pages/edit/railway-maintenance"
-                              );
+                            if (isClient) {
+                              const isAdminMode =
+                                window.location.pathname.includes("/admin");
+                              if (isAdminMode) {
+                                e.preventDefault();
+                                router.push(
+                                  "/admin/pages/edit/railway-maintenance"
+                                );
+                              }
                             }
                           }}
                         >
                           {t("services.railway_maintenance")}
-                        </Link>
+                        </AdminLink>
                       </li>
                       <li className="py-2 text-gray-600 font-bold">
-                        <Link
+                        <AdminLink
                           href="/teenused/remont-ja-renoveerimine"
                           onClick={(e) => {
                             closeAllMenus();
-                            const isAdminMode =
-                              window.location.pathname.includes("/admin");
-                            if (isAdminMode) {
-                              e.preventDefault();
-                              router.push("/admin/pages/edit/railway-repair");
+                            if (isClient) {
+                              const isAdminMode =
+                                window.location.pathname.includes("/admin");
+                              if (isAdminMode) {
+                                e.preventDefault();
+                                router.push("/admin/pages/edit/railway-repair");
+                              }
                             }
                           }}
                         >
                           {t("services.repair_renovation")}
-                        </Link>
+                        </AdminLink>
                       </li>
                       <li className="py-2 text-gray-600 font-bold">
-                        <Link
+                        <AdminLink
                           href="/teenused/raudtee-ehitus"
                           onClick={(e) => {
                             closeAllMenus();
-                            const isAdminMode =
-                              window.location.pathname.includes("/admin");
-                            if (isAdminMode) {
-                              e.preventDefault();
-                              router.push(
-                                "/admin/pages/edit/railway-infrastructure"
-                              );
+                            if (isClient) {
+                              const isAdminMode =
+                                window.location.pathname.includes("/admin");
+                              if (isAdminMode) {
+                                e.preventDefault();
+                                router.push(
+                                  "/admin/pages/edit/railway-infrastructure"
+                                );
+                              }
                             }
                           }}
                         >
                           {t("services.railway_construction")}
-                        </Link>
+                        </AdminLink>
                       </li>
                       <li className="py-2 text-gray-600 font-bold">
-                        <Link
+                        <AdminLink
                           href="/teenused/projekteerimine"
                           onClick={(e) => {
                             closeAllMenus();
-                            const isAdminMode =
-                              window.location.pathname.includes("/admin");
-                            if (isAdminMode) {
-                              e.preventDefault();
-                              router.push("/admin/pages/edit/railway-design");
+                            if (isClient) {
+                              const isAdminMode =
+                                window.location.pathname.includes("/admin");
+                              if (isAdminMode) {
+                                e.preventDefault();
+                                router.push("/admin/pages/edit/railway-design");
+                              }
                             }
                           }}
                         >
                           {t("services.design")}
-                        </Link>
+                        </AdminLink>
                       </li>
                     </ul>
                   </div>
@@ -427,7 +527,7 @@ const Navbar = () => {
                 )}
                 {!isLoading && contactInfo.email && (
                   <a
-                    href="/kontakt"
+                    href={getLocalizedUrl("/kontakt")}
                     className="mt-2 border border-primary-border rounded-full py-3 px-4 text-center font-bold text-primary-text block"
                   >
                     {contactInfo.email}
@@ -470,7 +570,7 @@ const Navbar = () => {
               </div>
               <div className="hidden md:flex md:items-center">
                 <a
-                  href="/kontakt"
+                  href={getLocalizedUrl("/kontakt")}
                   className="border border-primary-border rounded-full px-4 py-2 text-primary-text flex items-center"
                 >
                   {!isLoading ? contactInfo.email : "Laen..."}
@@ -482,7 +582,6 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Rest of desktop menu content unchanged */}
           {/* Navigation links */}
           <nav className="max-w-7xl w-full flex items-center pt-10 mb-10 relative">
             <div className="w-full pt-10 mb-10">

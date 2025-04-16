@@ -1,9 +1,12 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Playfair_Display } from "next/font/google";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useEdit } from "@/contexts/EditContext";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 const playfair = Playfair_Display({
   subsets: ["latin", "cyrillic"],
@@ -17,44 +20,51 @@ interface ColorSchemeEventDetail {
 
 const Hero = () => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
 
-  // Safely access the edit context with a fallback mechanism
-  const editContext = useEdit();
-  const isEditMode = editContext?.isEditMode || false;
-
-  // Properly get media URL with fallback to translation
-  const getMediaUrlSafe = (key: string, defaultUrl?: string): string => {
-    // If edit context is available and valid, use it
-    if (editContext && typeof editContext.getMediaUrl === "function") {
-      return editContext.getMediaUrl(key, defaultUrl);
-    }
-
-    // Otherwise fall back to translation or default
-    return defaultUrl || t(key) || "";
-  };
+  // Add isClient state to handle hydration issues
+  const [isClient, setIsClient] = useState(false);
 
   // State for line variant
   const [lineVariant, setLineVariant] = useState<"dark" | "white">("dark");
   // Simplified - use a fixed text color based on line variant
   const ctaTextColor = lineVariant === "dark" ? "white" : "black";
 
-  // Get video URL with proper fallbacks
-  const videoEmbedUrl =
-    getMediaUrlSafe("hero.youtube_embed") ||
-    t("hero.video") ||
-    t("hero.youtube_embed") ||
-    "https://player.vimeo.com/video/1073950156?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479";
+  // Get media from translations directly without EditContext
+  const getMediaUrlSafe = (key: string, defaultUrl?: string): string => {
+    return defaultUrl || t(key) || "";
+  };
+
+  // Set defaults for SSR to avoid hydration mismatch
+  // Get video URL with proper fallbacks on client-side only
+  const [videoEmbedUrl, setVideoEmbedUrl] = useState(
+    "https://player.vimeo.com/video/1073950156?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+  );
 
   // Determine default SVG file based on line variant
   const defaultLineSvg =
     lineVariant === "dark" ? "/line_dark.svg" : "/line_white.svg";
 
-  // Get line from media context if available, otherwise use the default
+  // Get line using simplified function
   const lineSvg = getMediaUrlSafe("line", defaultLineSvg);
+
+  // Set client-side state and load any dependent data
+  useEffect(() => {
+    setIsClient(true);
+
+    // Update the video URL after component mounts to avoid hydration errors
+    setVideoEmbedUrl(
+      getMediaUrlSafe("hero.youtube_embed") ||
+        t("hero.video") ||
+        t("hero.youtube_embed") ||
+        "https://player.vimeo.com/video/1073950156?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+    );
+  }, [t]); // Note: getMediaUrlSafe is a function created within the component and won't change
 
   // Load line variant from localStorage on component mount
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const savedLineVariant = localStorage.getItem("site.lineVariant");
     if (savedLineVariant === "dark" || savedLineVariant === "white") {
       setLineVariant(savedLineVariant);
@@ -91,20 +101,26 @@ const Hero = () => {
         handleColorSchemeChange as EventListener
       );
     };
-  }, []);
+  }, [isClient]);
 
   const openVideo = () => {
     setIsVideoOpen(true);
-    document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+    if (isClient) {
+      document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+    }
   };
 
   const closeVideo = () => {
     setIsVideoOpen(false);
-    document.body.style.overflow = "unset"; // Re-enable scrolling
+    if (isClient) {
+      document.body.style.overflow = "unset"; // Re-enable scrolling
+    }
   };
 
   // Close video when ESC key is pressed
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const handleEscKey = (event: KeyboardEvent) => {
       if (isVideoOpen && event.key === "Escape") {
         closeVideo();
@@ -113,7 +129,7 @@ const Hero = () => {
 
     window.addEventListener("keydown", handleEscKey);
     return () => window.removeEventListener("keydown", handleEscKey);
-  }, [isVideoOpen]);
+  }, [isVideoOpen, isClient]);
 
   return (
     <>
@@ -140,7 +156,10 @@ const Hero = () => {
                 {t("hero.subtitle")}
               </p>
               <Link
-                href="/kontakt"
+                href={buildLocalizedUrl(
+                  "contact",
+                  currentLang as SupportedLanguage
+                )}
                 className={`inline-flex items-center bg-primary-text ${
                   ctaTextColor === "white" ? "text-white" : "text-black"
                 } px-6 py-3 rounded-full w-fit hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1`}
@@ -218,7 +237,7 @@ const Hero = () => {
       </div>
 
       {/* Video Modal Overlay - Click anywhere to close */}
-      {isVideoOpen && (
+      {isVideoOpen && isClient && (
         <div
           className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
           onClick={closeVideo}

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useRouter } from "next/navigation";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 interface ColorSchemeEventDetail {
   logoVariant: "dark" | "white";
@@ -15,6 +17,7 @@ const Footer: React.FC = () => {
   const { t, currentLang: currentLanguage } = useTranslation();
   const router = useRouter();
   const { contactInfo, isLoading, getPhoneByLabel } = useContactInfo();
+  const [isClient, setIsClient] = useState(false);
 
   // State for logo variant
   const [logoVariant, setLogoVariant] = useState<"dark" | "white">("dark");
@@ -25,8 +28,27 @@ const Footer: React.FC = () => {
   // Dynamic logo URL based on logoVariant
   const logoUrl = `/logo_${logoVariant}.svg`;
 
+  // Initialize mainPhone to avoid hydration issues
+  const [mainPhone, setMainPhone] = useState<any>(null);
+
+  // Set client-side state and load dynamic data after component mounts
+  useEffect(() => {
+    setIsClient(true);
+
+    // Get specific phones if available
+    const phone =
+      getPhoneByLabel("Üldtelefon") ||
+      getPhoneByLabel("main") ||
+      getPhoneByLabel("üld") ||
+      (contactInfo.phones.length > 0 ? contactInfo.phones[0] : undefined);
+
+    setMainPhone(phone);
+  }, [getPhoneByLabel, contactInfo.phones]);
+
   // Load logo variant from localStorage on component mount
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const loadLogoVariant = () => {
       const savedLogoVariant = localStorage.getItem("site.logoVariant");
       if (savedLogoVariant === "dark" || savedLogoVariant === "white") {
@@ -72,13 +94,6 @@ const Footer: React.FC = () => {
     };
   }, []);
 
-  // Get specific phones if available
-  const mainPhone =
-    getPhoneByLabel("Üldtelefon") ||
-    getPhoneByLabel("main") ||
-    getPhoneByLabel("üld") ||
-    (contactInfo.phones.length > 0 ? contactInfo.phones[0] : undefined);
-
   const getKodaLogo = () => {
     const base = "Kaubanduskoda-liikmelogo";
     const variant = kodaLogoVariant === "dark" ? "dark" : "white"; // logo color on opposite background
@@ -100,6 +115,8 @@ const Footer: React.FC = () => {
     e: React.MouseEvent<HTMLAnchorElement>,
     path: string
   ) => {
+    if (!isClient) return;
+
     // Check for admin edit mode using URL or other method
     const isAdminMode = window.location.pathname.includes("/admin");
 
@@ -138,6 +155,39 @@ const Footer: React.FC = () => {
     }
   };
 
+  // Helper function to convert a static URL to a localized one
+  const getLocalizedUrl = (staticUrl: string) => {
+    // Map static URLs to route keys
+    let routeKey;
+
+    if (staticUrl === "/") {
+      routeKey = "home";
+    } else if (staticUrl === "/ettevottest") {
+      routeKey = "about";
+    } else if (staticUrl === "/tehtud-tood") {
+      routeKey = "projects";
+    } else if (staticUrl === "/kontakt") {
+      routeKey = "contact";
+    } else if (staticUrl === "/teenused/raudteede-jooksev-korrashoid") {
+      routeKey = "railway-maintenance";
+    } else if (staticUrl === "/teenused/remont-ja-renoveerimine") {
+      routeKey = "repair-renovation";
+    } else if (staticUrl === "/teenused/raudtee-ehitus") {
+      routeKey = "railway-construction";
+    } else if (staticUrl === "/teenused/projekteerimine") {
+      routeKey = "design";
+    } else {
+      // If not a recognized path, return the original URL
+      return staticUrl;
+    }
+
+    // Build localized URL using the routeTranslations utility
+    return buildLocalizedUrl(
+      routeKey as any,
+      currentLanguage as SupportedLanguage
+    );
+  };
+
   // Create custom link component that handles admin navigation
   type AdminLinkProps = {
     href: string;
@@ -152,8 +202,15 @@ const Footer: React.FC = () => {
     className = "",
     onClick,
   }) => {
+    // Get the localized URL if needed (skip admin URLs)
+    const localizedHref = href.includes("/admin")
+      ? href
+      : getLocalizedUrl(href);
+
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-      const isAdminMode = window.location.pathname.includes("/admin");
+      const isAdminMode = isClient
+        ? window.location.pathname.includes("/admin")
+        : false;
       if (isAdminMode) {
         handleAdminNavigation(e, href);
       }
@@ -161,7 +218,7 @@ const Footer: React.FC = () => {
     };
 
     return (
-      <Link href={href} className={className} onClick={handleClick}>
+      <Link href={localizedHref} className={className} onClick={handleClick}>
         {children}
       </Link>
     );
@@ -169,6 +226,8 @@ const Footer: React.FC = () => {
 
   // Improved function to handle footer positioning
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const positionFooter = () => {
       const footer = document.getElementById("main-footer");
       const body = document.body;
@@ -232,7 +291,7 @@ const Footer: React.FC = () => {
       window.removeEventListener("load", positionFooter);
       observer.disconnect();
     };
-  }, []);
+  }, [isClient]); // Only run when component is mounted on client
 
   return (
     <footer
@@ -272,12 +331,13 @@ const Footer: React.FC = () => {
           <div className="mb-8 md:mb-0">
             <h3 className="font-bold text-lg mb-2">{t("footer.contact")}</h3>
             <div className="space-y-1">
-              {!isLoading && mainPhone && (
+              {isClient && !isLoading && mainPhone && (
                 <p className="text-sm">
                   {t("footer.general_phone")} {mainPhone.number}
                 </p>
               )}
-              {!isLoading &&
+              {isClient &&
+                !isLoading &&
                 contactInfo.phones &&
                 contactInfo.phones.length > 0 && (
                   <>
@@ -300,7 +360,7 @@ const Footer: React.FC = () => {
                     })}
                   </>
                 )}
-              {!isLoading && contactInfo.email && (
+              {isClient && !isLoading && contactInfo.email && (
                 <p className="text-sm">{contactInfo.email}</p>
               )}
             </div>
@@ -310,7 +370,7 @@ const Footer: React.FC = () => {
           <div className="mb-8 md:mb-0">
             <h3 className="font-bold text-lg mb-2">{t("footer.office")}</h3>
             <div className="space-y-1">
-              {!isLoading && contactInfo.office && (
+              {isClient && !isLoading && contactInfo.office && (
                 <>
                   <p className="text-sm">{contactInfo.office.city}</p>
                   <p className="text-sm">{contactInfo.office.postal}</p>
@@ -352,7 +412,9 @@ const Footer: React.FC = () => {
           <div className="flex flex-col items-end">
             {/* Scroll to top button on top */}
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              onClick={() =>
+                isClient && window.scrollTo({ top: 0, behavior: "smooth" })
+              }
               className="w-10 h-10 bg-black rounded-full flex items-center justify-center mb-4"
               aria-label="Scroll to top"
             >
@@ -395,12 +457,13 @@ const Footer: React.FC = () => {
             <div className="max-w-1/3">
               <h3 className="font-bold text-lg mb-2">{t("footer.contact")}</h3>
               <div className="space-y-1">
-                {!isLoading && mainPhone && (
+                {isClient && !isLoading && mainPhone && (
                   <p className="text-sm">
                     {t("footer.general_phone")} {mainPhone.number}
                   </p>
                 )}
-                {!isLoading &&
+                {isClient &&
+                  !isLoading &&
                   contactInfo.phones &&
                   contactInfo.phones.length > 0 && (
                     <>
@@ -423,7 +486,7 @@ const Footer: React.FC = () => {
                       })}
                     </>
                   )}
-                {!isLoading && contactInfo.email && (
+                {isClient && !isLoading && contactInfo.email && (
                   <p className="text-sm">{contactInfo.email}</p>
                 )}
               </div>
@@ -433,7 +496,7 @@ const Footer: React.FC = () => {
             <div>
               <h3 className="font-bold text-lg mb-2">{t("footer.office")}</h3>
               <div className="space-y-1">
-                {!isLoading && contactInfo.office && (
+                {isClient && !isLoading && contactInfo.office && (
                   <>
                     <p className="text-sm">{contactInfo.office.city}</p>
                     <p className="text-sm">{contactInfo.office.postal}</p>
@@ -475,18 +538,22 @@ const Footer: React.FC = () => {
           {/* Logo and scroll button in a better aligned container */}
           <div className="flex flex-row items-center justify-between mt-10 mb-6">
             {/* Logo aligned on the left */}
-            <a href="https://www.koda.ee">
-              <img
-                src={getKodaLogo()}
-                alt="Kaubanduskoja liikmelogo"
-                className="w-56"
-                key={`koda-mobile-logo-${kodaLogoVariant}`}
-              />
-            </a>
+            {isClient && (
+              <a href="https://www.koda.ee">
+                <img
+                  src={getKodaLogo()}
+                  alt="Kaubanduskoja liikmelogo"
+                  className="w-56"
+                  key={`koda-mobile-logo-${kodaLogoVariant}`}
+                />
+              </a>
+            )}
 
             {/* Scroll to Top Button aligned on the right */}
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              onClick={() =>
+                isClient && window.scrollTo({ top: 0, behavior: "smooth" })
+              }
               className="w-10 h-10 bg-black rounded-full flex items-center justify-center"
               aria-label="Scroll to top"
             >
@@ -515,14 +582,16 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} Steel Buckle OÜ
           </p>
           {/* Logo appears only on desktop, aligned with copyright and right-aligned */}
-          <a href="https://www.koda.ee" className="hidden md:block">
-            <img
-              src={getKodaLogo()}
-              alt="Kaubanduskoja liikmelogo"
-              className="w-56"
-              key={`koda-desktop-logo-${kodaLogoVariant}`}
-            />
-          </a>
+          {isClient && (
+            <a href="https://www.koda.ee" className="hidden md:block">
+              <img
+                src={getKodaLogo()}
+                alt="Kaubanduskoja liikmelogo"
+                className="w-56"
+                key={`koda-desktop-logo-${kodaLogoVariant}`}
+              />
+            </a>
+          )}
         </div>
       </div>
     </footer>

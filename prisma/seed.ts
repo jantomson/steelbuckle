@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // Available languages in your JSON files
 const LANGUAGES = [
   { code: "en", name: "English", filePath: "public/locales/en/common.json" },
-  { code: "est", name: "Estonian", filePath: "public/locales/est/common.json" },
+  { code: "et", name: "Estonian", filePath: "public/locales/et/common.json" },
   { code: "lv", name: "Latvian", filePath: "public/locales/lv/common.json" },
   { code: "ru", name: "Russian", filePath: "public/locales/ru/common.json" },
 ];
@@ -337,7 +337,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Railway construction, repair & maintenance services across the Baltics with 35+ years of industry experience.",
           },
-          est: {
+          et: {
             title: "Raudteede ehitus ja hooldus | Steel Buckle",
             metaDescription:
               "Steel Buckle pakub raudtee-ehitus-, remondi- ja hooldusteenuseid 35+ aasta kogemusega Eestis, Lätis ja Leedus.",
@@ -383,7 +383,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Steel Buckle has been providing railway construction and maintenance services across the Baltic region for over three decades.",
           },
-          est: {
+          et: {
             title: "Ettevõttest | Steel Buckle",
             metaDescription:
               "Tutvu Steel Buckle'iga - raudtee-ehitusettevõte 35+ aasta kogemusega Eestis, Lätis ja Leedus. Kvaliteetsed raudteeteenused alates 1989.",
@@ -428,7 +428,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Comprehensive railway maintenance services including inspections, measurements, and technical maintenance to ensure safe and reliable railway infrastructure.",
           },
-          est: {
+          et: {
             title: "Raudteede jooksev korrashoid | Steel Buckle",
             metaDescription:
               "Raudteede jooksva korrashoiu teenused Steel Buckle'ilt. Regulaarsed ülevaatused, defektoskoopia ja tehniline hooldus ohutuks raudtee toimimiseks.",
@@ -473,7 +473,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Railway repair and renovation services using certified materials and modern technologies for long-lasting railway infrastructure.",
           },
-          est: {
+          et: {
             title: "Raudtee remont ja renoveerimine | Steel Buckle",
             metaDescription:
               "Raudteede remondi- ja renoveerimisteenus Steel Buckle'ilt. Rööbaste ja liiprite vahetus, pöörmete remont, raudteeülesõitude uuendamine ja täielik tee kapitaalremont.",
@@ -522,7 +522,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Railway construction services including project planning, technical documentation, construction, and commissioning by experienced railway specialists.",
           },
-          est: {
+          et: {
             title: "Raudtee-ehitusteenused | Steel Buckle",
             metaDescription:
               "Raudtee-ehitusteenused Steel Buckle'ilt. Projektdokumentatsioonist kuni kasutuselevõtuni ehitame usaldusväärset raudteeinfrastruktuuri üle Eesti, Läti ja Leedu.",
@@ -567,7 +567,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Specialized railway design services that consider client needs, terrain specifics, and regional requirements for optimal railway infrastructure solutions.",
           },
-          est: {
+          et: {
             title: "Raudtee projekteerimisteenused | Steel Buckle",
             metaDescription:
               "Raudtee projekteerimisteenused Steel Buckle'ilt. Tehnilise dokumentatsiooni ettevalmistamine, raudteeinfrastruktuuri projekteerimine ja lubade dokumentatsioon.",
@@ -612,7 +612,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Reach out to our team of railway construction and maintenance experts for your next project across the Baltic countries.",
           },
-          est: {
+          et: {
             title: "Võta ühendust | Steel Buckle",
             metaDescription:
               "Võta ühendust Steel Buckle'iga raudtee-ehitus-, hooldus- ja remonditeenuste saamiseks Eestis, Lätis ja Leedus. Küsi pakkumist juba täna.",
@@ -657,7 +657,7 @@ async function seedSeoMetadata() {
             ogDescription:
               "Browse through our railway construction, repair, and renovation projects showcasing our expertise across the Baltic region.",
           },
-          est: {
+          et: {
             title: "Meie raudteeprojektid | Steel Buckle",
             metaDescription:
               "Tutvu Steel Buckle'i lõpetatud raudtee-ehitus- ja renoveerimisprojektide portfoolioga Eestis, Lätis ja Leedus. Vaata meie kogemust töös.",
@@ -777,7 +777,7 @@ async function seedContactInfo() {
           email: "steelbuckle@steelbuckle.ee",
           officeCity: "Tallinn",
           officePostal: "11415",
-          officeStreet: "Peterburi tee 45",
+          officeStreet: "Peterburi tee 46",
           officeRoom: "Ruum 507",
         },
       });
@@ -824,7 +824,7 @@ async function seedProjects() {
         year: "2018–2019",
         translations: {
           en: "Nõmme Historical Railway Track Renovation",
-          est: "Nõmme ajaloolise raudtee lõigu renoveerimine",
+          et: "Nõmme ajaloolise raudtee lõigu renoveerimine",
           lv: "Nõmme vēsturiskā dzelzceļa posma atjaunošana",
           ru: "Реновация исторического железнодорожного участка Нымме",
         },
@@ -834,7 +834,7 @@ async function seedProjects() {
         year: "2015",
         translations: {
           en: "Liepāja Railway Station Reconstruction",
-          est: "Liepāja raudteejaama rekonstrueerimine",
+          et: "Liepāja raudteejaama rekonstrueerimine",
           lv: "Liepājas dzelzceļa stacijas rekonstrukcija",
           ru: "Реконструкция железнодорожного вокзала Лиепаи",
         },
@@ -844,7 +844,7 @@ async function seedProjects() {
         year: "2010-2012",
         translations: {
           en: "Valga Railway Station Reconstruction",
-          est: "Valga raudteejaama rekonstrueerimine",
+          et: "Valga raudteejaama rekonstrueerimine",
           lv: "Valgas dzelzceļa stacijas rekonstrukcija",
           ru: "Реконструкция железнодорожного вокзала Валга",
         },
@@ -854,7 +854,7 @@ async function seedProjects() {
         year: "2013-2015",
         translations: {
           en: "Renovation of Sorting Hill and Underground Tracks at Šķirotava Station",
-          est: "Sorteerimismäe ja mäealuste teede renoveerimine Šķirotava jaamas",
+          et: "Sorteerimismäe ja mäealuste teede renoveerimine Šķirotava jaamas",
           lv: "Šķirotavas stacijas šķirošanas kalna un kalnapakšas ceļu renovācija",
           ru: "Реновация сортировочной горки и подгорных путей на станции Шкиротава",
         },
@@ -864,7 +864,7 @@ async function seedProjects() {
         year: "2013-2015",
         translations: {
           en: "Construction of Technology Park in Krievu Island Area",
-          est: "Tehnoloogiapargi ehitus Krievu saare piirkonnas",
+          et: "Tehnoloogiapargi ehitus Krievu saare piirkonnas",
           lv: "Tehnoloģiskā parka būvniecība Krievu salas rajonā",
           ru: "Строительство технологического парка в районе острова Криеву",
         },
@@ -874,7 +874,7 @@ async function seedProjects() {
         year: "2012-2015",
         translations: {
           en: "Construction of Second Track on Skrīveri-Krustpils Section",
-          est: "Teise rööpapaari ehitamine lõigul Skrīveri-Krustpils",
+          et: "Teise rööpapaari ehitamine lõigul Skrīveri-Krustpils",
           lv: "Otrā sliežu ceļa būvniecība posmā Skrīveri-Krustpils",
           ru: "Строительство второго пути на участке Скривери-Крустпилс",
         },
@@ -884,7 +884,7 @@ async function seedProjects() {
         year: "2015",
         translations: {
           en: "Construction of Bolderāja 2 Railway Station",
-          est: "Raudteejaama Bolderāja 2 ehitamine",
+          et: "Raudteejaama Bolderāja 2 ehitamine",
           lv: "Dzelzceļa stacijas Bolderāja 2 būvniecība",
           ru: "Строительство железнодорожной станции Болдерая 2",
         },
@@ -894,7 +894,7 @@ async function seedProjects() {
         year: "2012-2025",
         translations: {
           en: "Snow Removal Works on AS Eesti Raudtee Tracks and Switches",
-          est: "Lumetõrjetööd AS Eesti Raudtee teedel ja pöörmetel",
+          et: "Lumetõrjetööd AS Eesti Raudtee teedel ja pöörmetel",
           lv: "Sniega tīrīšanas darbi uz AS Eesti Raudtee ceļiem un pārmijām",
           ru: "Работы по уборке снега на путях и стрелках AS Eesti Raudtee",
         },
@@ -904,7 +904,7 @@ async function seedProjects() {
         year: "2013-2014",
         translations: {
           en: "Construction of Kazlų Rūda-Marijampole Railway Section (1435 mm Gauge)",
-          est: "Raudteelõigu Kazlų Rūda-Marijampole ehitus (rööpmelaius 1435 mm)",
+          et: "Raudteelõigu Kazlų Rūda-Marijampole ehitus (rööpmelaius 1435 mm)",
           lv: "Dzelzceļa posma Kazlų Rūda-Marijampole būvniecība (sliežu platums 1435 mm)",
           ru: "Строительство железнодорожного участка Казлу-Руда-Мариямполе (ширина колеи 1435 мм)",
         },
@@ -915,7 +915,7 @@ async function seedProjects() {
         year: "2014",
         translations: {
           en: "Reconstruction of Crane Tracks in Muuga Port",
-          est: "Kraanateede rekonstrueerimine Muuga sadamas",
+          et: "Kraanateede rekonstrueerimine Muuga sadamas",
           lv: "Celtņu ceļu rekonstrukcija Mūgas ostā",
           ru: "Реконструкция крановых путей в порту Мууга",
         },
@@ -925,7 +925,7 @@ async function seedProjects() {
         year: "2015, 2016, 2019-2024",
         translations: {
           en: "Repair Works on Paldiski South Harbor Railway Tracks",
-          est: "Paldiski Lõunasadama raudteede remonditööd",
+          et: "Paldiski Lõunasadama raudteede remonditööd",
           lv: "Paldiskas Dienvidu ostas dzelzceļa sliežu remontdarbi",
           ru: "Ремонтные работы железнодорожных путей Южного порта Палдиски",
         },

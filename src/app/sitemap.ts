@@ -1,104 +1,61 @@
-// app/sitemap.ts (for Next.js App Router)
+// app/sitemap.ts
 
-import { PrismaClient } from "@prisma/client";
 import { MetadataRoute } from "next";
+import {
+  supportedLanguages,
+  routeTranslations,
+  RouteKey,
+} from "@/config/routeTranslations";
 
-const prisma = new PrismaClient();
-
-// Define your application routes with their update frequency
-const routes = [
-  { path: "", changeFrequency: "weekly", priority: 1.0 },
-  { path: "about", changeFrequency: "monthly", priority: 0.8 },
-  { path: "contact", changeFrequency: "monthly", priority: 0.8 },
-  { path: "projects", changeFrequency: "weekly", priority: 0.9 },
-  {
-    path: "services/railway-maintenance",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "services/repair-renovation",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "services/railway-construction",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  { path: "services/design", changeFrequency: "monthly", priority: 0.8 },
+// Define routes with their SEO properties
+const routes: Array<{
+  key: RouteKey;
+  changeFrequency: string;
+  priority: number;
+}> = [
+  { key: "home", changeFrequency: "weekly", priority: 1.0 },
+  { key: "about", changeFrequency: "monthly", priority: 0.8 },
+  { key: "contact", changeFrequency: "monthly", priority: 0.8 },
+  { key: "projects", changeFrequency: "weekly", priority: 0.9 },
+  { key: "railway-maintenance", changeFrequency: "monthly", priority: 0.8 },
+  { key: "repair-renovation", changeFrequency: "monthly", priority: 0.8 },
+  { key: "railway-construction", changeFrequency: "monthly", priority: 0.8 },
+  { key: "design", changeFrequency: "monthly", priority: 0.8 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://steelbuckle.ee";
-
-  // Get all supported languages
-  const languages = await prisma.language.findMany({
-    select: { code: true },
-  });
-
   const sitemapEntries: MetadataRoute.Sitemap = [];
 
   // Current date for lastModified
   const lastModified = new Date();
 
-  // Generate entries for each route in each language
-  for (const route of routes) {
-    // Default language (Estonian) is at the root
-    sitemapEntries.push({
-      url: `${baseUrl}/${route.path}`,
-      lastModified,
-      changeFrequency: route.changeFrequency as any,
-      priority: route.priority,
-    });
-
-    // Other languages have their code in the URL
-    for (const language of languages) {
-      // Skip Estonian as it's handled above
-      if (language.code === "est") continue;
-
-      sitemapEntries.push({
-        url: `${baseUrl}/${language.code}/${route.path}`,
-        lastModified,
-        changeFrequency: route.changeFrequency as any,
-        priority: route.priority,
-      });
-    }
-  }
-
-  // Add projects pages if you have dynamic project pages
   try {
-    const projects = await prisma.project.findMany({
-      select: { id: true },
-    });
+    // Generate entries for each route in each language using route translations
+    for (const route of routes) {
+      for (const lang of supportedLanguages) {
+        // Get the translated path for this route in this language
+        let translatedPath = routeTranslations[lang][route.key];
 
-    for (const project of projects) {
-      // Default language (Estonian)
-      sitemapEntries.push({
-        url: `${baseUrl}/projects/${project.id}`,
-        lastModified,
-        changeFrequency: "monthly",
-        priority: 0.7,
-      });
-
-      // Other languages
-      for (const language of languages) {
-        if (language.code === "est") continue;
+        // Build the full URL
+        const url = `${baseUrl}/${lang}${
+          translatedPath ? `/${translatedPath}` : ""
+        }`;
 
         sitemapEntries.push({
-          url: `${baseUrl}/${language.code}/projects/${project.id}`,
+          url,
           lastModified,
-          changeFrequency: "monthly",
-          priority: 0.7,
+          changeFrequency: route.changeFrequency as any,
+          priority: route.priority,
         });
       }
     }
-  } catch (error) {
-    console.error("Error fetching projects for sitemap:", error);
-  }
 
-  // Clean up Prisma connection
-  await prisma.$disconnect();
+    // Note: We've removed the individual project URL generation
+    // since those pages don't actually exist
+  } catch (error) {
+    console.error("Error generating sitemap:", error);
+  }
 
   return sitemapEntries;
 }

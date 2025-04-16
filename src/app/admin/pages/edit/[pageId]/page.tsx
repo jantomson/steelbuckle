@@ -306,6 +306,25 @@ export default function EditablePage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
+  // Add this useEffect alongside your other hooks
+  useEffect(() => {
+    // Check if we're on a language-prefixed admin route and redirect if needed
+    const pathname = window.location.pathname;
+    const languagePrefixedAdminPattern = /^\/(en|lv|ru|et)(\/admin\/.*)$/;
+    const match = pathname.match(languagePrefixedAdminPattern);
+
+    if (match && match[2]) {
+      // Get just the admin part
+      const adminPath = match[2];
+      console.log(
+        `Detected language-prefixed admin path, redirecting to ${adminPath}`
+      );
+
+      // Redirect to the admin path without the language prefix
+      window.location.href = adminPath;
+    }
+  }, []);
+
   // Toggle color picker
   const toggleColorPicker = useCallback(() => {
     setShowColorPicker((prev) => !prev);

@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePathname } from "next/navigation";
 
 interface Project {
   id: string;
@@ -11,45 +12,76 @@ interface Project {
   year: string;
 }
 
+// Helper to extract language from URL path
+function extractLanguageFromPath(path: string): string {
+  if (path.startsWith("/en")) return "en";
+  if (path.startsWith("/lv")) return "lv";
+  if (path.startsWith("/ru")) return "ru";
+  if (path.startsWith("/et")) return "et";
+  return "et"; // Default
+}
+
 const ProjectsUser = () => {
   const { t } = useTranslation();
-  const { currentLang, isLanguageLoaded } = useLanguage(); // Get isLanguageLoaded flag
+  const { currentLang, isLanguageLoaded } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const pathname = usePathname(); // Get current URL path
 
-  // Fetch projects from the API - only after language is loaded
-  useEffect(() => {
-    // Only fetch projects if language is loaded
-    if (isLanguageLoaded) {
-      console.log(
-        "ProjectsUser: Fetching projects with language:",
-        currentLang
-      );
-      const fetchProjects = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`/api/projects?lang=${currentLang}`);
+  // Directly use URL-based language for fetching to avoid race conditions
+  const urlLang = pathname ? extractLanguageFromPath(pathname) : currentLang;
 
-          if (!response.ok) {
-            throw new Error("Failed to fetch projects");
-          }
+  // Enhanced fetch function with improved error handling and cache busting
+  // Now using URL-based language directly
+  const fetchProjects = useCallback(
+    async (lang: string) => {
+      if (!isLanguageLoaded) return;
 
-          const data = await response.json();
-          console.log("ProjectsUser: Fetched projects data:", data);
-          setProjects(data);
-          setError(null);
-        } catch (err) {
-          console.error("Error fetching projects:", err);
-          setError("Error loading projects. Please try again later.");
-        } finally {
-          setLoading(false);
+      try {
+        console.log(
+          `ProjectsUser: Fetching projects with language from URL: ${lang}`
+        );
+        setLoading(true);
+
+        // Add cache-busting parameter to avoid cached responses
+        const response = await fetch(
+          `/api/projects?lang=${lang}&_t=${Date.now()}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch projects: ${response.status} ${response.statusText}`
+          );
         }
-      };
 
-      fetchProjects();
+        const data = await response.json();
+        console.log(
+          `ProjectsUser: Fetched ${data.length} projects for language: ${lang}`
+        );
+        setProjects(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+        setError("Error loading projects. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isLanguageLoaded]
+  );
+
+  // Fetch projects whenever URL path changes
+  useEffect(() => {
+    if (isLanguageLoaded && pathname) {
+      // Use language from URL directly to avoid context synchronization issues
+      const lang = extractLanguageFromPath(pathname);
+      console.log(
+        `ProjectsUser: URL path changed to ${pathname}, language: ${lang}`
+      );
+      fetchProjects(lang);
     }
-  }, [currentLang, isLanguageLoaded]); // Add isLanguageLoaded as a dependency
+  }, [pathname, isLanguageLoaded, fetchProjects]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -239,7 +271,7 @@ const ProjectsUser = () => {
     return (
       <section className="relative py-16 bg-gray-100">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center">Loading projects...</div>
+          <div className="text-center">Laen projekte...</div>
         </div>
       </section>
     );

@@ -1,10 +1,19 @@
-// Updated app/api/media/route.ts with cache-busting improvements
+// app/api/media/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // Define a type for the response data structure
 interface MediaRefMap {
   [key: string]: string;
+}
+
+// Helper to add cache-busting parameter to URL
+function addCacheBustToUrl(url: string, timestamp: string): string {
+  // Check if URL already has query parameters
+  if (url.includes("?")) {
+    return `${url}&_t=${timestamp}`;
+  }
+  return `${url}?_t=${timestamp}`;
 }
 
 export async function GET(request: Request) {
@@ -40,9 +49,7 @@ export async function GET(request: Request) {
       }
 
       // Add cache-busting parameter to image paths
-      const mediaPath = mediaRef.media.path.includes("?")
-        ? `${mediaRef.media.path}&_t=${cacheBust}`
-        : `${mediaRef.media.path}?_t=${cacheBust}`;
+      const mediaPath = addCacheBustToUrl(mediaRef.media.path, cacheBust);
 
       return NextResponse.json(
         {
@@ -74,9 +81,7 @@ export async function GET(request: Request) {
         if (ref.media) {
           const path = ref.media.path;
           // Add cache-busting parameter to media paths
-          result[ref.referenceKey] = path.includes("?")
-            ? `${path}&_t=${cacheBust}`
-            : `${path}?_t=${cacheBust}`;
+          result[ref.referenceKey] = addCacheBustToUrl(path, cacheBust);
         }
       });
 
@@ -102,9 +107,7 @@ export async function GET(request: Request) {
         if (ref.media) {
           const path = ref.media.path;
           // Add cache-busting parameter to media paths
-          result[ref.referenceKey] = path.includes("?")
-            ? `${path}&_t=${cacheBust}`
-            : `${path}?_t=${cacheBust}`;
+          result[ref.referenceKey] = addCacheBustToUrl(path, cacheBust);
         }
       });
 
@@ -117,10 +120,7 @@ export async function GET(request: Request) {
 
       // Transform the response to include cache-busting and just the paths
       const items = media.map((item) => {
-        const path = item.path;
-        return path.includes("?")
-          ? `${path}&_t=${cacheBust}`
-          : `${path}?_t=${cacheBust}`;
+        return addCacheBustToUrl(item.path, cacheBust);
       });
 
       return NextResponse.json({ items }, { headers: responseHeaders });

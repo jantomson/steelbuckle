@@ -6,7 +6,7 @@ const nextConfig = {
   },
   // Configure image domains for next/image
   images: {
-    domains: ["localhost"],
+    domains: ["localhost", "res.cloudinary.com", "steelbuckle.ee"],
     // Allow placeholder images for development
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

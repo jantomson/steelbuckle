@@ -8,9 +8,11 @@ import { usePageMedia } from "@/hooks/usePageMedia";
 import Link from "next/link";
 import SubpageHeader from "@/components/SubpageHeader";
 import SEOMetadata from "@/components/SEOMetadata";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 const RailwayDesignPage = () => {
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
 
   // Define the page prefix and default images
   const PAGE_PREFIX = "railway_design_page";
@@ -133,10 +135,13 @@ const RailwayDesignPage = () => {
           {/* Contact button */}
           <div className="mb-12 flex justify-center">
             <Link
-              href="/kontakt"
+              href={buildLocalizedUrl(
+                "contact",
+                currentLang as SupportedLanguage
+              )}
               className="inline-flex items-center bg-black text-white px-6 py-3 rounded-full w-fit hover:bg-gray-600 transition-colors group"
             >
-              {t("railway_design_page.cta")}{" "}
+              {t("railway_design_page.cta")}
               <img src="/open.svg" alt="Arrow Right" className="w-7 h-7 ml-2" />
             </Link>
           </div>

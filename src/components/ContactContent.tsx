@@ -491,7 +491,7 @@ const ContactContent: React.FC = () => {
     if (!checkRateLimit()) {
       newErrors.message =
         t("contact.form.validation.too_many_submissions") ||
-        "Too many submissions. Please try again later.";
+        "Liiga palju katseid. Proovi hiljem uuesti.";
     }
 
     setErrors(newErrors);
@@ -740,7 +740,7 @@ const ContactContent: React.FC = () => {
                 {isSubmitting
                   ? t("contact.form.submitting")
                   : submissionAttempts >= 5
-                  ? t("contact.form.too_many_attempts") || "Please wait..."
+                  ? t("contact.form.too_many_attempts") || "Palun oota..."
                   : t("contact.form.submit")}
                 {/* Fix for hydration error - only render on client side */}
                 {isMounted && (

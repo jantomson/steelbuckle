@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import {
+  isCloudinaryUrl,
+  getOptimizedImageUrl,
+  extractPublicIdFromUrl,
+} from "@/lib/cloudinaryUrl";
 
 // Define the media config type based on Prisma schema
 type MediaConfigType = {
@@ -394,14 +399,19 @@ export function usePageMedia(
 
   // Helper to get media URL from config - memoized for performance
   const getImageUrl = useCallback(
-    (key: string, defaultUrl: string = ""): string => {
+    (key: string, defaultUrl: string = "", size?: number): string => {
       // Try multiple key formats
       const fullKey = key.includes(".") ? key : `${pagePrefix}.images.${key}`;
       const altKey = key.includes(".") ? key : `${pagePrefix}.${key}`;
 
       // Check each possible format for a non-empty value
-      const mediaUrl =
+      let mediaUrl =
         mediaConfig[fullKey] || mediaConfig[altKey] || mediaConfig[key];
+
+      // If we have a media URL and it's a Cloudinary URL, handle optimization if size is provided
+      if (mediaUrl && isCloudinaryUrl(mediaUrl) && size) {
+        return getOptimizedImageUrl(mediaUrl, size);
+      }
 
       // Only use the default if we didn't find anything
       if (mediaUrl) {
@@ -412,6 +422,14 @@ export function usePageMedia(
     },
     [mediaConfig, pagePrefix]
   );
+
+  // Function to identify a Cloudinary URL and extract public ID
+  const getPublicId = useCallback((url: string): string | null => {
+    if (!url || !isCloudinaryUrl(url)) {
+      return null;
+    }
+    return extractPublicIdFromUrl(url);
+  }, []);
 
   // Function to invalidate the specific cache entry - memoized
   const invalidateCache = useCallback(() => {
@@ -430,8 +448,18 @@ export function usePageMedia(
       getImageUrl,
       invalidateCache,
       forceMediaRefresh,
+      getPublicId, // Add this new utility function for Cloudinary public IDs
+      isCloudinaryUrl, // Expose this utility function directly
     }),
-    [mediaConfig, loading, getImageUrl, invalidateCache, forceMediaRefresh]
+    [
+      mediaConfig,
+      loading,
+      getImageUrl,
+      invalidateCache,
+      forceMediaRefresh,
+      getPublicId,
+      isCloudinaryUrl,
+    ]
   );
 }
 

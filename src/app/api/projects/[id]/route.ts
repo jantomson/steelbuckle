@@ -1,22 +1,22 @@
 // app/api/projects/[id]/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
+import { extractPublicIdFromUrl } from "@/lib/cloudinaryUrl";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    // Ensure params is awaited before accessing properties
-    const resolvedParams = await params;
-    const projectId = resolvedParams.id;
+    const projectId = context.params.id;
 
     // Fetch project data with translations
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       include: {
         translations: {
-          where: { languageCode: "est" }, // Default to Estonian for editing
+          where: { languageCode: "et" }, // Default to Estonian for editing
           take: 1,
         },
       },
@@ -46,18 +46,16 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    // Ensure params is awaited before accessing properties
-    const resolvedParams = await params;
-    const projectId = resolvedParams.id;
+    const projectId = context.params.id;
 
     const formData = await request.formData();
 
     const title = formData.get("title") as string;
     const year = formData.get("year") as string;
-    const languageCode = (formData.get("language") as string) || "est"; // Default to Estonian
+    const languageCode = (formData.get("language") as string) || "et"; // Default to Estonian
 
     // Check if project exists
     const existingProject = await prisma.project.findUnique({
@@ -73,19 +71,45 @@ export async function PUT(
     let imagePath = existingProject.image; // Keep existing image by default
 
     if (image && image.size > 0) {
-      // Generate unique filename with timestamp
-      const filename = `${Date.now()}_${image.name.replace(/\s+/g, "_")}`;
-      imagePath = `/${filename}`; // Path relative to public folder
+      // Check if existing image is from Cloudinary and delete it
+      if (
+        existingProject.image &&
+        existingProject.image.includes("cloudinary.com")
+      ) {
+        const publicId = extractPublicIdFromUrl(existingProject.image);
+        if (publicId) {
+          try {
+            await deleteFromCloudinary(publicId);
+          } catch (cloudinaryError) {
+            console.error(
+              "Error deleting previous image from Cloudinary:",
+              cloudinaryError
+            );
+            // Continue with upload even if deletion fails
+          }
+        }
+      }
 
-      // Get file buffer
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      // Upload new image to Cloudinary
+      const arrayBuffer = await image.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-      // Save file to public directory
-      const { writeFile } = await import("fs/promises");
-      const { join } = await import("path");
-      const publicPath = join(process.cwd(), "public", filename);
-      await writeFile(publicPath, buffer);
+      const uploadResult = await uploadToCloudinary(buffer, {
+        folder: "steel-buckle/projects",
+        resourceType: "image",
+      });
+
+      imagePath = uploadResult.secure_url;
+
+      // Save the image to the media library as well
+      await prisma.media.create({
+        data: {
+          filename: image.name,
+          path: imagePath,
+          mediaType: image.type,
+          altText: title || image.name.split(".")[0] || "Project Image",
+        },
+      });
     } else if (formData.get("imageUrl")) {
       imagePath = formData.get("imageUrl") as string;
     }
@@ -135,12 +159,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    // Ensure params is awaited before accessing properties
-    const resolvedParams = await params;
-    const projectId = resolvedParams.id;
+    const projectId = context.params.id;
 
     // Check if project exists
     const existingProject = await prisma.project.findUnique({
@@ -149,6 +171,25 @@ export async function DELETE(
 
     if (!existingProject) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // If using Cloudinary, delete the image from Cloudinary as well
+    if (
+      existingProject.image &&
+      existingProject.image.includes("cloudinary.com")
+    ) {
+      const publicId = extractPublicIdFromUrl(existingProject.image);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId);
+        } catch (cloudinaryError) {
+          console.error(
+            "Error deleting image from Cloudinary:",
+            cloudinaryError
+          );
+          // Continue with project deletion even if Cloudinary deletion fails
+        }
+      }
     }
 
     // Delete project (will cascade delete translations due to onDelete: Cascade in schema)

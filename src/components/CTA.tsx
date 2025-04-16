@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Playfair_Display } from "next/font/google";
 import Link from "next/link";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 const playfair = Playfair_Display({
   subsets: ["latin", "cyrillic"],
@@ -12,7 +14,13 @@ const playfair = Playfair_Display({
 });
 
 const CTA = () => {
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
+  const [isClient, setIsClient] = useState(false);
+
+  // Set isClient to true after component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <section className="py-16 bg-white">
@@ -45,37 +53,41 @@ const CTA = () => {
               </div>
 
               {/* Text Content - Improved spacing for tablet */}
-              <div className="lg:col-span-7 px-4 lg:pl-12 text-center lg:text-left">
+              <div className="lg:col-span-7 px-4 lg:pl-12 text-center lg:text-center">
                 <h2 className="text-4xl sm:text-5xl font-semibold mb-4 text-black">
                   {t("cta.title_start")}
                   <br />
-                  <div className="whitespace-nowrap mt-2">
-                    <span className="text-gray-500 italic">
+                  <div className="whitespace-nowrap mt-2 text-center mx-auto">
+                    <span className="text-gray-500 italic inline-block">
                       {t("cta.title_span")}
                       <img
                         src="/line_dark.svg"
                         alt="Underline"
-                        className="w-50 h-4 mb-2 mt-1 mx-auto lg:mx-0"
+                        className="w-50 h-4 mb-2 mt-1 mx-auto"
                       />
                     </span>
-                    {""}
                   </div>
                   {t("cta.title_end")}
                 </h2>
                 <p className="text-gray-600 mb-8 mt-8 lg:mt-10">
                   {t("cta.description")}
                 </p>
-                <div className="flex justify-center lg:justify-start">
+                <div className="flex justify-center">
                   <Link
-                    href="/kontakt"
+                    href={buildLocalizedUrl(
+                      "contact",
+                      currentLang as SupportedLanguage
+                    )}
                     className="inline-flex items-center bg-black text-white px-6 py-3 rounded-full hover:bg-gray-600 transition-colors"
                   >
                     {t("cta.button")}
-                    <img
-                      src="/open.svg"
-                      alt="Arrow Right"
-                      className="w-7 h-7 ml-2"
-                    />
+                    {isClient && (
+                      <img
+                        src="/open.svg"
+                        alt="Arrow Right"
+                        className="w-7 h-7 ml-2"
+                      />
+                    )}
                   </Link>
                 </div>
               </div>
@@ -134,15 +146,20 @@ const CTA = () => {
             </p>
             <div className="flex justify-center">
               <Link
-                href="/kontakt"
+                href={buildLocalizedUrl(
+                  "contact",
+                  currentLang as SupportedLanguage
+                )}
                 className="inline-flex items-center bg-black text-white px-6 py-3 rounded-full hover:bg-gray-600 transition-colors"
               >
                 {t("cta.button")}
-                <img
-                  src="/open.svg"
-                  alt="Arrow Right"
-                  className="w-7 h-7 ml-2"
-                />
+                {isClient && (
+                  <img
+                    src="/open.svg"
+                    alt="Arrow Right"
+                    className="w-7 h-7 ml-2"
+                  />
+                )}
               </Link>
             </div>
           </div>

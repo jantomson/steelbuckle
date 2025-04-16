@@ -9,7 +9,7 @@ interface MediaUpdate {
 
 export async function POST(request: Request) {
   try {
-    // Parse the request body as JSON instead of FormData
+    // Parse the request body as JSON
     const body = await request.json();
     const updates = body.updates as MediaUpdate[];
 
@@ -26,9 +26,15 @@ export async function POST(request: Request) {
     const results = await Promise.all(
       updates.map(async (update) => {
         try {
-          // Find the media by path
-          const media = await prisma.media.findUnique({
-            where: { path: update.mediaPath },
+          // Find the media by path - noting that we're now using Cloudinary URLs
+          // We need to remove any cache busting parameters that might be in the URL
+          const cleanPath = update.mediaPath.split("?")[0];
+
+          const media = await prisma.media.findFirst({
+            where: {
+              // Look for the path without any query parameters
+              path: cleanPath,
+            },
           });
 
           if (!media) {

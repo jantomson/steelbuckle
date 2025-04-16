@@ -1,12 +1,13 @@
 // app/api/projects/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    // Get language from query param or use 'est' as default
-    const lang = searchParams.get("lang") || "est";
+    // Get language from query param or use 'et' as default
+    const lang = searchParams.get("lang") || "et";
 
     // Fetch all projects with translations for the requested language
     const projects = await prisma.project.findMany({
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     const title = formData.get("title") as string;
     const year = formData.get("year") as string;
     const description = formData.get("description") as string;
-    const languageCode = (formData.get("language") as string) || "est"; // Default to Estonian
+    const languageCode = (formData.get("language") as string) || "et"; // Default to Estonian
 
     // Get the highest display order to add new items at the end
     const highestOrder = await prisma.project.findFirst({
@@ -71,20 +72,27 @@ export async function POST(request: Request) {
     let imagePath = "/images/placeholder.jpg"; // Default fallback
 
     if (image && image.size > 0) {
-      // Generate unique filename with timestamp
-      const filename = `${Date.now()}_${image.name.replace(/\s+/g, "_")}`;
-      imagePath = `/${filename}`; // Path relative to public folder
+      // Convert File to Buffer for our existing cloudinary helper
+      const arrayBuffer = await image.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-      // Get file buffer
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      // Upload image to Cloudinary using our helper
+      const uploadResult = await uploadToCloudinary(buffer, {
+        folder: "steel-buckle/projects",
+        resourceType: "image",
+      });
 
-      // Save file to public directory (this requires the fs module, which isn't available in edge functions)
-      // In a real app, you'd use a storage service like AWS S3, Cloudinary, etc.
-      const { writeFile } = await import("fs/promises");
-      const { join } = await import("path");
-      const publicPath = join(process.cwd(), "public", filename);
-      await writeFile(publicPath, buffer);
+      imagePath = uploadResult.secure_url;
+
+      // Save the image to the media library as well
+      await prisma.media.create({
+        data: {
+          filename: image.name,
+          path: imagePath,
+          mediaType: image.type,
+          altText: title || image.name.split(".")[0] || "Project Image",
+        },
+      });
     } else if (formData.get("imageUrl")) {
       imagePath = formData.get("imageUrl") as string;
     }

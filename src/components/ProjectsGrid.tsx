@@ -1,14 +1,24 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePathname } from "next/navigation";
 
 interface Project {
   id: string;
   image: string;
   title: string;
   year: string;
+}
+
+// Helper to extract language from URL path
+function extractLanguageFromPath(path: string): string {
+  if (path.startsWith("/en")) return "en";
+  if (path.startsWith("/lv")) return "lv";
+  if (path.startsWith("/ru")) return "ru";
+  if (path.startsWith("/et")) return "et";
+  return "et"; // Default
 }
 
 const ProjectsGrid: React.FC = () => {
@@ -19,37 +29,60 @@ const ProjectsGrid: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const pathname = usePathname(); // Get current URL path
 
-  useEffect(() => {
-    if (isLanguageLoaded) {
-      console.log(
-        "ProjectsGrid: Fetching projects with language:",
-        currentLang
-      );
-      const fetchProjects = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`/api/projects?lang=${currentLang}`);
+  // Directly use URL-based language for fetching to avoid race conditions
+  const urlLang = pathname ? extractLanguageFromPath(pathname) : currentLang;
 
-          if (!response.ok) {
-            throw new Error("Failed to fetch projects");
-          }
+  // Enhanced fetchProjects function with URL-based language and cache busting
+  const fetchProjects = useCallback(
+    async (lang: string) => {
+      if (!isLanguageLoaded) return;
 
-          const data = await response.json();
-          console.log("ProjectsGrid: Fetched projects:", data);
-          setProjects(data);
-          setError(null);
-        } catch (err) {
-          console.error("Error fetching projects:", err);
-          setError("Error loading projects. Please try again later.");
-        } finally {
-          setLoading(false);
+      try {
+        setLoading(true);
+        console.log(
+          `ProjectsGrid: Fetching projects with language from URL: ${lang}`
+        );
+
+        // Add cache-busting parameter to avoid cached responses
+        const response = await fetch(
+          `/api/projects?lang=${lang}&_t=${Date.now()}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch projects: ${response.status} ${response.statusText}`
+          );
         }
-      };
 
-      fetchProjects();
+        const data = await response.json();
+        console.log(
+          `ProjectsGrid: Fetched ${data.length} projects for language: ${lang}`
+        );
+        setProjects(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+        setError("Error loading projects. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isLanguageLoaded]
+  );
+
+  // Fetch projects whenever URL path changes or component loads
+  useEffect(() => {
+    if (isLanguageLoaded && pathname) {
+      // Use language from URL directly to avoid context synchronization issues
+      const lang = extractLanguageFromPath(pathname);
+      console.log(
+        `ProjectsGrid: URL path changed to ${pathname}, language: ${lang}`
+      );
+      fetchProjects(lang);
     }
-  }, [currentLang, isLanguageLoaded]);
+  }, [pathname, isLanguageLoaded, fetchProjects]);
 
   const openModal = (project: Project) => {
     const index = projects.findIndex((p) => p.id === project.id);

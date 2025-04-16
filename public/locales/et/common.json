@@ -260,6 +260,10 @@
   },
   "projects_page": {
     "page_title": "Projektid",
-    "page_subtitle": "Koostöös partneritega loome parimad lahendused"
+    "page_subtitle": "Koostöös partneritega loome parimad lahendused."
+  },
+  "projects": {
+    "title": "Projektid",
+    "text": "Saavutame parimad tulemused läbi individuaalse lähenemise ja koostöö partneritega."
   }
 }

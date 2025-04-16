@@ -5,11 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePageMedia } from "@/hooks/usePageMedia";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 const AboutSection = () => {
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
 
-  // Use the updated hook with proper default images
+  // Use the hook with proper default images
   const { getImageUrl, loading } = usePageMedia("about", {
     main_image: "/Shkirotava_(14).jpg", // Default fallback image
   });
@@ -18,20 +20,23 @@ const AboutSection = () => {
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         <div className="border-t border-gray-200 w-full mb-4"></div>
-        <h2 className="text-sm text-gray-500 mb-20 mt-10">
+        <h2 className="text-sm text-gray-500 mb-10 mt-10">
           {t("about.title")}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
           {/* Left column with text */}
-          <div className="space-y-20">
+          <div className="space-y-10">
             <p className="text-xl font-normal text-gray-800 leading-relaxed">
               {t("about.text_1")}
             </p>
 
             <div className="pt-2">
               <Link
-                href="/ettevottest"
+                href={buildLocalizedUrl(
+                  "about",
+                  currentLang as SupportedLanguage
+                )}
                 className="inline-flex items-center text-sm text-gray-500 group duration-300 hover:gray-600"
               >
                 {t("about.read_more")}

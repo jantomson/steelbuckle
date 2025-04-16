@@ -1,25 +1,23 @@
 // app/api/media/upload/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { mkdir, writeFile } from "fs/promises";
-import { join } from "path";
+import { v2 as cloudinary } from "cloudinary";
 import { randomUUID } from "crypto";
 
-// Configure uploads directory
-const uploadsDir = join(process.cwd(), "public/uploads");
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 
 export async function POST(request: Request) {
   try {
-    // Ensure uploads directory exists
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (error) {
-      console.error("Error creating uploads directory:", error);
-    }
-
     // Get the form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const folder = (formData.get("folder") as string) || "steel-buckle"; // Default folder name
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -31,6 +29,7 @@ export async function POST(request: Request) {
       "image/png",
       "image/gif",
       "image/svg+xml",
+      "image/webp",
     ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
@@ -52,42 +51,57 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate a unique filename with the original extension
+    // Generate a unique ID for the file
+    const uniqueId = randomUUID();
+
+    // Get original filename for reference
     const originalFilename = file.name;
-    const fileExtension = originalFilename.split(".").pop() || "";
-    const fileName = `${randomUUID()}.${fileExtension}`;
-    const filePath = join(uploadsDir, fileName);
 
-    // URL path to access the file
-    const urlPath = `/uploads/${fileName}`;
+    // Convert file to buffer for upload
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    // Convert file to buffer and save to disk
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
+    // Base64 encode the buffer for Cloudinary's upload API
+    const base64Data = buffer.toString("base64");
+    const fileUri = `data:${file.type};base64,${base64Data}`;
 
-    // Save file info to database using the correct field names from your schema
+    // Upload to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(fileUri, {
+      folder: folder,
+      public_id: uniqueId,
+      resource_type: "auto",
+      overwrite: true,
+    });
+
+    // Save file info to database
     const media = await prisma.media.create({
       data: {
-        filename: originalFilename, // Changed from 'name' to 'filename' to match schema
-        path: urlPath,
+        filename: originalFilename,
+        path: uploadResult.secure_url, // Use the secure_url from Cloudinary
         mediaType: file.type,
         altText: originalFilename.split(".")[0] || "Image", // Default alt text
       },
     });
 
-    // Return the URL with a cache-busting parameter
-    const cacheBustedUrl = `${urlPath}?_t=${Date.now()}`;
+    // Return the Cloudinary URL with a cache-busting parameter
+    const cacheBustedUrl = `${uploadResult.secure_url}?_t=${Date.now()}`;
 
     return NextResponse.json({
-      message: "File uploaded successfully",
+      message: "File uploaded successfully to Cloudinary",
       url: cacheBustedUrl,
       mediaId: media.id,
       originalName: originalFilename,
+      cloudinaryData: {
+        publicId: uploadResult.public_id,
+        format: uploadResult.format,
+        version: uploadResult.version,
+        resourceType: uploadResult.resource_type,
+      },
     });
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("Error uploading file to Cloudinary:", error);
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: "Failed to upload file to Cloudinary" },
       { status: 500 }
     );
   }

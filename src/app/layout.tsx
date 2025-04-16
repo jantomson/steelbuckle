@@ -5,7 +5,10 @@ import Script from "next/script";
 import ThemeProvider from "@/components/ThemeProvider";
 import DynamicFavicon from "@/components/DynamicFavicon";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata = {
   title: {

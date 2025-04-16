@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePathname } from "next/navigation";
 
 type Translations = {
   [key: string]: string | { [key: string]: string | object };
@@ -49,6 +50,15 @@ export function invalidateTranslationsCache() {
   });
 }
 
+// Helper function to detect language from path
+export function detectLanguageFromPath(path: string): string {
+  if (path.startsWith("/en")) return "en";
+  if (path.startsWith("/lv")) return "lv";
+  if (path.startsWith("/ru")) return "ru";
+  if (path.startsWith("/et")) return "et";
+  return "et"; // Default
+}
+
 export function useTranslation() {
   const [translations, setTranslations] = useState<Translations>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -56,6 +66,17 @@ export function useTranslation() {
   const { currentLang, setCurrentLang, isLanguageLoaded } = useLanguage();
   const isMounted = useRef(true);
   const fetchingTranslations = useRef(false);
+  const pathname = usePathname();
+
+  // Detect language from URL path
+  useEffect(() => {
+    if (pathname) {
+      const pathLang = detectLanguageFromPath(pathname);
+      if (pathLang !== currentLang) {
+        setCurrentLang(pathLang);
+      }
+    }
+  }, [pathname, currentLang, setCurrentLang]);
 
   // Fetch translations from the API, but only after language is loaded
   useEffect(() => {
@@ -133,7 +154,7 @@ export function useTranslation() {
     return () => {
       isMounted.current = false;
     };
-  }, [currentLang, cacheTimestamp, isLanguageLoaded]); // Add isLanguageLoaded as dependency
+  }, [currentLang, cacheTimestamp, isLanguageLoaded]);
 
   // Translation function - memoized for performance
   const t = useCallback(

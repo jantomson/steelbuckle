@@ -9,7 +9,7 @@ interface NestedObject {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const lang = searchParams.get("lang") || "est"; // Default to Estonian
+    const lang = searchParams.get("lang") || "et"; // Default to Estonian
 
     // Fetch all translations for the language
     const translations = await prisma.translation.findMany({

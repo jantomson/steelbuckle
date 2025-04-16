@@ -8,50 +8,80 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 
 type Language = {
   code: string;
   name: string;
+  path?: string;
 };
 
 type LanguageContextType = {
   currentLang: string;
   setCurrentLang: (lang: string) => void;
   availableLanguages: Language[];
-  isLanguageLoaded: boolean; // New loading state flag
+  isLanguageLoaded: boolean;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined
 );
 
-// Default languages (fallback if API fails)
+// Default languages with path mapping
 const DEFAULT_LANGUAGES: Language[] = [
-  { code: "est", name: "Est" },
-  { code: "en", name: "En" },
-  { code: "lv", name: "Lv" },
-  { code: "ru", name: "Ru" },
+  { code: "et", name: "Et", path: "/et" },
+  { code: "en", name: "En", path: "/en" },
+  { code: "lv", name: "Lv", path: "/lv" },
+  { code: "ru", name: "Ru", path: "/ru" },
 ];
 
+// Function to detect language from URL path
+function detectLanguageFromPath(path: string): string {
+  if (path.startsWith("/en")) return "en";
+  if (path.startsWith("/lv")) return "lv";
+  if (path.startsWith("/ru")) return "ru";
+  if (path.startsWith("/et")) return "et";
+  return "et"; // Default
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [currentLang, setCurrentLang] = useState("est");
+  const [currentLang, setCurrentLang] = useState("et");
   const [availableLanguages, setAvailableLanguages] =
     useState<Language[]>(DEFAULT_LANGUAGES);
-  const [isLanguageLoaded, setIsLanguageLoaded] = useState(false); // Initialize as not loaded
+  const [isLanguageLoaded, setIsLanguageLoaded] = useState(false);
+  const pathname = usePathname();
 
-  // Load language preference from localStorage - run this first
+  // Detect language from URL path and load it
   useEffect(() => {
-    try {
-      const savedLang = localStorage.getItem("language") || "est";
-      setCurrentLang(savedLang);
-      setIsLanguageLoaded(true); // Mark language as loaded after getting from localStorage
-      console.log("Language loaded from localStorage:", savedLang);
-    } catch (error) {
-      console.error("Failed to load language from localStorage:", error);
-      // Still mark as loaded even if there's an error, using the default
+    if (pathname) {
+      // Determine language based on URL path
+      const detectedLang = detectLanguageFromPath(pathname);
+
+      // Set detected language
+      setCurrentLang(detectedLang);
+
+      try {
+        // Save to localStorage for consistency
+        localStorage.setItem("language", detectedLang);
+      } catch (error) {
+        console.error("Failed to save language to localStorage:", error);
+      }
+
       setIsLanguageLoaded(true);
+      console.log("Language detected from URL path:", detectedLang);
+    } else {
+      // Fallback to localStorage if pathname is not available
+      try {
+        const savedLang = localStorage.getItem("language") || "et";
+        setCurrentLang(savedLang);
+        setIsLanguageLoaded(true);
+      } catch (error) {
+        console.error("Failed to load language from localStorage:", error);
+        setCurrentLang("et");
+        setIsLanguageLoaded(true);
+      }
     }
-  }, []);
+  }, [pathname]);
 
   // Fetch available languages from API - this can run after the locale is loaded
   useEffect(() => {
@@ -61,7 +91,23 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
         if (response.ok) {
           const data = await response.json();
-          setAvailableLanguages(data);
+
+          // Add path properties to the languages
+          const enhancedLanguages = data.map((lang: Language) => {
+            const pathMapping: { [key: string]: string } = {
+              et: "/et",
+              en: "/en",
+              lv: "/lv",
+              ru: "/ru",
+            };
+
+            return {
+              ...lang,
+              path: pathMapping[lang.code] || "/et",
+            };
+          });
+
+          setAvailableLanguages(enhancedLanguages);
         }
       } catch (error) {
         console.error("Failed to fetch languages:", error);
@@ -71,8 +117,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (isLanguageLoaded) {
       fetchLanguages();
     }
-  }, [isLanguageLoaded]); // Only run after language is loaded from localStorage
+  }, [isLanguageLoaded]);
 
+  // Just update the language in localStorage
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
     try {

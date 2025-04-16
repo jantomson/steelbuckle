@@ -4,13 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePageMedia } from "@/hooks/usePageMedia";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 const ServicesSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
 
-  // Set up default images that will be used as fallbacks - UPDATED to match the exact DB key format
+  // Set up default images that will be used as fallbacks
   const defaultImages = {
     "services_slider.slide1.image": "/foto_jooksev.jpg",
     "services_slider.slide2.image": "/Remont_2.jpg",
@@ -21,7 +23,7 @@ const ServicesSlider = () => {
   // Define the type for the key to avoid the TypeScript error
   type DefaultImageKeys = keyof typeof defaultImages;
 
-  // Use our updated hook with the services_slider prefix, similar to About.tsx
+  // Use our updated hook with the services_slider prefix
   const { getImageUrl, loading } = usePageMedia(
     "services_slider",
     defaultImages
@@ -120,19 +122,19 @@ const ServicesSlider = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  // Get the appropriate URL for each service based on its ID
-  const getServiceUrl = (id: number) => {
+  // Get the route key for each service based on its ID
+  const getServiceRouteKey = (id: number): string => {
     switch (id) {
       case 1:
-        return "teenused/raudteede-jooksev-korrashoid";
+        return "railway-maintenance";
       case 2:
-        return "/teenused/remont-ja-renoveerimine";
+        return "repair-renovation";
       case 3:
-        return "/teenused/raudtee-ehitus";
+        return "railway-construction";
       case 4:
-        return "/teenused/projekteerimine";
+        return "design";
       default:
-        return "/teenused/raudteede-jooksev-korrashoid";
+        return "railway-maintenance";
     }
   };
 
@@ -180,7 +182,10 @@ const ServicesSlider = () => {
                   {slides[currentSlide].description}
                 </p>
                 <Link
-                  href={getServiceUrl(slides[currentSlide].id)}
+                  href={buildLocalizedUrl(
+                    getServiceRouteKey(slides[currentSlide].id) as any,
+                    currentLang as SupportedLanguage
+                  )}
                   className="text-gray-600 hover:text-gray-800 flex items-center gap-2 mt-2"
                 >
                   {t("services_slider.read_more")}

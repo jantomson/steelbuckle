@@ -8,9 +8,11 @@ import { usePageMedia } from "@/hooks/usePageMedia";
 import Link from "next/link";
 import SubpageHeader from "@/components/SubpageHeader";
 import SEOMetadata from "@/components/SEOMetadata";
+import { buildLocalizedUrl } from "@/config/routeTranslations";
+import { SupportedLanguage } from "@/config/routeTranslations";
 
 const RailwayRepairPage = () => {
-  const { t } = useTranslation();
+  const { t, currentLang } = useTranslation();
 
   // Define the page prefix and default images
   const PAGE_PREFIX = "repair_renovation_page";
@@ -224,7 +226,10 @@ const RailwayRepairPage = () => {
           {/* Contact button */}
           <div className="text-center mb-12">
             <Link
-              href="/kontakt"
+              href={buildLocalizedUrl(
+                "contact",
+                currentLang as SupportedLanguage
+              )}
               className="inline-flex items-center bg-black text-white px-6 py-3 rounded-full w-fit hover:bg-gray-600 transition-colors group"
             >
               {t("repair_renovation_page.cta")}

@@ -260,6 +260,10 @@
   },
   "projects_page": {
     "page_title": "Projects",
-    "page_subtitle": "Creating the best solutions in collaboration with partners"
+    "page_subtitle": "Creating the best solutions in collaboration with partners."
+  },
+  "projects": {
+    "title": "Projects",
+    "text": "We achieve the best results through a personalized approach and cooperation with our partners."
   }
 }

@@ -12,6 +12,11 @@ import React, {
 } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { invalidateMediaCache } from "@/hooks/usePageMedia";
+import {
+  isCloudinaryUrl,
+  extractPublicIdFromUrl,
+  getOptimizedImageUrl,
+} from "@/lib/cloudinaryUrl";
 
 // Define the TranslationField type to match what's used in page.tsx
 interface TranslationField {
@@ -218,35 +223,54 @@ const MediaGrid = React.memo(
 
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {mediaLibrary.map((url, index) => (
-          <div
-            key={index}
-            onClick={() => onUpdate(mediaKey.key, url)}
-            className={`cursor-pointer border rounded-lg overflow-hidden 
-            hover:border-blue-500 transition-all
-            ${mediaKey.url === url ? "ring-2 ring-blue-500" : ""}
-          `}
-          >
-            <div className="relative h-40 w-full bg-gray-100 flex items-center justify-center">
-              <img
-                src={url}
-                alt={`Meedia valik ${index + 1}`}
-                className="max-h-32 max-w-full object-contain"
-                onError={(e) => {
-                  if (
-                    !(e.target as HTMLImageElement).src.includes("placeholder")
-                  ) {
-                    (e.target as HTMLImageElement).src = "/placeholder.png";
-                    (e.target as HTMLImageElement).alt = "Pilt pole saadaval";
-                  }
-                }}
-              />
+        {mediaLibrary.map((url, index) => {
+          // Remove any cache busting parameters for comparison
+          const cleanUrl = url.split("?")[0];
+          const cleanCurrentUrl = mediaKey.url.split("?")[0];
+
+          // For display, use optimized version of Cloudinary URLs
+          const displayUrl = isCloudinaryUrl(url)
+            ? getOptimizedImageUrl(url, 200) // Smaller size for the grid view
+            : url;
+
+          // For Cloudinary URLs, extract a readable name to display
+          const displayName = isCloudinaryUrl(url)
+            ? extractPublicIdFromUrl(url)?.split("/").pop() ||
+              url.split("/").pop()
+            : url.split("/").pop();
+
+          return (
+            <div
+              key={index}
+              onClick={() => onUpdate(mediaKey.key, cleanUrl)}
+              className={`cursor-pointer border rounded-lg overflow-hidden 
+              hover:border-blue-500 transition-all
+              ${cleanCurrentUrl === cleanUrl ? "ring-2 ring-blue-500" : ""}
+            `}
+            >
+              <div className="relative h-40 w-full bg-gray-100 flex items-center justify-center">
+                <img
+                  src={displayUrl}
+                  alt={`Meedia valik ${index + 1}`}
+                  className="max-h-32 max-w-full object-contain"
+                  onError={(e) => {
+                    if (
+                      !(e.target as HTMLImageElement).src.includes(
+                        "placeholder"
+                      )
+                    ) {
+                      (e.target as HTMLImageElement).src = "/placeholder.png";
+                      (e.target as HTMLImageElement).alt = "Pilt pole saadaval";
+                    }
+                  }}
+                />
+              </div>
+              <div className="p-2 text-xs text-gray-500 truncate">
+                {displayName}
+              </div>
             </div>
-            <div className="p-2 text-xs text-gray-500 truncate">
-              {url.split("/").pop()}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -622,45 +646,14 @@ export const EditProvider = ({
           const data = await response.json();
           setMediaLibrary(data.items || []);
         } else {
-          // Fallback to default media
-          setMediaLibrary([
-            "/logo.svg",
-            "/naissaare.png",
-            "/Liepaja_(61).jpg",
-            "/valgaraudteejaam.jpg",
-            "/Bolderaja_(49).jpg",
-            "/Shkirotava_(14).jpg",
-            "/Avaleht_Renome_EST.jpg",
-            "/Krievu_Sala_3.jpg",
-            "/Kazlu_Rida_3.jpg",
-            "/Skriveri_1.jpg",
-            "/Liepaja_(77).jpg",
-            "/Liepaja_(57).jpg",
-            "/Remont_2.jpg",
-            "/Kazlu_Ruda_2.jpg",
-            "/Avaleht_Valga_2.jpg",
-          ]);
+          // Fallback to default media if the API fails
+          console.error("Failed to fetch media library, using fallback");
+          setMediaLibrary(["/logo.svg", "/naissaare.png", "/Liepaja_(61).jpg"]);
         }
       } catch (error) {
         console.error("Error fetching media library:", error);
-        // Fallback to default media
-        setMediaLibrary([
-          "/logo.svg",
-          "/naissaare.png",
-          "/Liepaja_(61).jpg",
-          "/valgaraudteejaam.jpg",
-          "/Bolderaja_(49).jpg",
-          "/Shkirotava_(14).jpg",
-          "/Avaleht_Renome_EST.jpg",
-          "/Krievu_Sala_3.jpg",
-          "/Kazlu_Rida_3.jpg",
-          "/Skriveri_1.jpg",
-          "/Liepaja_(77).jpg",
-          "/Liepaja_(57).jpg",
-          "/Remont_2.jpg",
-          "/Kazlu_Ruda_2.jpg",
-          "/Avaleht_Valga_2.jpg",
-        ]);
+        // Fallback to empty array
+        setMediaLibrary([]);
       }
     };
 
