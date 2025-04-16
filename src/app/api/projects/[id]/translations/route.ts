@@ -4,12 +4,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    // Ensure params is awaited before accessing properties
-    const resolvedParams = await context.params;
-    const projectId = resolvedParams.id;
+    // Await params before accessing its properties
+    const projectId = (await params).id;
 
     if (!projectId) {
       return NextResponse.json(
@@ -44,12 +43,11 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    // Ensure params is awaited before accessing properties
-    const resolvedParams = await context.params;
-    const projectId = resolvedParams.id;
+    // Await params before accessing its properties
+    const projectId = (await params).id;
 
     const { translations } = await request.json();
 
