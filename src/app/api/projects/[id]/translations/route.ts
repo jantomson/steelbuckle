@@ -4,11 +4,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await params before accessing its properties
-    const projectId = (await params).id;
+    const { id: projectId } = await params;
 
     if (!projectId) {
       return NextResponse.json(
@@ -43,11 +43,11 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await params before accessing its properties
-    const projectId = (await params).id;
+    const { id: projectId } = await params;
 
     const { translations } = await request.json();
 

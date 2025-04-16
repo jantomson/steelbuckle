@@ -6,11 +6,11 @@ import { extractPublicIdFromUrl } from "@/lib/cloudinaryUrl";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await params before accessing its properties
-    const projectId = (await params).id;
+    const { id: projectId } = await params;
 
     // Fetch project data with translations
     const project = await prisma.project.findUnique({
@@ -47,11 +47,11 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await params before accessing its properties
-    const projectId = (await params).id;
+    const { id: projectId } = await params;
 
     const formData = await request.formData();
 
@@ -161,11 +161,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await params before accessing its properties
-    const projectId = (await params).id;
+    const { id: projectId } = await params;
 
     // Check if project exists
     const existingProject = await prisma.project.findUnique({
