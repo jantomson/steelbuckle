@@ -265,5 +265,10 @@
   "projects": {
     "title": "Projects",
     "text": "We achieve the best results through a personalized approach and cooperation with our partners."
+  },
+  "404": {
+    "title": "Page Not Found",
+    "message": "Sorry, we couldn't find the page you're looking for.",
+    "back_home": "Back to Home"
   }
 }

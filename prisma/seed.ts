@@ -92,7 +92,7 @@ async function insertMediaData() {
       filename: "logo_dark.svg",
       path: "/logo_dark.svg",
       mediaType: "image/svg+xml",
-      altText: "Steel Buckle Logo Dark",
+      altText: "Steel Buckle Logo",
     },
     {
       filename: "logo_green.png",
@@ -110,18 +110,18 @@ async function insertMediaData() {
       filename: "logo_white.svg",
       path: "/logo_white.svg",
       mediaType: "image/svg+xml",
-      altText: "Steel Buckle Logo White",
+      altText: "Steel Buckle Logo",
     },
     // Project Images
     {
-      filename: "naissaare.PNG",
-      path: "/naissaare.PNG",
+      filename: "naissaare.png",
+      path: "/naissaare.png",
       mediaType: "image/png",
       altText: "Naissaare",
     },
     {
-      filename: "Liepaja_(61).JPG",
-      path: "/Liepaja_(61).JPG",
+      filename: "Liepaja_(61).jpg",
+      path: "/Liepaja_(61).jpg",
       mediaType: "image/jpeg",
       altText: "Liepaja Station",
     },
@@ -132,20 +132,20 @@ async function insertMediaData() {
       altText: "Valga Railway Station",
     },
     {
-      filename: "Bolderaja_(49).JPG",
-      path: "/Bolderaja_(49).JPG",
+      filename: "Bolderaja_(49).jpg",
+      path: "/Bolderaja_(49).jpg",
       mediaType: "image/jpeg",
       altText: "Bolderaja",
     },
     {
-      filename: "Shkirotava_(14).JPG",
-      path: "/Shkirotava_(14).JPG",
+      filename: "Shkirotava_(14).jpg",
+      path: "/Shkirotava_(14).jpg",
       mediaType: "image/jpeg",
       altText: "Shkirotava Station",
     },
     {
-      filename: "Shkirotava_(55).JPG",
-      path: "/Shkirotava_(55).JPG",
+      filename: "Shkirotava_(55).jpg",
+      path: "/Shkirotava_(55).jpg",
       mediaType: "image/jpeg",
       altText: "Shkirotava Sorting Hill",
     },
@@ -162,8 +162,8 @@ async function insertMediaData() {
       altText: "Avaleht Valga 2",
     },
     {
-      filename: "Krievu_Sala_3.JPG",
-      path: "/Krievu_Sala_3.JPG",
+      filename: "Krievu_Sala_3.jpg",
+      path: "/Krievu_Sala_3.jpg",
       mediaType: "image/jpeg",
       altText: "Krievu Sala 3",
     },
@@ -186,14 +186,14 @@ async function insertMediaData() {
       altText: "Skriveri 1",
     },
     {
-      filename: "Liepaja_(77).JPG",
-      path: "/Liepaja_(77).JPG",
+      filename: "Liepaja_(77).jpg",
+      path: "/Liepaja_(77).jpg",
       mediaType: "image/jpeg",
       altText: "Liepaja 77",
     },
     {
-      filename: "Liepaja_(57).JPG",
-      path: "/Liepaja_(57).JPG",
+      filename: "Liepaja_(57).jpg",
+      path: "/Liepaja_(57).jpg",
       mediaType: "image/jpeg",
       altText: "Liepaja 57",
     },
@@ -330,7 +330,7 @@ async function seedSeoMetadata() {
           en: {
             title: "Railway Construction & Maintenance | Steel Buckle",
             metaDescription:
-              "Steel Buckle provides railway construction, repair & maintenance services with 35+ years of experience in Estonia, Latvia & Lithuania.",
+              "Steel Buckle provides comprehensive railway construction, repair & maintenance services with over 35 years of experience across Estonia, Latvia & Lithuania. Expert solutions for all railway infrastructure needs.",
             keywords:
               "railway construction, railway maintenance, railway repair, Estonia, Latvia, Lithuania",
             ogTitle: "Railway Construction & Maintenance | Steel Buckle",
@@ -340,7 +340,7 @@ async function seedSeoMetadata() {
           et: {
             title: "Raudteede ehitus ja hooldus | Steel Buckle",
             metaDescription:
-              "Steel Buckle pakub raudtee-ehitus-, remondi- ja hooldusteenuseid 35+ aasta kogemusega Eestis, Lätis ja Leedus.",
+              "Steel Buckle pakub põhjalikke raudtee-ehitus-, remondi- ja hooldusteenuseid enam kui 35-aastase kogemusega Eestis, Lätis ja Leedus. Professionaalsed lahendused kõikidele raudteeinfrastruktuuri vajadustele.",
             keywords:
               "raudtee-ehitus, raudtee hooldus, raudtee remont, Eesti, Läti, Leedu",
             ogTitle: "Raudteede ehitus ja hooldus | Steel Buckle",
@@ -350,7 +350,7 @@ async function seedSeoMetadata() {
           lv: {
             title: "Dzelzceļu būvniecība un uzturēšana | Steel Buckle",
             metaDescription:
-              "Steel Buckle piedāvā dzelzceļa būvniecības, remonta un uzturēšanas pakalpojumus ar 35+ gadu pieredzi Igaunijā, Latvijā un Lietuvā.",
+              "Steel Buckle piedāvā visaptverošus dzelzceļa būvniecības, remonta un uzturēšanas pakalpojumus ar vairāk nekā 35 gadu pieredzi Igaunijā, Latvijā un Lietuvā. Profesionāli risinājumi visām dzelzceļa infrastruktūras vajadzībām.",
             keywords:
               "dzelzceļa būvniecība, dzelzceļa uzturēšana, dzelzceļa remonts, Igaunija, Latvija, Lietuva",
             ogTitle: "Dzelzceļu būvniecība un uzturēšana | Steel Buckle",
@@ -360,7 +360,7 @@ async function seedSeoMetadata() {
           ru: {
             title: "Строительство и обслуживание железных дорог | Steel Buckle",
             metaDescription:
-              "Steel Buckle предоставляет услуги по строительству, ремонту и обслуживанию железных дорог с 35+ летним опытом в Эстонии, Латвии и Литве.",
+              "Steel Buckle предоставляет комплексные услуги по строительству, ремонту и обслуживанию железных дорог с более чем 35-летним опытом в Эстонии, Латвии и Литве. Профессиональные решения для всех потребностей железнодорожной инфраструктуры.",
             keywords:
               "строительство железных дорог, обслуживание железных дорог, ремонт железных дорог, Эстония, Латвия, Литва",
             ogTitle:
@@ -376,7 +376,7 @@ async function seedSeoMetadata() {
           en: {
             title: "About Our Company | Steel Buckle",
             metaDescription:
-              "Learn about Steel Buckle - a railway construction company with 35+ years of experience in Estonia, Latvia & Lithuania. Quality railway services since 1989.",
+              "Learn about Steel Buckle - a trusted railway construction company with over 35 years of experience in Estonia, Latvia & Lithuania. Specializing in high-quality railway services, maintenance and infrastructure development since 1989.",
             keywords:
               "about Steel Buckle, railway construction company, railway maintenance company, Estonia, Latvia, Lithuania",
             ogTitle: "About Our Company | Steel Buckle",
@@ -386,7 +386,7 @@ async function seedSeoMetadata() {
           et: {
             title: "Ettevõttest | Steel Buckle",
             metaDescription:
-              "Tutvu Steel Buckle'iga - raudtee-ehitusettevõte 35+ aasta kogemusega Eestis, Lätis ja Leedus. Kvaliteetsed raudteeteenused alates 1989.",
+              "Tutvu Steel Buckle'iga - usaldusväärne raudtee-ehitusettevõte enam kui 35-aastase kogemusega Eestis, Lätis ja Leedus. Spetsialiseerunud kvaliteetsetele raudteeteenustele, hooldusele ja infrastruktuuri arendamisele alates 1989. aastast.",
             keywords:
               "Steel Buckle'ist, raudtee-ehitusettevõte, raudtee hooldusettevõte, Eesti, Läti, Leedu",
             ogTitle: "Ettevõttest | Steel Buckle",
@@ -396,7 +396,7 @@ async function seedSeoMetadata() {
           lv: {
             title: "Par uzņēmumu | Steel Buckle",
             metaDescription:
-              "Uzziniet par Steel Buckle - dzelzceļa būvniecības uzņēmums ar 35+ gadu pieredzi Igaunijā, Latvijā un Lietuvā. Kvalitatīvi dzelzceļa pakalpojumi kopš 1989.",
+              "Uzziniet par Steel Buckle - uzticams dzelzceļa būvniecības uzņēmums ar vairāk nekā 35 gadu pieredzi Igaunijā, Latvijā un Lietuvā. Specializējamies kvalitatīvos dzelzceļa pakalpojumos, uzturēšanā un infrastruktūras attīstīšanā kopš 1989. gada.",
             keywords:
               "par Steel Buckle, dzelzceļa būvniecības uzņēmums, dzelzceļa uzturēšanas uzņēmums, Igaunija, Latvija, Lietuva",
             ogTitle: "Par uzņēmumu | Steel Buckle",
@@ -406,7 +406,7 @@ async function seedSeoMetadata() {
           ru: {
             title: "О компании | Steel Buckle",
             metaDescription:
-              "Узнайте о Steel Buckle - железнодорожной строительной компании с 35+ летним опытом в Эстонии, Латвии и Литве. Качественные железнодорожные услуги с 1989 года.",
+              "Узнайте о Steel Buckle - надежной железнодорожной строительной компании с более чем 35-летним опытом в Эстонии, Латвии и Литве. Специализируемся на высококачественных железнодорожных услугах, обслуживании и развитии инфраструктуры с 1989 года.",
             keywords:
               "о Steel Buckle, железнодорожная строительная компания, компания по обслуживанию железных дорог, Эстония, Латвия, Литва",
             ogTitle: "О компании | Steel Buckle",
@@ -686,6 +686,49 @@ async function seedSeoMetadata() {
             ogTitle: "Наши железнодорожные проекты | Steel Buckle",
             ogDescription:
               "Просмотрите наши проекты по строительству, ремонту и реновации железных дорог, демонстрирующие наш опыт по всему Балтийскому региону.",
+          },
+        },
+      },
+      {
+        pageKey: "404",
+        translations: {
+          en: {
+            title: "Page Not Found | Steel Buckle",
+            metaDescription:
+              "The page you're looking for cannot be found. Steel Buckle provides professional railway construction, repair & maintenance services across Estonia, Latvia & Lithuania with over 35 years of industry expertise.",
+            keywords: "404, page not found, Steel Buckle, railway services",
+            ogTitle: "Page Not Found | Steel Buckle",
+            ogDescription:
+              "Sorry, the page you're looking for doesn't exist. Return to our homepage to explore our railway construction and maintenance services across the Baltic region.",
+          },
+          et: {
+            title: "Lehte ei leitud | Steel Buckle",
+            metaDescription:
+              "Otsitavat lehekülge ei leitud. Steel Buckle pakub professionaalseid raudtee-ehitus-, remondi- ja hooldusteenuseid Eestis, Lätis ja Leedus enam kui 35-aastase kogemusega raudteevaldkonnas.",
+            keywords: "404, lehekülge ei leitud, Steel Buckle, raudteeteenused",
+            ogTitle: "Lehte ei leitud | Steel Buckle",
+            ogDescription:
+              "Vabandame, kuid otsitavat lehekülge ei eksisteeri. Naase avalehele, et tutvuda meie raudtee-ehitus- ja hooldusteenustega Balti riikides.",
+          },
+          lv: {
+            title: "Lapa nav atrasta | Steel Buckle",
+            metaDescription:
+              "Meklētā lapa nav atrasta. Steel Buckle piedāvā profesionālus dzelzceļa būvniecības, remonta un uzturēšanas pakalpojumus Igaunijā, Latvijā un Lietuvā ar vairāk nekā 35 gadu pieredzi dzelzceļa nozarē.",
+            keywords:
+              "404, lapa nav atrasta, Steel Buckle, dzelzceļa pakalpojumi",
+            ogTitle: "Lapa nav atrasta | Steel Buckle",
+            ogDescription:
+              "Atvainojamies, meklētā lapa neeksistē. Atgriezieties sākumlapā, lai apskatītu mūsu dzelzceļa būvniecības un uzturēšanas pakalpojumus Baltijas valstīs.",
+          },
+          ru: {
+            title: "Страница не найдена | Steel Buckle",
+            metaDescription:
+              "Запрашиваемая страница не найдена. Steel Buckle предоставляет профессиональные услуги по строительству, ремонту и обслуживанию железных дорог в Эстонии, Латвии и Литве с более чем 35-летним опытом в отрасли.",
+            keywords:
+              "404, страница не найдена, Steel Buckle, железнодорожные услуги",
+            ogTitle: "Страница не найдена | Steel Buckle",
+            ogDescription:
+              "Извините, запрашиваемая страница не существует. Вернитесь на главную страницу, чтобы ознакомиться с нашими услугами по строительству и обслуживанию железных дорог в странах Балтии.",
           },
         },
       },

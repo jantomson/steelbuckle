@@ -21,6 +21,16 @@ function extractLanguageFromPath(path: string): string {
   return "et"; // Default
 }
 
+// Helper to add cache busting to image URLs
+function addCacheBuster(url: string): string {
+  // Skip cache busting for external URLs
+  if (url.startsWith("http") || url.includes("?_t=")) {
+    return url;
+  }
+  // Add timestamp to prevent caching
+  return `${url}?_t=${Date.now()}`;
+}
+
 const ProjectsGrid: React.FC = () => {
   const { t } = useTranslation();
   const { currentLang, isLanguageLoaded } = useLanguage();
@@ -142,11 +152,13 @@ const ProjectsGrid: React.FC = () => {
               <div key={project.id} className="mb-8 flex flex-col h-full">
                 {/* Fixed height container - 400px on desktop, responsive on smaller screens */}
                 <div className="relative w-full h-96 sm:h-80 md:h-96 lg:h-[500px] mb-4 group overflow-hidden">
+                  {/* Add cache busting and unoptimized prop */}
                   <Image
-                    src={project.image}
+                    src={addCacheBuster(project.image)}
                     alt={project.title}
                     fill
                     className="object-cover"
+                    unoptimized={true}
                   />
                   <div
                     className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
@@ -208,6 +220,9 @@ const Modal: React.FC<ModalProps> = ({
   isFirst,
   isLast,
 }) => {
+  // Use the same helper to ensure consistent cache busting
+  const imageSrc = addCacheBuster(project.image);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -291,10 +306,11 @@ const Modal: React.FC<ModalProps> = ({
             )}
 
             <Image
-              src={project.image}
+              src={imageSrc}
               alt={project.title}
               fill
               className="object-contain"
+              unoptimized={true}
             />
           </div>
 

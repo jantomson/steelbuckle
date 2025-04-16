@@ -1,28 +1,144 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useTranslation } from "@/hooks/useTranslation";
-import { usePageMedia } from "@/hooks/usePageMedia";
+import { usePageMedia, invalidateMediaCache } from "@/hooks/usePageMedia";
 import Link from "next/link";
 import SubpageHeader from "@/components/SubpageHeader";
 import SEOMetadata from "@/components/SEOMetadata";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
 
+// Helper to add cache busting to image URLs
+function addCacheBuster(url: string): string {
+  // Skip cache busting for external URLs or if already has cache busting
+  if (url.startsWith("http") || url.includes("?_t=")) {
+    return url;
+  }
+  // Add timestamp to prevent caching
+  return `${url}?_t=${Date.now()}`;
+}
+
 const RailwayRepairPage = () => {
   const { t, currentLang } = useTranslation();
+  const [imageKey, setImageKey] = useState(Date.now().toString());
+  const lastRefreshRef = useRef(Date.now());
+  const [directImageUrls, setDirectImageUrls] = useState({
+    firstImage: "",
+    secondImage: "",
+  });
 
   // Define the page prefix and default images
   const PAGE_PREFIX = "repair_renovation_page";
+  const FIRST_IMAGE_KEY = `${PAGE_PREFIX}.images.first_image`;
+  const SECOND_IMAGE_KEY = `${PAGE_PREFIX}.images.second_image`;
+
   const defaultImages: Record<string, string> = {
-    first_image: "/Remont_2.jpg",
-    second_image: "/Kazlu_Ruda_2.jpg",
+    [FIRST_IMAGE_KEY]: "/Remont_2.jpg",
+    [SECOND_IMAGE_KEY]: "/Kazlu_Ruda_2.jpg",
   };
 
   // Use our custom hook to get images from the database
-  const { getImageUrl, loading } = usePageMedia(PAGE_PREFIX, defaultImages);
+  const { getImageUrl, loading, forceMediaRefresh } = usePageMedia(
+    PAGE_PREFIX,
+    defaultImages
+  );
+
+  // Function to directly fetch images from the API
+  const fetchImagesDirectly = async () => {
+    try {
+      // Build query string with the exact DB keys
+      const keys = [FIRST_IMAGE_KEY, SECOND_IMAGE_KEY].join(",");
+
+      const response = await fetch(
+        `/api/media?keys=${encodeURIComponent(keys)}&_t=${Date.now()}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Update direct image URLs
+        setDirectImageUrls({
+          firstImage: data[FIRST_IMAGE_KEY] || defaultImages[FIRST_IMAGE_KEY],
+          secondImage:
+            data[SECOND_IMAGE_KEY] || defaultImages[SECOND_IMAGE_KEY],
+        });
+
+        console.log("Directly fetched image URLs:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching images directly:", error);
+    }
+  };
+
+  // Initial fetch and setup listeners
+  useEffect(() => {
+    // Fetch images directly on initial load
+    fetchImagesDirectly();
+
+    // Refresh cache and force media update
+    invalidateMediaCache();
+    forceMediaRefresh();
+
+    const handleMediaUpdate = () => {
+      console.log("RailwayRepairPage: Media update detected");
+      // Only refresh if it's been more than 1 second since last refresh
+      if (Date.now() - lastRefreshRef.current > 1000) {
+        lastRefreshRef.current = Date.now();
+
+        // Fetch images directly
+        fetchImagesDirectly();
+
+        // Force a refresh of the usePageMedia hook
+        forceMediaRefresh();
+
+        // Update key to force re-render of images
+        setImageKey(Date.now().toString());
+      }
+    };
+
+    // Set up listeners for custom events
+    window.addEventListener("media-cache-updated", handleMediaUpdate);
+
+    // Also listen for storage events from other tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "mediaTimestamp") {
+        console.log("Storage event detected for media timestamp");
+        handleMediaUpdate();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("media-cache-updated", handleMediaUpdate);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [forceMediaRefresh]);
+
+  // Helper function to get the first image URL with fallback chain
+  const getFirstImageUrl = () => {
+    // First try the direct API fetch result
+    if (directImageUrls.firstImage) {
+      return directImageUrls.firstImage;
+    }
+
+    // Then try the usePageMedia hook with the exact DB key
+    return getImageUrl(FIRST_IMAGE_KEY, defaultImages[FIRST_IMAGE_KEY]);
+  };
+
+  // Helper function to get the second image URL with fallback chain
+  const getSecondImageUrl = () => {
+    // First try the direct API fetch result
+    if (directImageUrls.secondImage) {
+      return directImageUrls.secondImage;
+    }
+
+    // Then try the usePageMedia hook with the exact DB key
+    return getImageUrl(SECOND_IMAGE_KEY, defaultImages[SECOND_IMAGE_KEY]);
+  };
 
   // Add this useEffect to ensure the page fills the viewport
   useEffect(() => {
@@ -125,13 +241,22 @@ const RailwayRepairPage = () => {
                 className="relative w-full md:w-[500px]"
                 style={{ height: "400px" }}
               >
-                <Image
-                  src={getImageUrl("first_image", defaultImages.first_image)}
-                  alt={t("railway_maintenance_page.alt_text.maintenance")}
-                  fill
-                  priority
-                  className="object-cover"
-                />
+                {loading ? (
+                  <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                    <div className="animate-pulse text-gray-400">Laen...</div>
+                  </div>
+                ) : (
+                  <Image
+                    src={`${getFirstImageUrl()}?_t=${imageKey}`}
+                    alt={t("railway_maintenance_page.alt_text.maintenance")}
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 500px"
+                    unoptimized={true}
+                    key={`first-image-${imageKey}`}
+                  />
+                )}
                 <div className="absolute top-0 right-0 rotate-90 h-160 flex items-center">
                   <img
                     src="/footer-cutout.svg"
@@ -153,16 +278,22 @@ const RailwayRepairPage = () => {
                   className="relative w-full md:w-[450px]"
                   style={{ height: "500px" }}
                 >
-                  <Image
-                    src={getImageUrl(
-                      "second_image",
-                      defaultImages.second_image
-                    )}
-                    alt={t("railway_maintenance_page.alt_text.maintenance")}
-                    fill
-                    priority
-                    className="object-cover"
-                  />
+                  {loading ? (
+                    <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                      <div className="animate-pulse text-gray-400">Laen...</div>
+                    </div>
+                  ) : (
+                    <Image
+                      src={`${getSecondImageUrl()}?_t=${imageKey}`}
+                      alt={t("railway_maintenance_page.alt_text.maintenance")}
+                      fill
+                      priority
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 450px"
+                      unoptimized={true}
+                      key={`second-image-${imageKey}`}
+                    />
+                  )}
                   <div className="absolute top-0 left-0 rotate-0 h-160 flex items-center">
                     <img
                       src="/footer-cutout.svg"

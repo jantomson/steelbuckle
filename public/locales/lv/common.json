@@ -265,5 +265,10 @@
   "projects": {
     "title": "Projekti",
     "text": "Mēs sasniedzam vislabākos rezultātus, izmantojot individuālu pieeju un sadarbojoties ar partneriem."
+  },
+  "404": {
+    "title": "Lapa nav atrasta",
+    "message": "Atvainojamies, mēs nevarējām atrast meklēto lapu.",
+    "back_home": "Atpakaļ uz sākumlapu"
   }
 }

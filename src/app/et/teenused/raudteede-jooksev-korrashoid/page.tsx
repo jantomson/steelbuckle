@@ -11,6 +11,16 @@ import SEOMetadata from "@/components/SEOMetadata";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
 
+// Helper to add cache busting to image URLs
+function addCacheBuster(url: string): string {
+  // Skip cache busting for external URLs or if already has cache busting
+  if (url.startsWith("http") || url.includes("?_t=")) {
+    return url;
+  }
+  // Add timestamp to prevent caching
+  return `${url}?_t=${Date.now()}`;
+}
+
 const RailwayMaintenancePage = () => {
   const { t, currentLang } = useTranslation();
   const [imageKey, setImageKey] = useState(Date.now().toString());
@@ -23,10 +33,9 @@ const RailwayMaintenancePage = () => {
   });
 
   // Define the exact DB keys
-  const MAINTENANCE_IMAGE_KEY =
-    "railway_maintenance_page.images.maintenance_image";
-  const BRANCH_OWNERS_IMAGE_KEY =
-    "railway_maintenance_page.images.branch_owners_image";
+  const PAGE_PREFIX = "railway_maintenance_page";
+  const MAINTENANCE_IMAGE_KEY = `${PAGE_PREFIX}.images.maintenance_image`;
+  const BRANCH_OWNERS_IMAGE_KEY = `${PAGE_PREFIX}.images.branch_owners_image`;
 
   // Set up default images that will be used as fallbacks
   const defaultImages = {
@@ -36,42 +45,9 @@ const RailwayMaintenancePage = () => {
 
   // Use our updated hook with the railway_maintenance_page prefix
   const { getImageUrl, loading, forceMediaRefresh } = usePageMedia(
-    "railway_maintenance_page",
+    PAGE_PREFIX,
     defaultImages
   );
-
-  // Add this useEffect to ensure the page fills the viewport
-  useEffect(() => {
-    const ensureMinHeight = () => {
-      const viewportHeight = window.innerHeight;
-      const content = document.querySelector(".content-wrapper");
-      if (!content) return;
-
-      // Get the footer height
-      const footer = document.getElementById("main-footer");
-      const footerHeight = footer ? footer.offsetHeight : 0;
-
-      // Get the navbar height
-      const navbar = document.querySelector("nav");
-      const navbarHeight = navbar ? navbar.offsetHeight : 0;
-
-      // Calculate minimum content height to fill viewport
-      const minContentHeight = viewportHeight - (navbarHeight + footerHeight);
-
-      // Apply minimum height to content wrapper
-      content.setAttribute("style", `min-height: ${minContentHeight}px`);
-    };
-
-    // Execute on load and resize
-    ensureMinHeight();
-    window.addEventListener("resize", ensureMinHeight);
-    window.addEventListener("load", ensureMinHeight);
-
-    return () => {
-      window.removeEventListener("resize", ensureMinHeight);
-      window.removeEventListener("load", ensureMinHeight);
-    };
-  }, []);
 
   // Function to directly fetch images from the API
   const fetchImagesDirectly = async () => {
@@ -175,6 +151,39 @@ const RailwayMaintenancePage = () => {
     );
   };
 
+  // Add this useEffect to ensure the page fills the viewport
+  useEffect(() => {
+    const ensureMinHeight = () => {
+      const viewportHeight = window.innerHeight;
+      const content = document.querySelector(".content-wrapper");
+      if (!content) return;
+
+      // Get the footer height
+      const footer = document.getElementById("main-footer");
+      const footerHeight = footer ? footer.offsetHeight : 0;
+
+      // Get the navbar height
+      const navbar = document.querySelector("nav");
+      const navbarHeight = navbar ? navbar.offsetHeight : 0;
+
+      // Calculate minimum content height to fill viewport
+      const minContentHeight = viewportHeight - (navbarHeight + footerHeight);
+
+      // Apply minimum height to content wrapper
+      content.setAttribute("style", `min-height: ${minContentHeight}px`);
+    };
+
+    // Execute on load and resize
+    ensureMinHeight();
+    window.addEventListener("resize", ensureMinHeight);
+    window.addEventListener("load", ensureMinHeight);
+
+    return () => {
+      window.removeEventListener("resize", ensureMinHeight);
+      window.removeEventListener("load", ensureMinHeight);
+    };
+  }, []);
+
   return (
     <div className="w-full bg-white font-[family-name:var(--font-geist-sans)]">
       <SEOMetadata pageKey="services/railway-maintenance" />
@@ -205,7 +214,11 @@ const RailwayMaintenancePage = () => {
                 className="relative w-full md:w-[400px]"
                 style={{ height: "600px" }}
               >
-                {!loading ? (
+                {loading ? (
+                  <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                    <div className="animate-pulse text-gray-400">Laen...</div>
+                  </div>
+                ) : (
                   <Image
                     src={`${getMaintenanceImageUrl()}?_t=${imageKey}`}
                     alt={t("railway_maintenance_page.alt_text.maintenance")}
@@ -216,10 +229,6 @@ const RailwayMaintenancePage = () => {
                     unoptimized={true}
                     key={`maintenance-image-${imageKey}`}
                   />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                    <div className="animate-pulse text-gray-400">Laen...</div>
-                  </div>
                 )}
                 <div className="absolute top-0 right-0 rotate-90 h-160 flex items-center">
                   <img
@@ -287,10 +296,14 @@ const RailwayMaintenancePage = () => {
                 className="relative w-full md:w-[400px]"
                 style={{ height: "600px" }}
               >
-                {!loading ? (
+                {loading ? (
+                  <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                    <div className="animate-pulse text-gray-400">Laen...</div>
+                  </div>
+                ) : (
                   <Image
                     src={`${getBranchOwnersImageUrl()}?_t=${imageKey}`}
-                    alt={t("railway_maintenance_page.alt_text.maintenance")}
+                    alt={t("railway_maintenance_page.alt_text.branch_owners")}
                     fill
                     priority
                     className="object-cover"
@@ -298,10 +311,6 @@ const RailwayMaintenancePage = () => {
                     unoptimized={true}
                     key={`branch-owners-image-${imageKey}`}
                   />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                    <div className="animate-pulse text-gray-400">Laen...</div>
-                  </div>
                 )}
                 <div className="absolute top-0 left-0 rotate-0 h-160 flex items-center">
                   <img

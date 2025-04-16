@@ -1,19 +1,43 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePageMedia } from "@/hooks/usePageMedia";
 
+// Helper to add cache busting to image URLs
+function addCacheBuster(url: string): string {
+  // Skip cache busting for external URLs or if already has cache busting
+  if (url.startsWith("http") || url.includes("?_t=")) {
+    return url;
+  }
+  // Add timestamp to prevent caching
+  return `${url}?_t=${Date.now()}`;
+}
+
 const Benefits = () => {
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(true);
 
   // Use our updated hook with the benefits prefix
   const defaultImages: Record<string, string> = {
     main_image: "/Avaleht_Renome_EST.jpg",
   };
 
-  const { getImageUrl, loading } = usePageMedia("benefits", defaultImages);
+  const { getImageUrl, loading: mediaLoading } = usePageMedia(
+    "benefits",
+    defaultImages
+  );
+
+  // Update loading state when media loading changes
+  useEffect(() => {
+    setLoading(mediaLoading);
+  }, [mediaLoading]);
+
+  // Helper function to get image URL with cache busting
+  const getImageWithCache = (key: string, fallback: string) => {
+    return addCacheBuster(getImageUrl(key, fallback));
+  };
 
   // Get the benefitItems array directly instead of nested object
   // The issue was that t("benefits.items") returns the raw array or object
@@ -57,13 +81,23 @@ const Benefits = () => {
               {t("benefits.subtitle")}
             </h3>
             <div className="relative h-[600px] lg:w-[400px]">
-              {/* Main Image - now using getImageUrl */}
-              <Image
-                src={getImageUrl("main_image", "/Avaleht_Renome_EST.jpg")}
-                alt="Railway tracks at sunset"
-                fill
-                className="object-cover"
-              />
+              {loading ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                  <div className="animate-pulse text-gray-400">Laen...</div>
+                </div>
+              ) : (
+                <Image
+                  src={getImageWithCache(
+                    "main_image",
+                    "/Avaleht_Renome_EST.jpg"
+                  )}
+                  alt="Railway tracks at sunset"
+                  fill
+                  className="object-cover"
+                  unoptimized={true}
+                  sizes="(max-width: 768px) 100vw, 400px"
+                />
+              )}
 
               {/* SVG Overlay Positioned to the Right */}
               <div className="absolute top-0 right-0 rotate-90 h-160 flex items-center">

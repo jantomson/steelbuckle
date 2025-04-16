@@ -21,6 +21,16 @@ function extractLanguageFromPath(path: string): string {
   return "et"; // Default
 }
 
+// Helper to add cache busting to image URLs
+function addCacheBuster(url: string): string {
+  // Skip cache busting for external URLs or if already has cache busting
+  if (url.startsWith("http") || url.includes("?_t=")) {
+    return url;
+  }
+  // Add timestamp to prevent caching
+  return `${url}?_t=${Date.now()}`;
+}
+
 const ProjectsUser = () => {
   const { t } = useTranslation();
   const { currentLang, isLanguageLoaded } = useLanguage();
@@ -328,11 +338,13 @@ const ProjectsUser = () => {
                     className="relative h-[500px] w-full mb-4 cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
                     onClick={(e) => openImageOverlay(project.image, index, e)}
                   >
+                    {/* Updated to use cache busting and unoptimized */}
                     <Image
-                      src={project.image}
+                      src={addCacheBuster(project.image)}
                       alt={project.title}
                       fill
                       className="object-cover rounded-lg"
+                      unoptimized={true}
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" />
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -418,13 +430,15 @@ const ProjectsUser = () => {
                   className="relative w-full"
                   style={{ paddingBottom: "75%" }}
                 >
+                  {/* Updated to use cache busting and unoptimized */}
                   <Image
-                    src={selectedImage}
+                    src={selectedImage ? addCacheBuster(selectedImage) : ""}
                     alt="Enlarged view"
                     fill
                     sizes="(max-width: 768px) 90vw, 80vw"
                     className="object-contain"
                     priority
+                    unoptimized={true}
                   />
                 </div>
               </div>

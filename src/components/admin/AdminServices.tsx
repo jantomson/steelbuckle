@@ -4,7 +4,7 @@ import React from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useEdit } from "@/contexts/EditContext";
 
-const Services = () => {
+const AdminServices = () => {
   const { t } = useTranslation();
 
   // Use the edit context
@@ -125,4 +125,4 @@ const Services = () => {
   );
 };
 
-export default Services;
+export default AdminServices;

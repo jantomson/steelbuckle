@@ -69,6 +69,7 @@ const AboutSection = () => {
                     alt="Railway tracks"
                     fill
                     className="object-cover"
+                    unoptimized={true}
                   />
                 </div>
                 {/* SVG Overlay Positioned to the Right */}

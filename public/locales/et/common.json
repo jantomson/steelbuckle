@@ -265,5 +265,10 @@
   "projects": {
     "title": "Projektid",
     "text": "Saavutame parimad tulemused läbi individuaalse lähenemise ja koostöö partneritega."
+  },
+  "404": {
+    "title": "Lehte ei leitud",
+    "message": "Vabandame, kuid otsitavat lehekülge ei õnnestunud leida.",
+    "back_home": "Tagasi avalehele"
   }
 }
