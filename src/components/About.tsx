@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -11,10 +11,36 @@ import { SupportedLanguage } from "@/config/routeTranslations";
 const AboutSection = () => {
   const { t, currentLang } = useTranslation();
 
-  // Use the hook with proper default images
-  const { getImageUrl, loading } = usePageMedia("about", {
-    main_image: "/Shkirotava_(14).jpg", // Default fallback image
-  });
+  // Define the Cloudinary URL directly as the default - this is essential
+  const cloudinaryUrl =
+    "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Shkirotava_(14).jpg";
+
+  // Create a detailed mediaConfig object with all possible key formats
+  const defaultConfig = {
+    main_image: cloudinaryUrl,
+    "about.main_image": cloudinaryUrl,
+    "about.images.main_image": cloudinaryUrl,
+  };
+
+  // Use the hook with the updated default config
+  const { getImageUrl, loading, mediaConfig } = usePageMedia(
+    "about",
+    defaultConfig
+  );
+
+  // // Debug info in development
+  // useEffect(() => {
+  //   if (process.env.NODE_ENV === "development") {
+  //     console.log("About mediaConfig:", mediaConfig);
+  //     console.log("Keys in mediaConfig:", Object.keys(mediaConfig));
+  //     console.log("main_image URL:", getImageUrl("main_image"));
+  //     console.log("about.main_image URL:", getImageUrl("about.main_image"));
+  //     console.log(
+  //       "about.images.main_image URL:",
+  //       getImageUrl("about.images.main_image")
+  //     );
+  //   }
+  // }, [mediaConfig, getImageUrl]);
 
   return (
     <section className="py-16 bg-white">
@@ -23,7 +49,6 @@ const AboutSection = () => {
         <h2 className="text-sm text-gray-500 mb-10 mt-10">
           {t("about.title")}
         </h2>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
           {/* Left column with text */}
           <div className="space-y-10">
@@ -63,14 +88,25 @@ const AboutSection = () => {
             <div className="relative">
               <div className="grid grid-cols-1 gap-2">
                 <div className="relative h-[400px] overflow-hidden mb-10">
-                  {/* Use the getImageUrl function to retrieve the image from DB or fallback */}
-                  <Image
-                    src={getImageUrl("main_image", "/Avaleht_Valga_2.jpg")}
-                    alt="Railway tracks"
-                    fill
-                    className="object-cover"
-                    unoptimized={true}
-                  />
+                  {loading ? (
+                    <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                      <p className="text-gray-500">Loading image...</p>
+                    </div>
+                  ) : (
+                    <Image
+                      // Try all possible key formats, falling back to the direct Cloudinary URL if needed
+                      src={
+                        getImageUrl("main_image") ||
+                        getImageUrl("about.main_image") ||
+                        getImageUrl("about.images.main_image") ||
+                        cloudinaryUrl
+                      }
+                      alt="Railway tracks"
+                      fill
+                      className="object-cover"
+                      unoptimized={true}
+                    />
+                  )}
                 </div>
                 {/* SVG Overlay Positioned to the Right */}
                 <div className="absolute top-0 right-0 rotate-90 h-160 flex items-center">

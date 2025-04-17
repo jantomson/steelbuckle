@@ -7,8 +7,12 @@ import { usePageMedia } from "@/hooks/usePageMedia";
 
 // Helper to add cache busting to image URLs
 function addCacheBuster(url: string): string {
-  // Skip cache busting for external URLs or if already has cache busting
-  if (url.startsWith("http") || url.includes("?_t=")) {
+  // Skip cache busting for Cloudinary URLs as they already have version control
+  if (url.includes("cloudinary.com")) {
+    return url;
+  }
+  // Skip if already has cache busting
+  if (url.includes("?_t=")) {
     return url;
   }
   // Add timestamp to prevent caching
@@ -19,9 +23,14 @@ const Benefits = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
 
-  // Use our updated hook with the benefits prefix
-  const defaultImages: Record<string, string> = {
-    main_image: "/Avaleht_Renome_EST.jpg",
+  // Use our updated hook with the benefits prefix - using Cloudinary URLs
+  const cloudinaryUrl =
+    "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Avaleht_Renome_EST.jpg";
+
+  const defaultImages = {
+    main_image: cloudinaryUrl,
+    "benefits.main_image": cloudinaryUrl,
+    "benefits.images.main_image": cloudinaryUrl,
   };
 
   const { getImageUrl, loading: mediaLoading } = usePageMedia(
@@ -36,16 +45,20 @@ const Benefits = () => {
 
   // Helper function to get image URL with cache busting
   const getImageWithCache = (key: string, fallback: string) => {
-    return addCacheBuster(getImageUrl(key, fallback));
+    // Try all possible key formats, falling back to the direct Cloudinary URL if needed
+    const imageUrl =
+      getImageUrl(key) ||
+      getImageUrl(`benefits.${key}`) ||
+      getImageUrl(`benefits.images.${key}`) ||
+      fallback;
+
+    return addCacheBuster(imageUrl);
   };
 
   // Get the benefitItems array directly instead of nested object
-  // The issue was that t("benefits.items") returns the raw array or object
-  // We need to manually access the array structure
   const benefitItems = [];
 
   // Determine how many benefit items there are by checking for existence
-  // Using a while loop with proper bounds check
   let i = 1;
   const MAX_ITEMS = 7; // Safety limit to prevent infinite loops
   let hasMoreItems = true;
@@ -75,6 +88,7 @@ const Benefits = () => {
         <h2 className="text-sm text-gray-500 mb-20 mt-10">
           {t("benefits.title")}
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
           <div className="space-y-6">
             <h3 className="text-3xl font-medium text-gray-800 mb-20 md:max-w-md">
@@ -87,14 +101,11 @@ const Benefits = () => {
                 </div>
               ) : (
                 <Image
-                  src={getImageWithCache(
-                    "main_image",
-                    "/Avaleht_Renome_EST.jpg"
-                  )}
+                  src={getImageWithCache("main_image", cloudinaryUrl)}
                   alt="Railway tracks at sunset"
                   fill
                   className="object-cover"
-                  unoptimized={true}
+                  unoptimized={true} // Use Cloudinary's optimization
                   sizes="(max-width: 768px) 100vw, 400px"
                 />
               )}

@@ -69,169 +69,209 @@ function loadJsonFile(filePath: string): any {
   }
 }
 
-// Insert media data (sample data for illustration)
+// Insert media data with Cloudinary URLs
 async function insertMediaData() {
-  console.log("Inserting media data...");
+  console.log("Cleaning up existing media data...");
 
-  // Define your media files
+  // First, delete all existing media references to avoid foreign key constraint issues
+  await prisma.mediaReference.deleteMany({});
+
+  // Then delete all existing media entries
+  await prisma.media.deleteMany({});
+
+  console.log("Inserting media data with Cloudinary URLs...");
+
+  // Define your media files with Cloudinary URLs
   const mediaFiles = [
     // Logos
     {
       filename: "logo.svg",
-      path: "/logo.svg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/logo.svg",
+      cloudinaryId: "media/logo.svg",
       mediaType: "image/svg+xml",
       altText: "Steel Buckle Logo",
     },
     {
       filename: "logo_blue.png",
-      path: "/logo_blue.png",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/logo_blue.png",
+      cloudinaryId: "media/logo_blue.png",
       mediaType: "image/png",
       altText: "Steel Buckle Logo Blue",
     },
     {
       filename: "logo_dark.svg",
-      path: "/logo_dark.svg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/logo_dark.svg",
+      cloudinaryId: "media/logo_dark.svg",
       mediaType: "image/svg+xml",
       altText: "Steel Buckle Logo",
     },
     {
       filename: "logo_green.png",
-      path: "/logo_green.png",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/logo_green.png",
+      cloudinaryId: "media/logo_green.png",
       mediaType: "image/png",
       altText: "Steel Buckle Logo Green",
     },
     {
       filename: "logo_grey.svg",
-      path: "/logo_grey.svg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/logo_grey.svg",
+      cloudinaryId: "media/logo_grey.svg",
       mediaType: "image/svg+xml",
       altText: "Steel Buckle Logo Grey",
     },
     {
       filename: "logo_white.svg",
-      path: "/logo_white.svg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/logo_white.svg",
+      cloudinaryId: "media/logo_white.svg",
       mediaType: "image/svg+xml",
       altText: "Steel Buckle Logo",
     },
     // Project Images
     {
       filename: "naissaare.png",
-      path: "/naissaare.png",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/naissaare.png",
+      cloudinaryId: "media/naissaare.png",
       mediaType: "image/png",
       altText: "Naissaare",
     },
     {
       filename: "Liepaja_(61).jpg",
-      path: "/Liepaja_(61).jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Liepaja_(61).jpg",
+      cloudinaryId: "media/Liepaja_(61).jpg",
       mediaType: "image/jpeg",
       altText: "Liepaja Station",
     },
     {
       filename: "valgaraudteejaam.jpg",
-      path: "/valgaraudteejaam.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/valgaraudteejaam.jpg",
+      cloudinaryId: "media/valgaraudteejaam.jpg",
       mediaType: "image/jpeg",
       altText: "Valga Railway Station",
     },
     {
       filename: "Bolderaja_(49).jpg",
-      path: "/Bolderaja_(49).jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Bolderaja_(49).jpg",
+      cloudinaryId: "media/Bolderaja_(49).jpg",
       mediaType: "image/jpeg",
       altText: "Bolderaja",
     },
     {
       filename: "Shkirotava_(14).jpg",
-      path: "/Shkirotava_(14).jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Shkirotava_(14).jpg",
+      cloudinaryId: "media/Shkirotava_(14).jpg",
       mediaType: "image/jpeg",
       altText: "Shkirotava Station",
     },
     {
       filename: "Shkirotava_(55).jpg",
-      path: "/Shkirotava_(55).jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Shkirotava_(55).jpg",
+      cloudinaryId: "media/Shkirotava_(55).jpg",
       mediaType: "image/jpeg",
       altText: "Shkirotava Sorting Hill",
     },
     {
       filename: "Avaleht_Renome_EST.jpg",
-      path: "/Avaleht_Renome_EST.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Avaleht_Renome_EST.jpg",
+      cloudinaryId: "media/Avaleht_Renome_EST.jpg",
       mediaType: "image/jpeg",
       altText: "Avaleht Renome EST",
     },
     {
       filename: "Avaleht_Valga_2.jpg",
-      path: "/Avaleht_Valga_2.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Avaleht_Valga_2.jpg",
+      cloudinaryId: "media/Avaleht_Valga_2.jpg",
       mediaType: "image/jpeg",
       altText: "Avaleht Valga 2",
     },
     {
       filename: "Krievu_Sala_3.jpg",
-      path: "/Krievu_Sala_3.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Krievu_Sala_3.jpg",
+      cloudinaryId: "media/Krievu_Sala_3.jpg",
       mediaType: "image/jpeg",
       altText: "Krievu Sala 3",
     },
     {
       filename: "Kazlu_Rida_3.jpg",
-      path: "/Kazlu_Rida_3.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Kazlu_Rida_3.jpg",
+      cloudinaryId: "media/Kazlu_Rida_3.jpg",
       mediaType: "image/jpeg",
       altText: "Kazlu Rida 3",
     },
     {
       filename: "Kazlu_Ruda_2.jpg",
-      path: "/Kazlu_Ruda_2.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754192/media/Kazlu_Ruda_2.jpg",
+      cloudinaryId: "media/Kazlu_Ruda_2.jpg",
       mediaType: "image/jpeg",
       altText: "Kazlu Ruda 2",
     },
     {
       filename: "Skriveri_1.jpg",
-      path: "/Skriveri_1.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Skriveri_1.jpg",
+      cloudinaryId: "media/Skriveri_1.jpg",
       mediaType: "image/jpeg",
       altText: "Skriveri 1",
     },
     {
       filename: "Liepaja_(77).jpg",
-      path: "/Liepaja_(77).jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Liepaja_(77).jpg",
+      cloudinaryId: "media/Liepaja_(77).jpg",
       mediaType: "image/jpeg",
       altText: "Liepaja 77",
     },
     {
       filename: "Liepaja_(57).jpg",
-      path: "/Liepaja_(57).jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Liepaja_(57).jpg",
+      cloudinaryId: "media/Liepaja_(57).jpg",
       mediaType: "image/jpeg",
       altText: "Liepaja 57",
     },
     {
       filename: "Remont_2.jpg",
-      path: "/Remont_2.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Remont_2.jpg",
+      cloudinaryId: "media/Remont_2.jpg",
       mediaType: "image/jpeg",
       altText: "Remont 2",
     },
     {
       filename: "foto_jooksev.jpg",
-      path: "/foto_jooksev.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/foto_jooksev.jpg",
+      cloudinaryId: "media/foto_jooksev.jpg",
       mediaType: "image/jpeg",
       altText: "Current Photo",
     },
     {
       filename: "thumbnail_Lumetorje_1.jpg",
-      path: "/thumbnail_Lumetorje_1.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/thumbnail_Lumetorje_1.jpg",
+      cloudinaryId: "media/thumbnail_Lumetorje_1.jpg",
       mediaType: "image/jpeg",
       altText: "Snow Removal 1",
     },
     {
       filename: "thumbnail_lumetorje_2.jpg",
-      path: "/thumbnail_lumetorje_2.jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/thumbnail_lumetorje_2.jpg",
+      cloudinaryId: "media/thumbnail_lumetorje_2.jpg",
       mediaType: "image/jpeg",
       altText: "Snow Removal 2",
     },
     {
       filename:
         "Eesti_Raudtee_Muuga_jaama_kõrik._Taamal_paistmas_ka_jaama_juhtimiskeskus_(ET-post).jpg",
-      path: "/Eesti_Raudtee_Muuga_jaama_kõrik._Taamal_paistmas_ka_jaama_juhtimiskeskus_(ET-post).jpg",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Eesti_Raudtee_Muuga_jaama_kõrik._Taamal_paistmas_ka_jaama_juhtimiskeskus_(ET-post).jpg",
+      cloudinaryId:
+        "media/Eesti_Raudtee_Muuga_jaama_kõrik._Taamal_paistmas_ka_jaama_juhtimiskeskus_(ET-post).jpg",
       mediaType: "image/jpeg",
       altText: "Muuga Port Station",
     },
+    {
+      filename: "giphy_qmfoxn.gif",
+      path: "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744871872/giphy_qmfoxn.gif",
+      cloudinaryId: "media/giphy_qmfoxn.gif",
+      mediaType: "image/svg+xml",
+      altText: "Gif",
+    },
   ];
 
-  // Media references
-  // Define comprehensive media references for all pages
+  // Media references remain the same
   const mediaReferences = [
     // Existing references
     { key: "site.logo", filename: "logo.svg" },
@@ -278,25 +318,27 @@ async function insertMediaData() {
     },
   ];
 
-  // Insert media files
+  // Insert media files with Cloudinary URLs and IDs
   for (const file of mediaFiles) {
     await prisma.media.upsert({
       where: { path: file.path },
       update: {
         filename: file.filename,
+        cloudinaryId: file.cloudinaryId,
         mediaType: file.mediaType,
         altText: file.altText,
       },
       create: {
         filename: file.filename,
         path: file.path,
+        cloudinaryId: file.cloudinaryId,
         mediaType: file.mediaType,
         altText: file.altText,
       },
     });
   }
 
-  // Insert media references
+  // Insert media references - this code remains the same
   for (const ref of mediaReferences) {
     // Find the media by filename
     const media = await prisma.media.findFirst({
@@ -863,7 +905,8 @@ async function seedProjects() {
     // Sample project data with translations
     const projectsData = [
       {
-        image: "/naissaare.png",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/naissaare.png",
         year: "2018–2019",
         translations: {
           en: "Nõmme Historical Railway Track Renovation",
@@ -873,7 +916,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/Liepaja_(61).jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Liepaja_(61).jpg",
         year: "2015",
         translations: {
           en: "Liepāja Railway Station Reconstruction",
@@ -883,7 +927,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/valgaraudteejaam.jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/valgaraudteejaam.jpg",
         year: "2010-2012",
         translations: {
           en: "Valga Railway Station Reconstruction",
@@ -893,7 +938,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/Shkirotava_(55).jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Shkirotava_(55).jpg",
         year: "2013-2015",
         translations: {
           en: "Renovation of Sorting Hill and Underground Tracks at Šķirotava Station",
@@ -903,7 +949,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/Krievu_Sala_3.jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Krievu_Sala_3.jpg",
         year: "2013-2015",
         translations: {
           en: "Construction of Technology Park in Krievu Island Area",
@@ -913,7 +960,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/Skriveri_1.jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Skriveri_1.jpg",
         year: "2012-2015",
         translations: {
           en: "Construction of Second Track on Skrīveri-Krustpils Section",
@@ -923,7 +971,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/Bolderaja_(49).jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Bolderaja_(49).jpg",
         year: "2015",
         translations: {
           en: "Construction of Bolderāja 2 Railway Station",
@@ -933,7 +982,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/thumbnail_lumetorje_2.jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/thumbnail_lumetorje_2.jpg",
         year: "2012-2025",
         translations: {
           en: "Snow Removal Works on AS Eesti Raudtee Tracks and Switches",
@@ -943,7 +993,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/Kazlu_Rida_3.jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Kazlu_Rida_3.jpg",
         year: "2013-2014",
         translations: {
           en: "Construction of Kazlų Rūda-Marijampole Railway Section (1435 mm Gauge)",
@@ -954,7 +1005,7 @@ async function seedProjects() {
       },
       {
         image:
-          "/Eesti_Raudtee_Muuga_jaama_kõrik._Taamal_paistmas_ka_jaama_juhtimiskeskus_(ET-post).jpg",
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Eesti_Raudtee_Muuga_jaama_kõrik._Taamal_paistmas_ka_jaama_juhtimiskeskus_(ET-post).jpg",
         year: "2014",
         translations: {
           en: "Reconstruction of Crane Tracks in Muuga Port",
@@ -964,7 +1015,8 @@ async function seedProjects() {
         },
       },
       {
-        image: "/lounasadam.jpg",
+        image:
+          "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744875430/lounasadam.jpg",
         year: "2015, 2016, 2019-2024",
         translations: {
           en: "Repair Works on Paldiski South Harbor Railway Tracks",

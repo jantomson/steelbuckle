@@ -9,7 +9,16 @@ interface MediaRefMap {
 
 // Helper to add cache-busting parameter to URL
 function addCacheBustToUrl(url: string, timestamp: string): string {
-  // Check if URL already has query parameters
+  // Check if it's a Cloudinary URL
+  if (url.includes("cloudinary.com")) {
+    // If URL already has transformations or query parameters
+    if (url.includes("?")) {
+      return `${url}&_t=${timestamp}`;
+    }
+    return `${url}?_t=${timestamp}`;
+  }
+
+  // Legacy URL handling (keep as is for backward compatibility)
   if (url.includes("?")) {
     return `${url}&_t=${timestamp}`;
   }

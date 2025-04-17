@@ -12,22 +12,44 @@ const ServicesSlider = () => {
   const [isMobile, setIsMobile] = useState(false);
   const { t, currentLang } = useTranslation();
 
-  // Set up default images that will be used as fallbacks
-  const defaultImages = {
-    "services_slider.slide1.image": "/foto_jooksev.jpg",
-    "services_slider.slide2.image": "/Remont_2.jpg",
-    "services_slider.slide3.image": "/Kazlu_Ruda_2.jpg",
-    "services_slider.slide4.image": "/Skriveri_1.jpg",
+  // Set up default images with full Cloudinary URLs
+  const defaultImages: Record<string, string> = {
+    "slide1.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/foto_jooksev.jpg",
+    "slide2.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Remont_2.jpg",
+    "slide3.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Kazlu_Rida_2.jpg",
+    "slide4.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Skriveri_1.jpg",
+    "services_slider.slide1.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/foto_jooksev.jpg",
+    "services_slider.slide2.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Remont_2.jpg",
+    "services_slider.slide3.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Kazlu_Rida_2.jpg",
+    "services_slider.slide4.image":
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Skriveri_1.jpg",
   };
-
-  // Define the type for the key to avoid the TypeScript error
-  type DefaultImageKeys = keyof typeof defaultImages;
 
   // Use our updated hook with the services_slider prefix
   const { getImageUrl, loading } = usePageMedia(
     "services_slider",
     defaultImages
   );
+
+  // Helper function to get the correct image URL for each slide
+  const getSlideImageUrl = (slideNum: number): string => {
+    // Try all possible key formats for this slide
+    const fullKey = `services_slider.slide${slideNum}.image`;
+    const shortKey = `slide${slideNum}.image`;
+
+    // Get the fallback URL from defaults
+    const fallbackUrl = defaultImages[fullKey] || defaultImages[shortKey];
+
+    // Use getImageUrl with proper fallback
+    return getImageUrl(fullKey) || getImageUrl(shortKey) || fallbackUrl;
+  };
 
   // Generate service items by checking translations that exist
   const serviceItems = [];
@@ -40,20 +62,18 @@ const ServicesSlider = () => {
     // If we get back the key itself, it means the translation doesn't exist
     if (title === titlePath) break;
 
-    // Get the image path from our media hook using the full key format
-    const slideImageKey = `services_slider.slide${i}.image`;
-    const defaultImage =
-      defaultImages[slideImageKey as DefaultImageKeys] || "/naissaare.png";
+    // Get the image URL using our helper function
+    const imageUrl = getSlideImageUrl(i);
 
     serviceItems.push({
       id: i,
       title: title,
       description: t(`services_slider.items.${i - 1}.description`),
-      image: getImageUrl(slideImageKey, defaultImage),
+      image: imageUrl,
     });
   }
 
-  // If no translations are found, use fallback data
+  // If no translations are found, use fallback data but with proper image URLs
   const slides =
     serviceItems.length > 0
       ? serviceItems
@@ -63,40 +83,28 @@ const ServicesSlider = () => {
             title: "Raudteede ja rajatiste jooksev korrashoid",
             description:
               "Jooksva korrashoiu teenuste osutamisel on meie peamine ülesanne süstemaatiline järelevalve raudteede ja raudteeseadmete üle eesmärgiga ennetada rikkeid, pikendada raudteeinfrastruktuuri elementide kasutusiga, tõsta turvalisuse taset ning tagada vagunite tõrgeteta etteandmine ja äraviimine.",
-            image: getImageUrl(
-              "services_slider.slide1.image",
-              "/Bolderaja_(49).jpg"
-            ),
+            image: getSlideImageUrl(1),
           },
           {
             id: 2,
             title: "Remont ja renoveerimine",
             description:
               "Pakume põhjalikke remondi- ja renoveerimistöid raudteeinfrastruktuurile, tagades kvaliteedi ja vastupidavuse.",
-            image: getImageUrl(
-              "services_slider.slide2.image",
-              "/naissaare.png"
-            ),
+            image: getSlideImageUrl(2),
           },
           {
             id: 3,
             title: "Raudtee-ehitus",
             description:
               "Täielikud raudtee-ehitusteenused planeerimisest teostuseni, sealhulgas uute rööbaste paigaldamine ja infrastruktuuri arendamine.",
-            image: getImageUrl(
-              "services_slider.slide3.image",
-              "/naissaare.png"
-            ),
+            image: getSlideImageUrl(3),
           },
           {
             id: 4,
             title: "Projekteerimine",
             description:
               "Professionaalsed projekteerimis- ja inseneriteenused raudteeprojektidele, sealhulgas tehnilise dokumentatsiooni ja projekti planeerimine.",
-            image: getImageUrl(
-              "services_slider.slide4.image",
-              "/naissaare.png"
-            ),
+            image: getSlideImageUrl(4),
           },
         ];
 
@@ -113,6 +121,19 @@ const ServicesSlider = () => {
       window.removeEventListener("resize", checkMobile);
     };
   }, []);
+
+  // DEBUG logging - uncomment if you need to see what's happening
+  /*
+  useEffect(() => {
+    console.log("ServicesSlider mediaConfig:", {
+      "slide1.image": getImageUrl("slide1.image"),
+      "services_slider.slide1.image": getImageUrl("services_slider.slide1.image"),
+      "slide2.image": getImageUrl("slide2.image"),
+      "services_slider.slide2.image": getImageUrl("services_slider.slide2.image"),
+    });
+    console.log("Current slide image:", slides[currentSlide].image);
+  }, [getImageUrl, currentSlide, slides]);
+  */
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -152,15 +173,21 @@ const ServicesSlider = () => {
           <div className="grid md:grid-cols-12 gap-0">
             <div className="md:col-span-5 relative">
               <div className="aspect-[4/3] md:aspect-auto md:h-full w-full relative">
-                <Image
-                  src={slides[currentSlide].image}
-                  alt={slides[currentSlide].title}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 40vw"
-                  unoptimized={true} // Add this to prevent caching
-                />
+                {loading ? (
+                  <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                    <div className="animate-pulse text-gray-400">Laen...</div>
+                  </div>
+                ) : (
+                  <Image
+                    src={slides[currentSlide].image}
+                    alt={slides[currentSlide].title}
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 40vw"
+                    unoptimized={true} // Prevent Next.js image optimization to use Cloudinary directly
+                  />
+                )}
 
                 <div className="absolute bottom-0 right-0 rotate-180 h-160 flex items-center">
                   <img

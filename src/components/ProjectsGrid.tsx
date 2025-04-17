@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePathname } from "next/navigation";
+import { usePageMedia } from "@/hooks/usePageMedia";
 
 interface Project {
   id: string;
@@ -23,8 +24,12 @@ function extractLanguageFromPath(path: string): string {
 
 // Helper to add cache busting to image URLs
 function addCacheBuster(url: string): string {
-  // Skip cache busting for external URLs
-  if (url.startsWith("http") || url.includes("?_t=")) {
+  // Skip cache busting for Cloudinary URLs as they already have version control
+  if (url.includes("cloudinary.com")) {
+    return url;
+  }
+  // Skip if already has cache busting
+  if (url.includes("?_t=")) {
     return url;
   }
   // Add timestamp to prevent caching
@@ -40,6 +45,23 @@ const ProjectsGrid: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const pathname = usePathname(); // Get current URL path
+
+  // Default Cloudinary URLs for project placeholders
+  const defaultProjectImage =
+    "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Skriveri_1.jpg";
+
+  // Set up default media configuration with project placeholder images
+  const defaultImages = {
+    project_placeholder: defaultProjectImage,
+    "projects_grid.project_placeholder": defaultProjectImage,
+    "projects_grid.images.project_placeholder": defaultProjectImage,
+  };
+
+  // Use our media hook for Cloudinary image management
+  const { getImageUrl, loading: mediaLoading } = usePageMedia(
+    "projects_grid",
+    defaultImages
+  );
 
   // Directly use URL-based language for fetching to avoid race conditions
   const urlLang = pathname ? extractLanguageFromPath(pathname) : currentLang;
@@ -125,7 +147,7 @@ const ProjectsGrid: React.FC = () => {
     }
   };
 
-  if (!isLanguageLoaded || loading) {
+  if (!isLanguageLoaded || loading || mediaLoading) {
     return (
       <div className="w-full bg-white text-black p-16 text-center">
         Laen projekte...
@@ -152,9 +174,9 @@ const ProjectsGrid: React.FC = () => {
               <div key={project.id} className="mb-8 flex flex-col h-full">
                 {/* Fixed height container - 400px on desktop, responsive on smaller screens */}
                 <div className="relative w-full h-96 sm:h-80 md:h-96 lg:h-[500px] mb-4 group overflow-hidden">
-                  {/* Add cache busting and unoptimized prop */}
+                  {/* Use Image with unoptimized for Cloudinary */}
                   <Image
-                    src={addCacheBuster(project.image)}
+                    src={project.image}
                     alt={project.title}
                     fill
                     className="object-cover"
@@ -220,9 +242,6 @@ const Modal: React.FC<ModalProps> = ({
   isFirst,
   isLast,
 }) => {
-  // Use the same helper to ensure consistent cache busting
-  const imageSrc = addCacheBuster(project.image);
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -306,7 +325,7 @@ const Modal: React.FC<ModalProps> = ({
             )}
 
             <Image
-              src={imageSrc}
+              src={project.image}
               alt={project.title}
               fill
               className="object-contain"

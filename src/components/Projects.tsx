@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePathname } from "next/navigation";
+import { usePageMedia } from "@/hooks/usePageMedia";
 
 interface Project {
   id: string;
@@ -23,8 +24,12 @@ function extractLanguageFromPath(path: string): string {
 
 // Helper to add cache busting to image URLs
 function addCacheBuster(url: string): string {
-  // Skip cache busting for external URLs or if already has cache busting
-  if (url.startsWith("http") || url.includes("?_t=")) {
+  // Skip cache busting for Cloudinary URLs as they already have version control
+  if (url.includes("cloudinary.com")) {
+    return url;
+  }
+  // Skip if already has cache busting
+  if (url.includes("?_t=")) {
     return url;
   }
   // Add timestamp to prevent caching
@@ -41,6 +46,23 @@ const ProjectsUser = () => {
 
   // Directly use URL-based language for fetching to avoid race conditions
   const urlLang = pathname ? extractLanguageFromPath(pathname) : currentLang;
+
+  // Default Cloudinary URLs for project placeholders
+  const defaultProjectImage =
+    "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Skriveri_1.jpg";
+
+  // Set up default media configuration with project placeholder images
+  const defaultImages = {
+    project_placeholder: defaultProjectImage,
+    "projects.project_placeholder": defaultProjectImage,
+    "projects.images.project_placeholder": defaultProjectImage,
+  };
+
+  // Use our media hook for Cloudinary image management
+  const { getImageUrl, loading: mediaLoading } = usePageMedia(
+    "projects",
+    defaultImages
+  );
 
   // Enhanced fetch function with improved error handling and cache busting
   // Now using URL-based language directly
@@ -277,7 +299,7 @@ const ProjectsUser = () => {
   }, [isDragging, selectedImage]);
 
   // If language is still loading or component is fetching projects, show loading
-  if (!isLanguageLoaded || loading) {
+  if (!isLanguageLoaded || loading || mediaLoading) {
     return (
       <section className="relative py-16 bg-gray-100">
         <div className="max-w-7xl mx-auto">
@@ -338,9 +360,9 @@ const ProjectsUser = () => {
                     className="relative h-[500px] w-full mb-4 cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
                     onClick={(e) => openImageOverlay(project.image, index, e)}
                   >
-                    {/* Updated to use cache busting and unoptimized */}
+                    {/* Use Image with Cloudinary support */}
                     <Image
-                      src={addCacheBuster(project.image)}
+                      src={project.image}
                       alt={project.title}
                       fill
                       className="object-cover rounded-lg"
@@ -430,9 +452,8 @@ const ProjectsUser = () => {
                   className="relative w-full"
                   style={{ paddingBottom: "75%" }}
                 >
-                  {/* Updated to use cache busting and unoptimized */}
                   <Image
-                    src={selectedImage ? addCacheBuster(selectedImage) : ""}
+                    src={selectedImage}
                     alt="Enlarged view"
                     fill
                     sizes="(max-width: 768px) 90vw, 80vw"
@@ -466,7 +487,7 @@ const ProjectsUser = () => {
             </div>
           )}
 
-          <style jsx>{`
+          <style jsx global>{`
             /* Hide scrollbar for Chrome, Safari and Opera */
             .hide-scrollbar::-webkit-scrollbar {
               display: none;

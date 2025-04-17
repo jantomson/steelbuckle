@@ -7,6 +7,7 @@ import { Playfair_Display } from "next/font/google";
 import Link from "next/link";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
+import { usePageMedia } from "@/hooks/usePageMedia";
 
 const playfair = Playfair_Display({
   subsets: ["latin", "cyrillic"],
@@ -16,6 +17,23 @@ const playfair = Playfair_Display({
 const CTA = () => {
   const { t, currentLang } = useTranslation();
   const [isClient, setIsClient] = useState(false);
+
+  // Define the Cloudinary URLs directly as defaults
+  const defaultGifUrl = "/giphy.gif";
+  const defaultOverlayUrl = "/gif_overlay.svg";
+
+  // Create a detailed mediaConfig object with all possible key formats
+  const defaultConfig = {
+    gif_image: defaultGifUrl,
+    "cta.gif_image": defaultGifUrl,
+    "cta.images.gif_image": defaultGifUrl,
+    overlay_image: defaultOverlayUrl,
+    "cta.overlay_image": defaultOverlayUrl,
+    "cta.images.overlay_image": defaultOverlayUrl,
+  };
+
+  // Use the hook with the updated default config
+  const { getImageUrl, loading } = usePageMedia("cta", defaultConfig);
 
   // Set isClient to true after component mounts
   useEffect(() => {
@@ -31,21 +49,29 @@ const CTA = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-6xl mx-auto">
               {/* Image Container - Modified for better responsiveness */}
               <div className="relative h-[500px] sm:h-[550px] lg:h-[650px] w-full lg:col-span-5 rounded-[60px] lg:rounded-[100px] overflow-hidden">
-                <Image
-                  src="/giphy.gif"
-                  alt="Gif"
-                  fill
-                  style={{ objectFit: "cover" }}
-                />
+                {loading ? (
+                  <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                    <p className="text-gray-500">Laen...</p>
+                  </div>
+                ) : (
+                  <Image
+                    src={getImageUrl("gif_image", defaultGifUrl)}
+                    alt="Gif"
+                    fill
+                    style={{ objectFit: "cover" }}
+                    unoptimized={true}
+                  />
+                )}
                 {/* GIF overlay with semi-transparent background */}
                 <div className="absolute inset-0 bg-black bg-opacity-30 z-10">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative w-full h-full">
                       <Image
-                        src="/gif_overlay.svg"
+                        src={getImageUrl("overlay_image", defaultOverlayUrl)}
                         alt="Overlay animation"
                         fill
                         style={{ objectFit: "cover" }}
+                        unoptimized={true}
                       />
                     </div>
                   </div>
@@ -103,22 +129,35 @@ const CTA = () => {
             style={{ height: "400px", maxWidth: "400px" }}
           >
             {/* Base image */}
-            <Image
-              src="/giphy.gif"
-              alt="Gif"
-              fill
-              style={{ objectFit: "cover" }}
-            />
+            {loading ? (
+              <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                <p className="text-gray-500">Laen...</p>
+              </div>
+            ) : (
+              <Image
+                src={getImageUrl("gif_image", defaultGifUrl)}
+                alt="Gif"
+                fill
+                style={{ objectFit: "cover" }}
+                unoptimized={true}
+              />
+            )}
 
             {/* GIF overlay with semi-transparent background */}
             <div className="absolute inset-0 bg-black bg-opacity-30 z-10">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-full h-full">
-                  <Image
-                    src="/gif_overlay.svg"
+                  <img
+                    src={defaultOverlayUrl}
                     alt="Overlay animation"
-                    fill
-                    style={{ objectFit: "cover" }}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 </div>
               </div>

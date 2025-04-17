@@ -97,6 +97,7 @@ model Media {
   id              Int              @id @default(autoincrement())
   filename        String           @db.VarChar(255)
   path            String           @unique @db.VarChar(512)
+  cloudinaryId    String?          @map("cloudinary_id") @db.VarChar(255)
   mediaType       String?          @map("media_type") @db.VarChar(50)
   altText         String?          @map("alt_text") @db.VarChar(255)
   mediaReferences MediaReference[]
