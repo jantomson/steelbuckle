@@ -13,8 +13,12 @@ import { SupportedLanguage } from "@/config/routeTranslations";
 
 // Helper to add cache busting to image URLs
 function addCacheBuster(url: string): string {
-  // Skip cache busting for external URLs or if already has cache busting
-  if (url.startsWith("http") || url.includes("?_t=")) {
+  // Skip cache busting for Cloudinary URLs as they already have version control
+  if (url.includes("cloudinary.com")) {
+    return url;
+  }
+  // Skip if already has cache busting
+  if (url.includes("?_t=")) {
     return url;
   }
   // Add timestamp to prevent caching
@@ -33,7 +37,8 @@ const RailwayInfrastructurePage = () => {
   const PAGE_PREFIX = "railway_infrastructure_page";
   const MAIN_IMAGE_KEY = `${PAGE_PREFIX}.images.main_image`;
   const defaultImages: Record<string, string> = {
-    [MAIN_IMAGE_KEY]: "/Shkirotava_(14).jpg",
+    [MAIN_IMAGE_KEY]:
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Shkirotava_(14).jpg",
   };
 
   // Use our custom hook to get images from the database
@@ -192,7 +197,7 @@ const RailwayInfrastructurePage = () => {
                   </div>
                 ) : (
                   <Image
-                    src={`${getMainImageUrl()}?_t=${imageKey}`}
+                    src={addCacheBuster(getMainImageUrl())}
                     alt={
                       t("railway_infrastructure_page.alt_text.main_image") ||
                       "Railway infrastructure"

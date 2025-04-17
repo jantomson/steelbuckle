@@ -13,8 +13,12 @@ import { SupportedLanguage } from "@/config/routeTranslations";
 
 // Helper to add cache busting to image URLs
 function addCacheBuster(url: string): string {
-  // Skip cache busting for external URLs or if already has cache busting
-  if (url.startsWith("http") || url.includes("?_t=")) {
+  // Skip cache busting for Cloudinary URLs as they already have version control
+  if (url.includes("cloudinary.com")) {
+    return url;
+  }
+  // Skip if already has cache busting
+  if (url.includes("?_t=")) {
     return url;
   }
   // Add timestamp to prevent caching
@@ -36,8 +40,10 @@ const RailwayRepairPage = () => {
   const SECOND_IMAGE_KEY = `${PAGE_PREFIX}.images.second_image`;
 
   const defaultImages: Record<string, string> = {
-    [FIRST_IMAGE_KEY]: "/Remont_2.jpg",
-    [SECOND_IMAGE_KEY]: "/Kazlu_Ruda_2.jpg",
+    [FIRST_IMAGE_KEY]:
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Remont_2.jpg",
+    [SECOND_IMAGE_KEY]:
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754192/media/Kazlu_Ruda_2.jpg",
   };
 
   // Use our custom hook to get images from the database
@@ -247,7 +253,7 @@ const RailwayRepairPage = () => {
                   </div>
                 ) : (
                   <Image
-                    src={`${getFirstImageUrl()}?_t=${imageKey}`}
+                    src={addCacheBuster(getFirstImageUrl())}
                     alt={t("railway_maintenance_page.alt_text.maintenance")}
                     fill
                     priority
@@ -284,7 +290,7 @@ const RailwayRepairPage = () => {
                     </div>
                   ) : (
                     <Image
-                      src={`${getSecondImageUrl()}?_t=${imageKey}`}
+                      src={addCacheBuster(getSecondImageUrl())}
                       alt={t("railway_maintenance_page.alt_text.maintenance")}
                       fill
                       priority

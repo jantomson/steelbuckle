@@ -13,8 +13,12 @@ import { SupportedLanguage } from "@/config/routeTranslations";
 
 // Helper to add cache busting to image URLs
 function addCacheBuster(url: string): string {
-  // Skip cache busting for external URLs or if already has cache busting
-  if (url.startsWith("http") || url.includes("?_t=")) {
+  // Skip cache busting for Cloudinary URLs as they already have version control
+  if (url.includes("cloudinary.com")) {
+    return url;
+  }
+  // Skip if already has cache busting
+  if (url.includes("?_t=")) {
     return url;
   }
   // Add timestamp to prevent caching
@@ -37,10 +41,12 @@ const RailwayMaintenancePage = () => {
   const MAINTENANCE_IMAGE_KEY = `${PAGE_PREFIX}.images.maintenance_image`;
   const BRANCH_OWNERS_IMAGE_KEY = `${PAGE_PREFIX}.images.branch_owners_image`;
 
-  // Set up default images that will be used as fallbacks
+  // Set up default Cloudinary URLs that will be used as fallbacks - similar to About.tsx and Benefits.tsx
   const defaultImages = {
-    [MAINTENANCE_IMAGE_KEY]: "/foto_jooksev.jpg",
-    [BRANCH_OWNERS_IMAGE_KEY]: "/Liepaja_(57).jpg",
+    [MAINTENANCE_IMAGE_KEY]:
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/foto_jooksev.jpg",
+    [BRANCH_OWNERS_IMAGE_KEY]:
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Liepaja_(57).jpg",
   };
 
   // Use our updated hook with the railway_maintenance_page prefix
@@ -220,7 +226,7 @@ const RailwayMaintenancePage = () => {
                   </div>
                 ) : (
                   <Image
-                    src={`${getMaintenanceImageUrl()}?_t=${imageKey}`}
+                    src={addCacheBuster(getMaintenanceImageUrl())}
                     alt={t("railway_maintenance_page.alt_text.maintenance")}
                     fill
                     priority
@@ -302,7 +308,7 @@ const RailwayMaintenancePage = () => {
                   </div>
                 ) : (
                   <Image
-                    src={`${getBranchOwnersImageUrl()}?_t=${imageKey}`}
+                    src={addCacheBuster(getBranchOwnersImageUrl())}
                     alt={t("railway_maintenance_page.alt_text.branch_owners")}
                     fill
                     priority

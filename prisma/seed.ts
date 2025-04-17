@@ -870,8 +870,8 @@ async function seedContactInfo() {
       // Create phone numbers
       const phones = [
         { number: "+372 5879 5887", label: "Üldtelefon" },
-        { number: "+372 5340 8493", label: "Dimitri" },
-        { number: "+372 505 9047", label: "Valeri" },
+        { number: "+372 5340 8493", label: "Dmitri Butkevitš" },
+        { number: "+372 505 9047", label: "Valeri Fjodorov" },
       ];
 
       for (const phone of phones) {
