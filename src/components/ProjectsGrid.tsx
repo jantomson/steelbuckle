@@ -165,7 +165,7 @@ const ProjectsGrid: React.FC = () => {
 
   return (
     <div className="w-full bg-white text-black">
-      <div className="max-w-7xl mx-auto px-4 md:px-12 py-16 mt-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-12 py-12">
         {projects.length === 0 ? (
           <div className="text-center py-8">Projektid pole saadaval.</div>
         ) : (
@@ -336,7 +336,9 @@ const Modal: React.FC<ModalProps> = ({
           {/* Info box with fixed height and same width as image */}
           <div className="bg-white text-black p-6 w-full h-24 mt-0 flex flex-col justify-center">
             <p className="text-sm text-gray-400">{project.year}</p>
-            <h2 className="text-lg font-medium mt-1">{project.title}</h2>
+            <h2 className="md:text-md text-sm font-medium mt-1">
+              {project.title}
+            </h2>
           </div>
         </div>
       </div>

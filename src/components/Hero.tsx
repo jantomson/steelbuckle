@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Playfair_Display } from "next/font/google";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
+import { Noto_Serif } from "next/font/google";
 
-const playfair = Playfair_Display({
+const notoSerif = Noto_Serif({
   subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["600"],
+  style: ["italic"],
 });
 
 interface ColorSchemeEventDetail {
@@ -137,18 +138,20 @@ const Hero = () => {
         <div className="w-full px-4 md:px-8 lg:max-w-[100%] lg:mx-auto">
           <div className="relative mx-auto max-w-7xl md:grid md:grid-cols-2 gap-8">
             <div className="flex flex-col justify-start pt-16 pb-6 md:py-20 md:justify-center md:h-full z-10">
-              <h1 className="text-5xl md:text-7xl font-semibold mb-4 text-primary-text">
+              <h1 className="text-5xl lg:text-7xl font-semibold mb-4 text-primary-text">
                 {t("hero.title_start")}
                 <br />
                 {t("hero.title_span")}
                 <br />
-                <span className="italic text-primary-accent">
+                <span
+                  className={`italic text-primary-accent ${notoSerif.className}`}
+                >
                   {t("hero.title_end")}
                 </span>
                 <img
                   src={lineSvg}
                   alt="Underline"
-                  className="w-64 md:w-80 h-3 md:h-4 mt-1 -ml-2"
+                  className="w-64 md:w-80 h-3.5 md:h-4 mt-1"
                   key={`hero-line-${lineVariant}`}
                 />
               </h1>

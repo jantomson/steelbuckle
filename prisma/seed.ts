@@ -281,7 +281,7 @@ async function insertMediaData() {
     { key: "benefits.main_image", filename: "Avaleht_Renome_EST.jpg" },
     { key: "services_slider.slide1.image", filename: "foto_jooksev.jpg" },
     { key: "services_slider.slide2.image", filename: "Remont_2.jpg" },
-    { key: "services_slider.slide3.image", filename: "Kazlu_Rida_2.jpg" },
+    { key: "services_slider.slide3.image", filename: "Kazlu_Ruda_2.jpg" },
     { key: "services_slider.slide4.image", filename: "Skriveri_1.jpg" },
     { key: "hero.youtube_embed", filename: "logo.svg" }, // This is just a placeholder
 
@@ -428,12 +428,12 @@ async function seedSeoMetadata() {
           et: {
             title: "Ettevõttest | Steel Buckle",
             metaDescription:
-              "Tutvu Steel Buckle'iga - usaldusväärne raudtee-ehitusettevõte enam kui 35-aastase kogemusega Eestis, Lätis ja Leedus. Spetsialiseerunud kvaliteetsetele raudteeteenustele, hooldusele ja infrastruktuuri arendamisele alates 1989. aastast.",
+              "Tutvu Steel Buckle'iga - usaldusväärne raudtee-ehitusettevõte enam kui 35-aastat kogemust Eestis, Lätis ja Leedus. Spetsialiseerunud kvaliteetsetele raudteeteenustele, hooldusele ja infrastruktuuri arendamisele alates 1989. aastast.",
             keywords:
               "Steel Buckle'ist, raudtee-ehitusettevõte, raudtee hooldusettevõte, Eesti, Läti, Leedu",
             ogTitle: "Ettevõttest | Steel Buckle",
             ogDescription:
-              "Steel Buckle on pakkunud raudtee-ehitus ja hooldusteenuseid üle Baltikumi rohkem kui kolm aastakümmet.",
+              "Steel Buckle on pakkunud raudtee-ehitus ja hooldusteenuseid üle Baltikumi rohkem kui kolmkümmend aastat.",
           },
           lv: {
             title: "Par uzņēmumu | Steel Buckle",
@@ -1057,6 +1057,51 @@ async function seedProjects() {
   }
 }
 
+// Add this function to your seed.ts file
+
+// async function seedSiteSettings() {
+//   console.log("Seeding site settings...");
+
+//   try {
+//     // Define default site settings
+//     const settings = [
+//       {
+//         key: "site.colorScheme",
+//         value: JSON.stringify({
+//           schemeId: "default",
+//           logoVariant: "dark",
+//           lineVariant: "dark",
+//           colors: {
+//             background: "#fde047",
+//             text: "#000000",
+//             accent: "#6b7280",
+//             border: "#000000",
+//             line: "#000000",
+//           },
+//         }),
+//         description: "Global color scheme for the entire site",
+//       },
+//       // Add other global settings here if needed
+//     ];
+
+//     for (const setting of settings) {
+//       await prisma.siteSettings.upsert({
+//         where: { key: setting.key },
+//         update: { value: setting.value },
+//         create: {
+//           key: setting.key,
+//           value: setting.value,
+//           description: setting.description,
+//         },
+//       });
+//     }
+
+//     console.log("Site settings seeded successfully");
+//   } catch (error) {
+//     console.error("Error seeding site settings:", error);
+//   }
+// }
+
 // Main function
 async function main() {
   try {
@@ -1110,6 +1155,7 @@ async function main() {
     // Seed SEO metadata
     await seedSeoMetadata();
 
+    //await seedSiteSettings();
     console.log("Database seeding completed!");
   } catch (error) {
     console.error("Error during seeding:", error);

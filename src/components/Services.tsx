@@ -39,7 +39,7 @@ const Services = () => {
         </h2>
 
         {/* Mobile View */}
-        <div className="grid grid-cols-2 gap-8 lg:hidden pb-10">
+        <div className="grid grid-cols-2 gap-8 lg:hidden">
           {services.map((service) => (
             <div
               key={service.id}

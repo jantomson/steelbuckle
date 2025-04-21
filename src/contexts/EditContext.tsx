@@ -17,7 +17,9 @@ import {
   extractPublicIdFromUrl,
   getOptimizedImageUrl,
 } from "@/lib/cloudinaryUrl";
-
+import { FieldEditorPanel } from "@/components/admin/FieldEditorPanel";
+import { MediaPickerPanel } from "@/components/admin/MediaPickerpanel";
+import { invalidateTranslationsCache } from "@/hooks/useTranslation";
 // Define the TranslationField type to match what's used in page.tsx
 interface TranslationField {
   path: string;
@@ -61,497 +63,14 @@ interface EditProviderProps {
   children: ReactNode;
   pageId: string;
   isAdminMode?: boolean;
+  originalLanguage?: string; // Add this parameter to track the source language
 }
-
-// Define the FieldEditorPanel component OUTSIDE the provider
-const FieldEditorPanel = React.memo(
-  ({
-    isOpen,
-    activeField,
-    content,
-    position,
-    isDragging,
-    onDragStart,
-    onSave,
-    onCancel,
-  }: {
-    isOpen: boolean;
-    activeField: string | null;
-    content: string;
-    position: { top: number; left: number };
-    isDragging: boolean;
-    onDragStart: (e: React.MouseEvent) => void;
-    onSave: (content: string) => void;
-    onCancel: () => void;
-  }) => {
-    // Don't render anything if not open or no activeField
-    if (!activeField || !isOpen) return null;
-
-    // Self-contained local state for the editor content
-    const [localEditContent, setLocalEditContent] = useState(content);
-
-    // Update local content when the parent content changes (on initial open)
-    useEffect(() => {
-      setLocalEditContent(content);
-    }, [content]);
-
-    // Use ref to access the textarea DOM element
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    // Track cursor position
-    const [selection, setSelection] = useState<{ start: number; end: number }>({
-      start: 0,
-      end: 0,
-    });
-
-    // Handle text changes while preserving cursor position
-    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newValue = e.target.value;
-      const newStart = e.target.selectionStart;
-      const newEnd = e.target.selectionEnd;
-
-      setLocalEditContent(newValue);
-      setSelection({ start: newStart || 0, end: newEnd || 0 });
-    };
-
-    // Restore cursor position after each render
-    useEffect(() => {
-      if (textareaRef.current) {
-        textareaRef.current.setSelectionRange(selection.start, selection.end);
-      }
-    }, [localEditContent, selection]);
-
-    // Handle save action using the local content
-    const handleSave = () => {
-      onSave(localEditContent);
-    };
-
-    const key = activeField.split(".").pop() || "";
-
-    return (
-      <div
-        className={`fixed z-50 w-full max-w-xl bg-white rounded-lg shadow-xl border border-gray-200 ${
-          isDragging ? "opacity-90" : ""
-        }`}
-        style={{
-          top: position.top + "px",
-          left: position.left + "px",
-          transform: "translateX(-50%)",
-          maxHeight: "80vh",
-          overflowY: "auto",
-          cursor: isDragging ? "grabbing" : "default",
-        }}
-      >
-        <div
-          className="flex justify-between items-center bg-green-800 text-white p-3 rounded-t-lg cursor-move"
-          onMouseDown={onDragStart}
-        >
-          <h3 className="text-base font-medium truncate max-w-xs flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2 opacity-70"
-            >
-              <circle cx="9" cy="5" r="1" />
-              <circle cx="9" cy="12" r="1" />
-              <circle cx="9" cy="19" r="1" />
-              <circle cx="15" cy="5" r="1" />
-              <circle cx="15" cy="12" r="1" />
-              <circle cx="15" cy="19" r="1" />
-            </svg>
-            Muudan: <span className="font-normal opacity-75 ml-1">{key}</span>
-          </h3>
-        </div>
-
-        <div className="p-4">
-          <textarea
-            ref={textareaRef}
-            value={localEditContent}
-            onChange={handleTextChange}
-            className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-800 focus:border-blue-900"
-            rows={Math.max(5, localEditContent.split("\n").length)}
-            autoFocus
-          />
-
-          <div className="mt-6 flex justify-end space-x-4 sticky bottom-0 pb-2 pt-2 bg-white">
-            <button
-              onClick={onCancel}
-              className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium"
-            >
-              Tühista
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-6 py-3 bg-green-800 text-white rounded-md hover:bg-green-700 font-medium shadow-sm"
-            >
-              Salvesta
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
-
-// MediaGrid component extracted for better rendering control
-const MediaGrid = React.memo(
-  ({
-    mediaLibrary,
-    mediaKey,
-    onUpdate,
-    isLoading,
-  }: {
-    mediaLibrary: string[];
-    mediaKey: { key: string; url: string; title?: string };
-    onUpdate: (key: string, url: string) => void;
-    isLoading: boolean;
-  }) => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-40 w-full">
-          <p className="text-gray-500">Laen...</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {mediaLibrary.map((url, index) => {
-          // Remove any cache busting parameters for comparison
-          const cleanUrl = url.split("?")[0];
-          const cleanCurrentUrl = mediaKey.url.split("?")[0];
-
-          // For display, use optimized version of Cloudinary URLs
-          const displayUrl = isCloudinaryUrl(url)
-            ? getOptimizedImageUrl(url, 200) // Smaller size for the grid view
-            : url;
-
-          // For Cloudinary URLs, extract a readable name to display
-          const displayName = isCloudinaryUrl(url)
-            ? extractPublicIdFromUrl(url)?.split("/").pop() ||
-              url.split("/").pop()
-            : url.split("/").pop();
-
-          return (
-            <div
-              key={index}
-              onClick={() => onUpdate(mediaKey.key, cleanUrl)}
-              className={`cursor-pointer border rounded-lg overflow-hidden 
-              hover:border-blue-500 transition-all
-              ${cleanCurrentUrl === cleanUrl ? "ring-2 ring-blue-500" : ""}
-            `}
-            >
-              <div className="relative h-40 w-full bg-gray-100 flex items-center justify-center">
-                <img
-                  src={displayUrl}
-                  alt={`Meedia valik ${index + 1}`}
-                  className="max-h-32 max-w-full object-contain"
-                  onError={(e) => {
-                    if (
-                      !(e.target as HTMLImageElement).src.includes(
-                        "placeholder"
-                      )
-                    ) {
-                      (e.target as HTMLImageElement).src = "/placeholder.png";
-                      (e.target as HTMLImageElement).alt = "Pilt pole saadaval";
-                    }
-                  }}
-                />
-              </div>
-              <div className="p-2 text-xs text-gray-500 truncate">
-                {displayName}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-);
-
-// Fixed MediaPickerPanel component
-const MediaPickerPanel = React.memo(
-  ({
-    isOpen,
-    mediaKey,
-    mediaLibrary,
-    onClose,
-    onUpdate,
-  }: {
-    isOpen: boolean;
-    mediaKey: { key: string; url: string; title?: string } | null;
-    mediaLibrary: string[];
-    onClose: () => void;
-    onUpdate: (key: string, url: string) => void;
-  }) => {
-    // Don't render anything if not open or no mediaKey
-    if (!mediaKey || !isOpen) return null;
-
-    // State for upload progress
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [uploadError, setUploadError] = useState<string | null>(null);
-    const [isLoadingLibrary, setIsLoadingLibrary] = useState(
-      mediaLibrary.length === 0
-    );
-
-    // Special handling for YouTube embed link
-    const isYoutubeEmbed = mediaKey.key === "hero.youtube_embed";
-    const [youtubeUrl, setYoutubeUrl] = useState(mediaKey.url);
-
-    // Format the display title - removing anything after a dash
-    const displayTitle = mediaKey.title
-      ? mediaKey.title.split("-")[0].trim()
-      : "";
-
-    // Function to save YouTube URL
-    const saveYoutubeUrl = () => {
-      onUpdate(mediaKey.key, youtubeUrl);
-    };
-
-    // Function to handle file upload
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      // Reset states
-      setIsUploading(true);
-      setUploadProgress(0);
-      setUploadError(null);
-
-      // Create form data
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        // Simulate upload progress
-        const progressInterval = setInterval(() => {
-          setUploadProgress((prev) => {
-            if (prev >= 90) {
-              clearInterval(progressInterval);
-              return 90;
-            }
-            return prev + 10;
-          });
-        }, 300);
-
-        // Send the file to the server
-        const response = await fetch("/api/media/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        clearInterval(progressInterval);
-
-        // Check if the response is OK
-        if (!response.ok) {
-          let errorMessage = "Üleslaadimine ebaõnnestus";
-
-          try {
-            // Try to get JSON error
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorMessage;
-          } catch (jsonError) {
-            // If not JSON, get text error
-            const errorText = await response.text();
-            console.error("Non-JSON error response:", errorText);
-            errorMessage = "Serveri viga. Proovi hiljem uuesti.";
-          }
-
-          throw new Error(errorMessage);
-        }
-
-        setUploadProgress(100);
-
-        // Parse the response as JSON
-        const data = await response.json();
-
-        // Update the media with the new URL
-        onUpdate(mediaKey.key, data.url);
-
-        // Success - let progress bar show 100% briefly before closing
-        setTimeout(() => {
-          setIsUploading(false);
-          setUploadProgress(0);
-        }, 1000);
-      } catch (error) {
-        console.error("Faili üleslaadimine ebaõnnestus:", error);
-        setUploadError(
-          error instanceof Error ? error.message : "Üleslaadimine ebaõnnestus"
-        );
-        setIsUploading(false);
-      }
-    };
-
-    // Effect to update loading state when media library changes
-    useEffect(() => {
-      if (mediaLibrary.length > 0) {
-        setIsLoadingLibrary(false);
-      }
-    }, [mediaLibrary]);
-
-    return (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-      >
-        <div className="bg-white rounded-lg m-4 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
-          <div className="flex justify-between items-center bg-green-800 text-white p-4 rounded-t-lg">
-            <h3 className="text-xl font-medium">
-              {isYoutubeEmbed ? "Muuda YouTube URLi" : "Vali meedia"}
-            </h3>
-            <button onClick={onClose} className="text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div className="p-6">
-            {isYoutubeEmbed ? (
-              // YouTube URL editor
-              <div>
-                <div className="mb-4">
-                  <label
-                    htmlFor="youtubeUrl"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    YouTube manustatud URL
-                  </label>
-                  <input
-                    type="text"
-                    id="youtubeUrl"
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    value={youtubeUrl}
-                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                    placeholder="https://www.youtube.com/embed/VIDEO_ID"
-                  />
-                </div>
-                <p className="text-sm text-gray-500 mb-4">
-                  Sisesta manustatud URL vormingus:
-                  https://www.youtube.com/embed/VIDEO_ID
-                </p>
-                <div className="flex justify-end">
-                  <button
-                    onClick={saveYoutubeUrl}
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                  >
-                    Salvesta URL
-                  </button>
-                </div>
-              </div>
-            ) : (
-              // Standard media picker with upload option
-              <div>
-                {/* File upload section */}
-                <div className="mb-6 border-b pb-6">
-                  <div className="flex flex-col">
-                    <div className="mb-4 border border-gray-200 p-4 rounded">
-                      <label
-                        htmlFor="media-upload"
-                        className="flex items-center cursor-pointer"
-                      >
-                        <div className="mr-3 flex items-center justify-center w-8 h-8">
-                          <svg
-                            width="30"
-                            height="30"
-                            viewBox="0 0 30 30"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M15 3V27"
-                              stroke="#009933"
-                              strokeWidth="4"
-                              strokeLinecap="round"
-                            />
-                            <path
-                              d="M3 15H27"
-                              stroke="#009933"
-                              strokeWidth="4"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-gray-700 text-sm">
-                          Laadi üles uus meedia
-                        </span>
-                        <input
-                          type="file"
-                          id="media-upload"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={handleFileUpload}
-                          disabled={isUploading}
-                        />
-                      </label>
-                    </div>
-
-                    {/* Upload progress indicator */}
-                    {isUploading && (
-                      <div className="w-full">
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-green-500 transition-all duration-300"
-                            style={{ width: `${uploadProgress}%` }}
-                          ></div>
-                        </div>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {uploadProgress < 100
-                            ? `Üleslaadimine: ${uploadProgress}%`
-                            : "Üleslaadimine õnnestus!"}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Upload error message */}
-                    {uploadError && (
-                      <p className="text-sm text-red-500 mt-1">{uploadError}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Media library grid with loading state */}
-                <h4 className="font-medium text-gray-700 mb-3">
-                  Olemasolev meedia
-                </h4>
-                <MediaGrid
-                  mediaLibrary={mediaLibrary}
-                  mediaKey={mediaKey}
-                  onUpdate={onUpdate}
-                  isLoading={isLoadingLibrary}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
 
 export const EditProvider = ({
   children,
   pageId,
   isAdminMode = false,
+  originalLanguage,
 }: EditProviderProps) => {
   const { t, currentLang } = useTranslation();
   const [editableFields, setEditableFields] = useState<TranslationField[]>([]);
@@ -580,6 +99,31 @@ export const EditProvider = ({
   const [editorPosition, setEditorPosition] = useState({ top: 0, left: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  // IMPORTANT: Lock the editing language to prevent automatic reset
+  const initialLanguageRef = useRef<string | null>(null);
+  const [editingLanguage, setEditingLanguage] = useState<string>("et");
+  const isMounted = useRef(true);
+
+  // Initialize language only once
+  useEffect(() => {
+    if (initialLanguageRef.current === null) {
+      const language =
+        originalLanguage ||
+        sessionStorage.getItem("adminEditingLanguage") ||
+        sessionStorage.getItem("editingLanguage") ||
+        currentLang;
+
+      initialLanguageRef.current = language;
+      setEditingLanguage(language);
+
+      console.log(`EditContext initialized with locked language: ${language}`);
+
+      // Set this in session storage to ensure consistency
+      sessionStorage.setItem("adminEditingLanguage", language);
+      sessionStorage.setItem("editingLanguage", language);
+    }
+  }, [originalLanguage, currentLang]);
 
   // Fetch media configuration from the database when component mounts
   useEffect(() => {
@@ -610,10 +154,14 @@ export const EditProvider = ({
   useEffect(() => {
     if (!isAdminMode) return;
 
-    // Load edited content
+    // Use editingLanguage, not currentLang for consistent editing
+    const editLang = initialLanguageRef.current || editingLanguage;
+
+    // Load edited content for the specific language
     const savedContent = localStorage.getItem(
-      `edited_content_${pageId}_${currentLang}`
+      `edited_content_${pageId}_${editLang}`
     );
+
     if (savedContent) {
       try {
         setEditedContent(JSON.parse(savedContent));
@@ -631,7 +179,7 @@ export const EditProvider = ({
         console.error("Failed to parse saved media:", e);
       }
     }
-  }, [pageId, currentLang, isAdminMode]);
+  }, [pageId, isAdminMode, editingLanguage]);
 
   // Lazy load media only when media picker is opened
   useEffect(() => {
@@ -748,6 +296,31 @@ export const EditProvider = ({
     [isAdminMode]
   );
 
+  const loadEditedContent = useCallback(
+    (language: string) => {
+      // Load edited content for the specific language
+      const savedContent = localStorage.getItem(
+        `edited_content_${pageId}_${language}`
+      );
+
+      if (savedContent) {
+        try {
+          setEditedContent(JSON.parse(savedContent));
+          console.log(`Loaded edited content for language: ${language}`);
+        } catch (e) {
+          console.error("Failed to parse saved content:", e);
+        }
+      } else {
+        // Clear current edited content if none exists for the new language
+        setEditedContent({});
+        console.log(
+          `No saved content found for language: ${language}, cleared current edits`
+        );
+      }
+    },
+    [pageId]
+  );
+
   // Function to open media picker
   const openMediaPicker = useCallback(
     (mediaKey: string, currentUrl: string, title?: string) => {
@@ -782,9 +355,12 @@ export const EditProvider = ({
           [path]: content,
         };
 
+        // Use the locked editingLanguage for saving, not currentLang
+        const saveLanguage = initialLanguageRef.current || editingLanguage;
+
         // Save to localStorage for persistence
         localStorage.setItem(
-          `edited_content_${pageId}_${currentLang}`,
+          `edited_content_${pageId}_${saveLanguage}`,
           JSON.stringify(updated)
         );
 
@@ -801,7 +377,7 @@ export const EditProvider = ({
         });
       });
     },
-    [pageId, currentLang]
+    [pageId, editingLanguage]
   );
 
   // Function to update media in state
@@ -809,25 +385,27 @@ export const EditProvider = ({
     (key: string, url: string) => {
       console.log(`EditContext: Updating media ${key} to ${url}`);
 
+      // 1. Clean the URL by removing any existing query parameters
+      const cleanUrl = url.split("?")[0];
+
+      // 2. Store both versions - one for immediate UI update and one for API
       // Add timestamp to URL for cache busting in UI display
-      // But store the clean URL (without timestamp) for persistence
-      const cleanUrl = url.split("?")[0]; // Remove any existing query parameters
       const urlWithTimestamp = `${cleanUrl}?_t=${Date.now()}`;
 
-      // First update UI immediately with the new URL (with timestamp)
+      // 3. First update UI immediately with the new URL (with timestamp)
       setMediaConfig((prev) => ({
         ...prev,
         [key]: urlWithTimestamp,
       }));
 
-      // Then update the edited media state for persistence with CLEAN URL
+      // 4. Update the edited media state with the CLEAN URL
       setEditedMedia((prev) => {
         const updated = {
           ...prev,
           [key]: cleanUrl, // Store clean URL without timestamp for API
         };
 
-        // Save to localStorage for persistence
+        // 5. Save to localStorage for persistence
         try {
           localStorage.setItem(
             `edited_media_${pageId}`,
@@ -840,7 +418,7 @@ export const EditProvider = ({
         return updated;
       });
 
-      // Update mediaTimestamp in localStorage to trigger updates in other components
+      // 6. Update mediaTimestamp in localStorage to trigger updates in other components
       const mediaTimestamp = Date.now();
       try {
         localStorage.setItem("mediaTimestamp", mediaTimestamp.toString());
@@ -848,7 +426,7 @@ export const EditProvider = ({
         console.error("Failed to update mediaTimestamp in localStorage:", e);
       }
 
-      // Broadcast the change with specific details about what changed
+      // 7. Broadcast the change with specific details
       try {
         // Create and dispatch custom event with the updated media info
         const event = new CustomEvent("media-cache-updated", {
@@ -862,7 +440,7 @@ export const EditProvider = ({
         console.log("Dispatching media-cache-updated event:", event.detail);
         window.dispatchEvent(event);
 
-        // Also call the global invalidation function to be thorough
+        // Also call the global invalidation function
         invalidateMediaCache();
       } catch (e) {
         console.error("Error dispatching media update event:", e);
@@ -894,17 +472,31 @@ export const EditProvider = ({
   const saveChanges = useCallback(async (): Promise<boolean> => {
     let success = true;
 
+    // Use the locked editing language
+    const languageToSave = initialLanguageRef.current || editingLanguage;
+    console.log(
+      `SaveChanges: Using language "${languageToSave}" for translations`
+    );
+
     // Save content changes
     if (Object.keys(editedContent).length > 0) {
       try {
-        // Create an array of updates to send to the API
+        console.log(
+          `Saving ${
+            Object.keys(editedContent).length
+          } content changes for language: ${languageToSave}`
+        );
+
+        // Create an array of updates with the explicitly set language code
         const updates = Object.entries(editedContent).map(
           ([path, content]) => ({
             path,
             content,
-            languageCode: currentLang,
+            languageCode: languageToSave, // Use the editing language, not admin language
           })
         );
+
+        console.log("Updates payload:", updates);
 
         // Send updates to the API
         const response = await fetch("/api/translations/update", {
@@ -919,9 +511,12 @@ export const EditProvider = ({
           throw new Error("Failed to save translations to database");
         }
 
+        const result = await response.json();
+        console.log("Translation update result:", result);
+
         // Clear edited content after successful save
         setEditedContent({});
-        localStorage.removeItem(`edited_content_${pageId}_${currentLang}`);
+        localStorage.removeItem(`edited_content_${pageId}_${languageToSave}`);
       } catch (error) {
         console.error("Error saving content changes:", error);
         success = false;
@@ -933,11 +528,15 @@ export const EditProvider = ({
       try {
         console.log("Saving media changes:", editedMedia);
 
-        // Format updates for API - URLs in editedMedia should already be clean (no timestamps)
-        const mediaUpdates = Object.entries(editedMedia).map(([key, url]) => ({
-          referenceKey: key,
-          mediaPath: url, // URLs should already be clean in editedMedia
-        }));
+        // Format updates for API with clean URLs
+        const mediaUpdates = Object.entries(editedMedia).map(([key, url]) => {
+          // Ensure the URL is clean without query parameters
+          const cleanUrl = url.split("?")[0];
+          return {
+            referenceKey: key,
+            mediaPath: cleanUrl,
+          };
+        });
 
         console.log("Sending media updates to API:", mediaUpdates);
 
@@ -963,12 +562,13 @@ export const EditProvider = ({
         const result = await mediaResponse.json();
         console.log("Media update API response:", result);
 
-        // Update the media config with the clean URLs
+        // Update the media config with fresh URLs including timestamps
         setMediaConfig((prev) => {
           const updated = { ...prev };
           for (const [key, url] of Object.entries(editedMedia)) {
             // Add a timestamp to force new browsers to reload the image
-            updated[key] = `${url}?_t=${Date.now()}`;
+            const cleanUrl = url.split("?")[0];
+            updated[key] = `${cleanUrl}?_t=${Date.now()}`;
           }
           console.log("Updated mediaConfig:", updated);
           return updated;
@@ -990,8 +590,72 @@ export const EditProvider = ({
       }
     }
 
+    // After saving, make sure we preserve the language on refresh
+    try {
+      // Store the language in sessionStorage with multiple keys for redundancy
+      sessionStorage.setItem("adminEditingLanguage", languageToSave);
+      sessionStorage.setItem("editingLanguage", languageToSave);
+      localStorage.setItem("adminLastEditedLanguage", languageToSave);
+
+      // Add the language to URL to ensure it persists through reload
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set("lang", languageToSave);
+
+      // Use history.replaceState to update URL without navigation
+      window.history.replaceState({}, "", currentUrl.toString());
+    } catch (error) {
+      console.error("Error storing language for persistence:", error);
+    }
+
     return success;
-  }, [currentLang, editedContent, editedMedia, pageId]);
+  }, [editedContent, editedMedia, pageId, editingLanguage]);
+
+  useEffect(() => {
+    const handleAdminLanguageChange = (event: CustomEvent) => {
+      if (event.detail && event.detail.language && isMounted.current) {
+        console.log(
+          `EditContext received language change event: ${event.detail.language}`
+        );
+
+        // Update the editing language
+        setEditingLanguage(event.detail.language);
+        initialLanguageRef.current = event.detail.language;
+
+        // Reload content for the new language
+        loadEditedContent(event.detail.language);
+
+        // Force a reload of translation fields
+        invalidateTranslationsCache();
+
+        // Update URL to reflect the language change
+        try {
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set("lang", event.detail.language);
+          window.history.replaceState({}, "", currentUrl.toString());
+        } catch (e) {
+          console.error("Failed to update URL with new language:", e);
+        }
+      }
+    };
+
+    window.addEventListener(
+      "admin-language-changed",
+      handleAdminLanguageChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "admin-language-changed",
+        handleAdminLanguageChange as EventListener
+      );
+    };
+  }, [loadEditedContent]);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Memoize the context value
   const contextValue = useMemo(

@@ -31,7 +31,7 @@ export async function uploadToCloudinary(
   };base64,${base64}`;
 
   // Set default folder if not provided
-  const folder = options.folder || "steel-buckle";
+  const folder = options.folder || "media";
 
   try {
     // Upload to Cloudinary

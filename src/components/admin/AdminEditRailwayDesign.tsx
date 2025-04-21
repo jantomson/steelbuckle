@@ -22,6 +22,28 @@ const AdminEditRailwayDesign = () => {
     return <div>Error: Edit mode not available</div>;
   }
 
+  // Check if we're missing the language parameter in the URL - moved inside component
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      !window.location.search.includes("lang=")
+    ) {
+      // Get the language from storage
+      const storedLang =
+        sessionStorage.getItem("adminEditingLanguage") ||
+        sessionStorage.getItem("editingLanguage") ||
+        localStorage.getItem("adminLastEditedLanguage") ||
+        "et";
+
+      // Update the URL with the language
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", storedLang);
+      window.history.replaceState({}, "", url.toString());
+
+      console.log(`Added missing language parameter to URL: ${storedLang}`);
+    }
+  }, []);
+
   // Use empty defaults to avoid hardcoded fallbacks
   const { getImageUrl, loading, forceMediaRefresh, mediaConfig } = usePageMedia(
     "railway_design_page",

@@ -3,15 +3,16 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
-import { Playfair_Display } from "next/font/google";
 import Link from "next/link";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
 import { usePageMedia } from "@/hooks/usePageMedia";
+import { Noto_Serif } from "next/font/google";
 
-const playfair = Playfair_Display({
+const notoSerif = Noto_Serif({
   subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["600"],
+  style: ["italic"],
 });
 
 const CTA = () => {
@@ -84,7 +85,9 @@ const CTA = () => {
                   {t("cta.title_start")}
                   <br />
                   <div className="whitespace-nowrap mt-2 text-center mx-auto">
-                    <span className="text-gray-500 italic inline-block">
+                    <span
+                      className={`italic text-gray-400 inline-block ${notoSerif.className}`}
+                    >
                       {t("cta.title_span")}
                       <img
                         src="/line_dark.svg"
@@ -126,7 +129,7 @@ const CTA = () => {
           {/* Image Container - Improved rounding and size */}
           <div
             className="relative w-full rounded-[40px] overflow-hidden mx-auto mb-6"
-            style={{ height: "400px", maxWidth: "400px" }}
+            style={{ height: "450px", maxWidth: "300px" }}
           >
             {/* Base image */}
             {loading ? (
@@ -166,10 +169,12 @@ const CTA = () => {
 
           {/* Text Content - Better spacing */}
           <div className="w-full">
-            <h2 className="text-4xl sm:text-5xl font-medium text-black leading-tight mt-4 text-center">
+            <h2 className="text-4xl sm:text-4xl font-semibold text-black leading-tight mt-4 text-center">
               {t("cta.title_start")}
               <br />
-              <span className="italic text-gray-400 inline-block relative">
+              <span
+                className={`italic text-gray-400 inline-block ${notoSerif.className}`}
+              >
                 {t("cta.title_span")}
                 <img
                   src="/line_dark.svg"

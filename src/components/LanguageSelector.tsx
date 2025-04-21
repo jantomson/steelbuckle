@@ -42,10 +42,27 @@ export default function LanguageSelector({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const isAdminMode = isAdminRoute(pathname);
 
+  // Initialize the selected language on component mount
   useEffect(() => {
-    setSelectedLanguage(currentLang);
-  }, [currentLang]);
+    if (isAdminMode) {
+      // For admin mode, check session/local storage first
+      const adminLang =
+        sessionStorage.getItem("adminEditingLanguage") ||
+        sessionStorage.getItem("editingLanguage") ||
+        localStorage.getItem("adminLastEditedLanguage") ||
+        currentLang;
+
+      console.log(
+        `LanguageSelector admin mode: Setting display language to ${adminLang}`
+      );
+      setSelectedLanguage(adminLang);
+    } else {
+      // For normal mode, use the language context
+      setSelectedLanguage(currentLang);
+    }
+  }, [isAdminMode, currentLang]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -64,48 +81,92 @@ export default function LanguageSelector({
     };
   }, []);
 
+  // Listen for admin-language-changed events
+  useEffect(() => {
+    const handleAdminLanguageChange = (event: CustomEvent) => {
+      if (event.detail && event.detail.language) {
+        console.log(
+          `LanguageSelector received language change event: ${event.detail.language}`
+        );
+        setSelectedLanguage(event.detail.language);
+      }
+    };
+
+    window.addEventListener(
+      "admin-language-changed",
+      handleAdminLanguageChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "admin-language-changed",
+        handleAdminLanguageChange as EventListener
+      );
+    };
+  }, []);
+
   const handleLanguageSelect = (languageCode: string) => {
     if (!isLanguageLoaded || !pathname) return;
 
+    console.log(`LanguageSelector: Changing language to ${languageCode}`);
+
+    // Immediately update the UI display
     setSelectedLanguage(languageCode);
     setIsOpen(false);
-    setCurrentLang(languageCode);
 
-    // Check if we're in admin section - if so, only update language, don't navigate
-    if (isAdminRoute(pathname)) {
-      // Set cookie to persist language
+    // Check if we're in admin section
+    if (isAdminMode) {
+      console.log(`Admin mode: Changing editing language to ${languageCode}`);
+
+      // Update the language in all storage locations for consistency
       document.cookie = `language=${languageCode}; path=/; max-age=31536000; SameSite=Lax`;
+      localStorage.setItem("language", languageCode);
+      localStorage.setItem("adminLastEditedLanguage", languageCode);
+      sessionStorage.setItem("editingLanguage", languageCode);
+      sessionStorage.setItem("adminEditingLanguage", languageCode);
+      sessionStorage.setItem("lastSavedLanguage", languageCode);
 
-      // Optional: Show a notification that language was changed
-      const showNotification = () => {
-        const notification = document.createElement("div");
-        notification.textContent = `Language changed to ${languageCode.toUpperCase()} (content only)`;
-        notification.style.position = "fixed";
-        notification.style.bottom = "20px";
-        notification.style.right = "20px";
-        notification.style.padding = "10px";
-        notification.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-        notification.style.color = "white";
-        notification.style.borderRadius = "5px";
-        notification.style.zIndex = "9999";
-        notification.style.fontSize = "14px";
+      // Force the URL to include the selected language in query param
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set("lang", languageCode);
 
-        document.body.appendChild(notification);
+      // Use history.replaceState to update URL without a full page reload
+      window.history.replaceState({}, "", currentUrl.toString());
 
-        setTimeout(() => {
-          notification.style.opacity = "0";
-          notification.style.transition = "opacity 0.5s ease";
-          setTimeout(() => {
-            document.body.removeChild(notification);
-          }, 500);
-        }, 2000);
-      };
+      // IMPORTANT: Dispatch event to both notify other components and invalidate translation caches
+      try {
+        // Dispatch admin language change event
+        const languageEvent = new CustomEvent("admin-language-changed", {
+          detail: { language: languageCode },
+        });
+        window.dispatchEvent(languageEvent);
 
-      showNotification();
-      return; // Exit early - don't navigate!
+        // Dispatch a custom event to force reload translations
+        const reloadEvent = new CustomEvent("reload-translations", {
+          detail: { language: languageCode, timestamp: Date.now() },
+        });
+        window.dispatchEvent(reloadEvent);
+
+        console.log(
+          "Dispatched admin-language-changed and reload-translations events"
+        );
+
+        // Show a visual confirmation
+        showNotification(languageCode);
+
+        // OPTIONAL: Consider forcefully reloading the page if updates aren't reflected
+        // This is a fallback but would lose unsaved changes
+        // setTimeout(() => window.location.reload(), 500);
+      } catch (error) {
+        console.error("Failed to dispatch language change events:", error);
+      }
+
+      return; // Don't continue with the regular navigation
     }
 
-    // Regular site navigation logic below
+    // Regular site navigation - update context and navigate
+    setCurrentLang(languageCode);
+
     // Get current path without language prefix
     let pathWithoutLang = pathname;
 
@@ -165,7 +226,35 @@ export default function LanguageSelector({
     }
   };
 
-  const selectedLang = languages.find((lang) => lang.code === selectedLanguage);
+  // Function to show a visual notification
+  const showNotification = (languageCode: string) => {
+    const notification = document.createElement("div");
+    notification.textContent = `Language changed to ${languageCode.toUpperCase()} (content only)`;
+    notification.style.position = "fixed";
+    notification.style.bottom = "20px";
+    notification.style.right = "20px";
+    notification.style.padding = "10px";
+    notification.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+    notification.style.color = "white";
+    notification.style.borderRadius = "5px";
+    notification.style.zIndex = "9999";
+    notification.style.fontSize = "14px";
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.opacity = "0";
+      notification.style.transition = "opacity 0.5s ease";
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 500);
+    }, 2000);
+  };
+
+  // Get the currently selected language object with fallback
+  const selectedLang =
+    languages.find((lang) => lang.code === selectedLanguage) ||
+    languages.find((lang) => lang.code === "et"); // Fallback to Estonian
 
   // Filter out current language and sort alphabetically
   const otherLanguages = languages
@@ -203,7 +292,7 @@ export default function LanguageSelector({
               <button
                 key={language.code}
                 onClick={() => handleLanguageSelect(language.code)}
-                className="block w-full px-4 py-2 text-left hover:font-bold scale-105 focus:font-bold scale-105 focus:outline-none"
+                className="block w-full px-4 py-2 text-left hover:font-bold scale-105 focus:font-bold focus:outline-none"
                 role="menuitem"
               >
                 {language.name}

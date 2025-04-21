@@ -20,10 +20,10 @@ const AdminEditRailwayMaintenance = () => {
   const hasFetchedRef = useRef(false);
 
   // Define the exact DB keys - MATCHING the keys used in page.tsx
-  const MAINTENANCE_IMAGE_KEY =
-    "railway_maintenance_page.images.maintenance_image";
+  // Updated to match the frontend component keys
+  const MAINTENANCE_IMAGE_KEY = "railway_maintenance_page.images.first_image";
   const BRANCH_OWNERS_IMAGE_KEY =
-    "railway_maintenance_page.images.branch_owners_image";
+    "railway_maintenance_page.images.second_image";
 
   // Use the edit context
   const editContext = useEdit();
@@ -33,6 +33,28 @@ const AdminEditRailwayMaintenance = () => {
   if (!isEditMode) {
     return <div>Error: Edit mode not available</div>;
   }
+
+  // Check if we're missing the language parameter in the URL - moved inside component
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      !window.location.search.includes("lang=")
+    ) {
+      // Get the language from storage
+      const storedLang =
+        sessionStorage.getItem("adminEditingLanguage") ||
+        sessionStorage.getItem("editingLanguage") ||
+        localStorage.getItem("adminLastEditedLanguage") ||
+        "et";
+
+      // Update the URL with the language
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", storedLang);
+      window.history.replaceState({}, "", url.toString());
+
+      console.log(`Added missing language parameter to URL: ${storedLang}`);
+    }
+  }, []);
 
   // Use empty defaults to avoid hardcoded fallbacks
   const { getImageUrl, loading, forceMediaRefresh, mediaConfig } = usePageMedia(

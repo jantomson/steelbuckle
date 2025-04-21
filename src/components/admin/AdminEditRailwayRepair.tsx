@@ -28,6 +28,28 @@ const AdminEditRailwayRepair = () => {
     return <div>Error: Edit mode not available</div>;
   }
 
+  // Check if we're missing the language parameter in the URL - moved inside component
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      !window.location.search.includes("lang=")
+    ) {
+      // Get the language from storage
+      const storedLang =
+        sessionStorage.getItem("adminEditingLanguage") ||
+        sessionStorage.getItem("editingLanguage") ||
+        localStorage.getItem("adminLastEditedLanguage") ||
+        "et";
+
+      // Update the URL with the language
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", storedLang);
+      window.history.replaceState({}, "", url.toString());
+
+      console.log(`Added missing language parameter to URL: ${storedLang}`);
+    }
+  }, []);
+
   // Use empty defaults to avoid hardcoded fallbacks
   const { getImageUrl, loading, forceMediaRefresh, mediaConfig } = usePageMedia(
     "repair_renovation_page",
@@ -372,9 +394,7 @@ const AdminEditRailwayRepair = () => {
                   />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                    <div className="animate-pulse text-gray-400">
-                      Loading image...
-                    </div>
+                    <div className="animate-pulse text-gray-400">Laen...</div>
                   </div>
                 )}
                 <div className="absolute top-0 left-0 rotate-0 h-160 flex items-center">

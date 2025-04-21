@@ -133,10 +133,64 @@ const AboutSection = () => {
       return hookUrl;
     }
 
-    // Priority 4: Fallback to a default image
-    console.log("Using fallback URL");
-    return "/Shkirotava_(14).jpg";
+    // Priority 4: Fallback to a default image from Cloudinary if available
+    const fallbackUrl =
+      "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Shkirotava_(14).jpg";
+    console.log("Using fallback URL:", fallbackUrl);
+    return fallbackUrl;
   };
+
+  // Improved image component in render section:
+
+  <div className="relative h-[400px] overflow-hidden mb-10">
+    {!loading ? (
+      <Image
+        src={getMainImageUrl() + `?_t=${imageKey}`} // Add cache-busting
+        alt="Railway tracks"
+        fill
+        className="object-cover"
+        unoptimized={isEditMode} // Only disable optimization in edit mode
+        key={imageKey} // Force re-render when key changes
+        priority={true} // Load the image with priority
+        onError={(e) => {
+          // Fallback if image fails to load
+          console.error("Image failed to load, using fallback");
+          // @ts-ignore - TypeScript doesn't know about currentTarget.src
+          e.currentTarget.src =
+            "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Shkirotava_(14).jpg";
+        }}
+      />
+    ) : (
+      <div className="h-full w-full flex items-center justify-center bg-gray-100">
+        <div className="animate-pulse text-gray-400">Laen...</div>
+      </div>
+    )}
+
+    {/* Edit button only shows in edit mode */}
+    {isEditMode && (
+      <button
+        className="absolute bottom-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 z-10"
+        onClick={() => {
+          const url = getMainImageUrl();
+          console.log("Opening media picker with URL:", url);
+          editContext.openMediaPicker(
+            MAIN_IMAGE_KEY,
+            url,
+            "About Section Image"
+          );
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
+      </button>
+    )}
+  </div>;
 
   // Helper to create editable elements
   const EditableText = ({

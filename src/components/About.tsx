@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -10,6 +10,10 @@ import { SupportedLanguage } from "@/config/routeTranslations";
 
 const AboutSection = () => {
   const { t, currentLang } = useTranslation();
+  const [imageKey, setImageKey] = useState(Date.now().toString());
+
+  // Important: Use the exact same key that the AdminAbout component uses
+  const MAIN_IMAGE_KEY = "about.main_image";
 
   // Define the Cloudinary URL directly as the default - this is essential
   const cloudinaryUrl =
@@ -17,30 +21,51 @@ const AboutSection = () => {
 
   // Create a detailed mediaConfig object with all possible key formats
   const defaultConfig = {
+    [MAIN_IMAGE_KEY]: cloudinaryUrl,
     main_image: cloudinaryUrl,
-    "about.main_image": cloudinaryUrl,
     "about.images.main_image": cloudinaryUrl,
   };
 
   // Use the hook with the updated default config
-  const { getImageUrl, loading, mediaConfig } = usePageMedia(
+  const { getImageUrl, loading, mediaConfig, forceMediaRefresh } = usePageMedia(
     "about",
     defaultConfig
   );
 
-  // // Debug info in development
-  // useEffect(() => {
-  //   if (process.env.NODE_ENV === "development") {
-  //     console.log("About mediaConfig:", mediaConfig);
-  //     console.log("Keys in mediaConfig:", Object.keys(mediaConfig));
-  //     console.log("main_image URL:", getImageUrl("main_image"));
-  //     console.log("about.main_image URL:", getImageUrl("about.main_image"));
-  //     console.log(
-  //       "about.images.main_image URL:",
-  //       getImageUrl("about.images.main_image")
-  //     );
-  //   }
-  // }, [mediaConfig, getImageUrl]);
+  // Force refresh when component mounts and listen for media updates
+  useEffect(() => {
+    // Force a refresh of the media data
+    forceMediaRefresh();
+
+    // Listen for media cache updates (e.g., when admin makes changes)
+    const handleMediaUpdate = () => {
+      console.log("About: Media update detected, refreshing...");
+      forceMediaRefresh();
+      setImageKey(Date.now().toString()); // Force Image component to re-render
+    };
+
+    // Set up the event listener
+    window.addEventListener("media-cache-updated", handleMediaUpdate);
+
+    return () => {
+      window.removeEventListener("media-cache-updated", handleMediaUpdate);
+    };
+  }, [forceMediaRefresh]);
+
+  // Get the main image URL with proper fallback chain
+  const getMainImageUrl = () => {
+    // Try the exact key used in admin component first
+    const mainImage = getImageUrl(MAIN_IMAGE_KEY);
+    if (mainImage) return mainImage;
+
+    // Fall back to other possible keys
+    const alternativeUrl =
+      getImageUrl("main_image") || getImageUrl("about.images.main_image");
+    if (alternativeUrl) return alternativeUrl;
+
+    // Final fallback to default URL
+    return cloudinaryUrl;
+  };
 
   return (
     <section className="py-16 bg-white">
@@ -62,7 +87,7 @@ const AboutSection = () => {
                   "about",
                   currentLang as SupportedLanguage
                 )}
-                className="inline-flex items-center text-sm text-gray-500 group duration-300 hover:gray-600"
+                className="inline-flex items-center text-md text-gray-500 group duration-300 hover:gray-600"
               >
                 {t("about.read_more")}
                 <div className="rounded-full border border-gray-300 w-6 h-6 ml-2 flex items-center justify-center">
@@ -87,24 +112,26 @@ const AboutSection = () => {
           <div className="space-y-4">
             <div className="relative">
               <div className="grid grid-cols-1 gap-2">
-                <div className="relative h-[400px] overflow-hidden mb-10">
+                <div className="relative h-[400px] overflow-hidden mb-6">
                   {loading ? (
                     <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                      <p className="text-gray-500">Loading image...</p>
+                      <p className="text-gray-500">Laen...</p>
                     </div>
                   ) : (
                     <Image
-                      // Try all possible key formats, falling back to the direct Cloudinary URL if needed
-                      src={
-                        getImageUrl("main_image") ||
-                        getImageUrl("about.main_image") ||
-                        getImageUrl("about.images.main_image") ||
-                        cloudinaryUrl
-                      }
+                      src={`${getMainImageUrl()}?_t=${imageKey}`} // Add cache busting
                       alt="Railway tracks"
                       fill
                       className="object-cover"
                       unoptimized={true}
+                      key={imageKey} // Force re-render when key changes
+                      priority={true} // Load with priority
+                      onError={(e) => {
+                        // Fallback if image fails to load
+                        console.error("Image failed to load, using fallback");
+                        // @ts-ignore - TypeScript doesn't know about currentTarget.src
+                        e.currentTarget.src = cloudinaryUrl;
+                      }}
                     />
                   )}
                 </div>
@@ -120,7 +147,7 @@ const AboutSection = () => {
               </div>
             </div>
 
-            <p className="text-normal text-gray-500 pt-2 max-w-md ml-auto">
+            <p className="text-normal text-gray-500 pt-2 max-w-md">
               {t("about.text_2")}
             </p>
           </div>

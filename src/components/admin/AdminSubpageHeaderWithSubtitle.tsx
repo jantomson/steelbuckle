@@ -47,14 +47,13 @@ const AdminSubpageHeaderWithSubtitle: React.FC<
       </span>
     );
   };
-
   return (
     <div className="bg-primary-background py-10 sm:py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
-        <h1 className="text-2xl sm:text-3xl font-medium text-primary-text pb-8 sm:pb-8 md:pb-8">
+        <h1 className="text-md text-primary-accent mb-10">
           <EditableText path={titlePath} />
         </h1>
-        <p className="text-md text-primary-accent mb-10">
+        <p className="text-2xl sm:text-3xl font-medium text-primary-text pb-8 sm:pb-8 md:pb-8">
           <EditableText path={subtitlePath} />
         </p>
       </div>

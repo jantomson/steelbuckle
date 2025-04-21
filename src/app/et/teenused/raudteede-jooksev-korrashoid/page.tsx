@@ -11,37 +11,16 @@ import SEOMetadata from "@/components/SEOMetadata";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
 
-// Helper to add cache busting to image URLs
-function addCacheBuster(url: string): string {
-  // Skip cache busting for Cloudinary URLs as they already have version control
-  if (url.includes("cloudinary.com")) {
-    return url;
-  }
-  // Skip if already has cache busting
-  if (url.includes("?_t=")) {
-    return url;
-  }
-  // Add timestamp to prevent caching
-  return `${url}?_t=${Date.now()}`;
-}
-
 const RailwayMaintenancePage = () => {
   const { t, currentLang } = useTranslation();
   const [imageKey, setImageKey] = useState(Date.now().toString());
-  const lastRefreshRef = useRef(Date.now());
 
-  // Direct API call to fetch the latest images from the database
-  const [directImageUrls, setDirectImageUrls] = useState({
-    maintenanceImage: "",
-    branchOwnersImage: "",
-  });
-
-  // Define the exact DB keys
+  // Define the page prefix and exact image keys
   const PAGE_PREFIX = "railway_maintenance_page";
-  const MAINTENANCE_IMAGE_KEY = `${PAGE_PREFIX}.images.maintenance_image`;
-  const BRANCH_OWNERS_IMAGE_KEY = `${PAGE_PREFIX}.images.branch_owners_image`;
+  const MAINTENANCE_IMAGE_KEY = `${PAGE_PREFIX}.images.first_image`;
+  const BRANCH_OWNERS_IMAGE_KEY = `${PAGE_PREFIX}.images.second_image`;
 
-  // Set up default Cloudinary URLs that will be used as fallbacks - similar to About.tsx and Benefits.tsx
+  // Set up default Cloudinary URLs
   const defaultImages = {
     [MAINTENANCE_IMAGE_KEY]:
       "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/foto_jooksev.jpg",
@@ -55,107 +34,27 @@ const RailwayMaintenancePage = () => {
     defaultImages
   );
 
-  // Function to directly fetch images from the API
-  const fetchImagesDirectly = async () => {
-    try {
-      // Build query string with the exact DB keys
-      const keys = [MAINTENANCE_IMAGE_KEY, BRANCH_OWNERS_IMAGE_KEY].join(",");
-
-      const response = await fetch(
-        `/api/media?keys=${encodeURIComponent(keys)}&_t=${Date.now()}`
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // Update direct image URLs
-        setDirectImageUrls({
-          maintenanceImage:
-            data[MAINTENANCE_IMAGE_KEY] || defaultImages[MAINTENANCE_IMAGE_KEY],
-          branchOwnersImage:
-            data[BRANCH_OWNERS_IMAGE_KEY] ||
-            defaultImages[BRANCH_OWNERS_IMAGE_KEY],
-        });
-
-        console.log("Directly fetched image URLs:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching images directly:", error);
-    }
-  };
-
-  // Initial fetch and setup listeners
+  // Force refresh when component mounts and listen for media updates
   useEffect(() => {
-    // Fetch images directly on initial load
-    fetchImagesDirectly();
-
-    // Refresh cache and force media update
-    invalidateMediaCache();
+    // Force a refresh of the media data
     forceMediaRefresh();
 
+    // Listen for media cache updates (e.g., when admin makes changes)
     const handleMediaUpdate = () => {
-      console.log("RailwayMaintenancePage: Media update detected");
-      // Only refresh if it's been more than 1 second since last refresh
-      if (Date.now() - lastRefreshRef.current > 1000) {
-        lastRefreshRef.current = Date.now();
-
-        // Fetch images directly
-        fetchImagesDirectly();
-
-        // Force a refresh of the usePageMedia hook
-        forceMediaRefresh();
-
-        // Update key to force re-render of images
-        setImageKey(Date.now().toString());
-      }
+      console.log(
+        "RailwayMaintenancePage: Media update detected, refreshing..."
+      );
+      forceMediaRefresh();
+      setImageKey(Date.now().toString()); // Force Image component to re-render
     };
 
-    // Set up listeners for custom events
+    // Set up the event listener
     window.addEventListener("media-cache-updated", handleMediaUpdate);
-
-    // Also listen for storage events from other tabs/windows
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "mediaTimestamp") {
-        console.log("Storage event detected for media timestamp");
-        handleMediaUpdate();
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
 
     return () => {
       window.removeEventListener("media-cache-updated", handleMediaUpdate);
-      window.removeEventListener("storage", handleStorageChange);
     };
   }, [forceMediaRefresh]);
-
-  // Helper function to get the maintenance image URL with fallback chain
-  const getMaintenanceImageUrl = () => {
-    // First try the direct API fetch result
-    if (directImageUrls.maintenanceImage) {
-      return directImageUrls.maintenanceImage;
-    }
-
-    // Then try the usePageMedia hook with the exact DB key
-    return getImageUrl(
-      MAINTENANCE_IMAGE_KEY,
-      defaultImages[MAINTENANCE_IMAGE_KEY]
-    );
-  };
-
-  // Helper function to get the branch owners image URL with fallback chain
-  const getBranchOwnersImageUrl = () => {
-    // First try the direct API fetch result
-    if (directImageUrls.branchOwnersImage) {
-      return directImageUrls.branchOwnersImage;
-    }
-
-    // Then try the usePageMedia hook with the exact DB key
-    return getImageUrl(
-      BRANCH_OWNERS_IMAGE_KEY,
-      defaultImages[BRANCH_OWNERS_IMAGE_KEY]
-    );
-  };
 
   // Add this useEffect to ensure the page fills the viewport
   useEffect(() => {
@@ -226,7 +125,10 @@ const RailwayMaintenancePage = () => {
                   </div>
                 ) : (
                   <Image
-                    src={addCacheBuster(getMaintenanceImageUrl())}
+                    src={`${getImageUrl(
+                      MAINTENANCE_IMAGE_KEY,
+                      defaultImages[MAINTENANCE_IMAGE_KEY]
+                    )}?_t=${imageKey}`}
                     alt={t("railway_maintenance_page.alt_text.maintenance")}
                     fill
                     priority
@@ -234,6 +136,13 @@ const RailwayMaintenancePage = () => {
                     sizes="(max-width: 768px) 100vw, 400px"
                     unoptimized={true}
                     key={`maintenance-image-${imageKey}`}
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      console.error("Image failed to load, using fallback");
+                      // @ts-ignore - TypeScript doesn't know about currentTarget.src
+                      e.currentTarget.src =
+                        defaultImages[MAINTENANCE_IMAGE_KEY];
+                    }}
                   />
                 )}
                 <div className="absolute top-0 right-0 rotate-90 h-160 flex items-center">
@@ -308,7 +217,10 @@ const RailwayMaintenancePage = () => {
                   </div>
                 ) : (
                   <Image
-                    src={addCacheBuster(getBranchOwnersImageUrl())}
+                    src={`${getImageUrl(
+                      BRANCH_OWNERS_IMAGE_KEY,
+                      defaultImages[BRANCH_OWNERS_IMAGE_KEY]
+                    )}?_t=${imageKey}`}
                     alt={t("railway_maintenance_page.alt_text.branch_owners")}
                     fill
                     priority
@@ -316,6 +228,13 @@ const RailwayMaintenancePage = () => {
                     sizes="(max-width: 768px) 100vw, 400px"
                     unoptimized={true}
                     key={`branch-owners-image-${imageKey}`}
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      console.error("Image failed to load, using fallback");
+                      // @ts-ignore - TypeScript doesn't know about currentTarget.src
+                      e.currentTarget.src =
+                        defaultImages[BRANCH_OWNERS_IMAGE_KEY];
+                    }}
                   />
                 )}
                 <div className="absolute top-0 left-0 rotate-0 h-160 flex items-center">

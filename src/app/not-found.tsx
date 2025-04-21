@@ -118,9 +118,6 @@ export default function NotFound() {
       {/* Add content-wrapper class to this div for height adjustment */}
       <div className="w-full bg-white content-wrapper">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32 flex flex-col items-center justify-center text-center">
-          <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold text-black mb-4">
-            404
-          </h1>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-black mb-6">
             {t("404.title") || "Page Not Found"}
           </h2>
@@ -128,12 +125,6 @@ export default function NotFound() {
             {t("404.message") ||
               "Sorry, we couldn't find the page you're looking for."}
           </p>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-200"
-          >
-            {t("404.back_home") || "Back to Home"}
-          </Link>
         </div>
       </div>
 

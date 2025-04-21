@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     // Get the form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const folder = (formData.get("folder") as string) || "steel-buckle"; // Default folder name
+    const folder = (formData.get("folder") as string) || "media"; // Use "media" as default folder name
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -73,11 +73,15 @@ export async function POST(request: Request) {
       overwrite: true,
     });
 
+    // Store the cloudinaryId properly - this is important!
+    const cloudinaryId = `${folder}/${uniqueId}`;
+
     // Save file info to database
     const media = await prisma.media.create({
       data: {
         filename: originalFilename,
         path: uploadResult.secure_url, // Use the secure_url from Cloudinary
+        cloudinaryId: cloudinaryId, // Store the cloudinaryId properly
         mediaType: file.type,
         altText: originalFilename.split(".")[0] || "Image", // Default alt text
       },

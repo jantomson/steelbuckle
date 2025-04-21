@@ -23,6 +23,28 @@ const AdminEditAbout = () => {
   // Dynamic logo URL based on logoVariant
   const logoUrl = `/logo_${logoVariant}.svg`;
 
+  // Check if we're missing the language parameter in the URL
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      !window.location.search.includes("lang=")
+    ) {
+      // Get the language from storage
+      const storedLang =
+        sessionStorage.getItem("adminEditingLanguage") ||
+        sessionStorage.getItem("editingLanguage") ||
+        localStorage.getItem("adminLastEditedLanguage") ||
+        "et";
+
+      // Update the URL with the language
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", storedLang);
+      window.history.replaceState({}, "", url.toString());
+
+      console.log(`Added missing language parameter to URL: ${storedLang}`);
+    }
+  }, []);
+
   // Load logo variant from localStorage on component mount
   useEffect(() => {
     const loadLogoVariant = () => {

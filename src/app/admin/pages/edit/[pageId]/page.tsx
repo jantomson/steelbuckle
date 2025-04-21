@@ -86,6 +86,7 @@ const AdminToolbar = React.memo(
     pageId,
     showColorPicker,
     toggleColorPicker,
+    originalLanguage,
   }: {
     pageTitle: string;
     isSaving: boolean;
@@ -94,11 +95,25 @@ const AdminToolbar = React.memo(
     pageId?: string;
     showColorPicker: boolean;
     toggleColorPicker: () => void;
+    originalLanguage: string | null;
   }) => {
     // Function to force page reload
     const handleForceRefresh = useCallback(() => {
       window.location.reload();
     }, []);
+
+    // Map language codes to display names
+    const languageNames: Record<string, string> = {
+      et: "Eesti",
+      en: "English",
+      lv: "Latviešu",
+      ru: "Русский",
+    };
+
+    // Get display name for the language
+    const languageDisplay = originalLanguage
+      ? languageNames[originalLanguage] || originalLanguage.toUpperCase()
+      : "Estonian"; // Default fallback
 
     return (
       <>
@@ -123,7 +138,6 @@ const AdminToolbar = React.memo(
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
             </Link>
-            <h1 className="text-lg font-medium truncate max-w-xs">Tagasi</h1>
           </div>
 
           <div className="flex items-center space-x-3">
@@ -305,6 +319,80 @@ export default function EditablePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [originalLanguage, setOriginalLanguage] = useState<string | null>(null);
+
+  // Function to extract the language from a language-prefixed route
+  const extractLanguageFromRoute = (pathname: string) => {
+    const match = pathname.match(/^\/(en|lv|ru|et)/);
+    return match ? match[1] : "et"; // Default to Estonian if no match
+  };
+
+  // Add this useEffect to detect the original language
+  useEffect(() => {
+    // Get the original language from multiple sources
+    const detectOriginalLanguage = () => {
+      // First check for language in URL search params
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        const urlLang = searchParams.get("source_lang");
+        if (urlLang) {
+          console.log(`Detected original language from URL params: ${urlLang}`);
+          setOriginalLanguage(urlLang);
+          // Ensure it's also set in session storage for consistency
+          sessionStorage.setItem("editingLanguage", urlLang);
+          return;
+        }
+      }
+
+      // Then check session storage (persists during page refreshes)
+      const sessionLang = sessionStorage.getItem("editingLanguage");
+      if (sessionLang) {
+        console.log(`Using language from session storage: ${sessionLang}`);
+        setOriginalLanguage(sessionLang);
+        return;
+      }
+
+      // Check if we have a stored language in localStorage
+      const storedLanguage = localStorage.getItem("language");
+
+      // If we came from a language-prefixed route, extract that language
+      if (document.referrer) {
+        try {
+          const referrerUrl = new URL(document.referrer);
+          const pathLanguage = extractLanguageFromRoute(referrerUrl.pathname);
+          if (pathLanguage) {
+            console.log(
+              `Detected original language from referrer: ${pathLanguage}`
+            );
+            setOriginalLanguage(pathLanguage);
+            // Save in session storage for persistence during refreshes
+            sessionStorage.setItem("editingLanguage", pathLanguage);
+            return;
+          }
+        } catch (e) {
+          console.error("Error parsing referrer URL:", e);
+        }
+      }
+
+      // Fall back to the stored language
+      if (storedLanguage) {
+        console.log(
+          `Using stored language from localStorage: ${storedLanguage}`
+        );
+        setOriginalLanguage(storedLanguage);
+        // Save in session storage for persistence during refreshes
+        sessionStorage.setItem("editingLanguage", storedLanguage);
+        return;
+      }
+
+      // Default to Estonian if no language can be determined
+      console.log("No language detected, defaulting to Estonian (et)");
+      setOriginalLanguage("et");
+      sessionStorage.setItem("editingLanguage", "et");
+    };
+
+    detectOriginalLanguage();
+  }, []);
 
   // Add this useEffect alongside your other hooks
   useEffect(() => {
@@ -316,12 +404,23 @@ export default function EditablePage() {
     if (match && match[2]) {
       // Get just the admin part
       const adminPath = match[2];
+      // Extract the language to save it for later
+      const language = match[1];
       console.log(
-        `Detected language-prefixed admin path, redirecting to ${adminPath}`
+        `Detected language-prefixed admin path, redirecting to ${adminPath} with language ${language}`
       );
 
-      // Redirect to the admin path without the language prefix
-      window.location.href = adminPath;
+      // Save the language to localStorage and sessionStorage before redirecting
+      localStorage.setItem("language", language);
+      sessionStorage.setItem("editingLanguage", language);
+
+      // Set the original language for editing
+      setOriginalLanguage(language);
+
+      // Redirect to the admin path without the language prefix, but with query param
+      const redirectUrl = new URL(adminPath, window.location.origin);
+      redirectUrl.searchParams.set("source_lang", language);
+      window.location.href = redirectUrl.toString();
     }
   }, []);
 
@@ -469,7 +568,11 @@ export default function EditablePage() {
     : "pt-20 md:pt-20";
 
   return (
-    <EditProvider pageId={pageId} isAdminMode={true}>
+    <EditProvider
+      pageId={pageId}
+      isAdminMode={true}
+      originalLanguage={originalLanguage || undefined}
+    >
       <div className="min-h-screen">
         {/* This component sets up the saveChanges functionality */}
         <AdminContentSaver
@@ -485,6 +588,7 @@ export default function EditablePage() {
           handleSaveAll={handleSaveAll}
           showColorPicker={showColorPicker}
           toggleColorPicker={toggleColorPicker}
+          originalLanguage={originalLanguage}
         />
 
         {/* Content with spacing for the fixed toolbar and color picker if open */}
@@ -527,7 +631,7 @@ export default function EditablePage() {
             height: 20px;
             border-radius: 50%;
             display: flex;
-            align-items: center;
+            align-items: center
             justify-content: center;
             opacity: 0;
             transition: opacity 0.2s ease;

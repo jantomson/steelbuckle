@@ -10,6 +10,7 @@ import { SupportedLanguage } from "@/config/routeTranslations";
 const ServicesSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [imageKey, setImageKey] = useState(Date.now().toString());
   const { t, currentLang } = useTranslation();
 
   // Set up default images with full Cloudinary URLs
@@ -33,10 +34,30 @@ const ServicesSlider = () => {
   };
 
   // Use our updated hook with the services_slider prefix
-  const { getImageUrl, loading } = usePageMedia(
+  const { getImageUrl, loading, forceMediaRefresh } = usePageMedia(
     "services_slider",
     defaultImages
   );
+
+  // Force refresh when component mounts and listen for media updates
+  useEffect(() => {
+    // Force a refresh of the media data
+    forceMediaRefresh();
+
+    // Listen for media cache updates (e.g., when admin makes changes)
+    const handleMediaUpdate = () => {
+      console.log("ServicesSlider: Media update detected, refreshing...");
+      forceMediaRefresh();
+      setImageKey(Date.now().toString()); // Force Image component to re-render
+    };
+
+    // Set up the event listener
+    window.addEventListener("media-cache-updated", handleMediaUpdate);
+
+    return () => {
+      window.removeEventListener("media-cache-updated", handleMediaUpdate);
+    };
+  }, [forceMediaRefresh]);
 
   // Helper function to get the correct image URL for each slide
   const getSlideImageUrl = (slideNum: number): string => {
@@ -122,19 +143,6 @@ const ServicesSlider = () => {
     };
   }, []);
 
-  // DEBUG logging - uncomment if you need to see what's happening
-  /*
-  useEffect(() => {
-    console.log("ServicesSlider mediaConfig:", {
-      "slide1.image": getImageUrl("slide1.image"),
-      "services_slider.slide1.image": getImageUrl("services_slider.slide1.image"),
-      "slide2.image": getImageUrl("slide2.image"),
-      "services_slider.slide2.image": getImageUrl("services_slider.slide2.image"),
-    });
-    console.log("Current slide image:", slides[currentSlide].image);
-  }, [getImageUrl, currentSlide, slides]);
-  */
-
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
@@ -179,13 +187,23 @@ const ServicesSlider = () => {
                   </div>
                 ) : (
                   <Image
-                    src={slides[currentSlide].image}
+                    src={`${slides[currentSlide].image}?_t=${imageKey}`}
                     alt={slides[currentSlide].title}
                     fill
                     priority
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 40vw"
                     unoptimized={true} // Prevent Next.js image optimization to use Cloudinary directly
+                    key={`${currentSlide}-${imageKey}`} // Force refresh when slide or imageKey changes
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      console.error("Image failed to load, using fallback");
+                      // @ts-ignore - TypeScript doesn't know about currentTarget.src
+                      e.currentTarget.src =
+                        defaultImages[
+                          `services_slider.slide${slides[currentSlide].id}.image`
+                        ];
+                    }}
                   />
                 )}
 
