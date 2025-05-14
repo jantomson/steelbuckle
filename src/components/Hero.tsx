@@ -138,7 +138,7 @@ const Hero = () => {
         <div className="w-full px-4 md:px-8 lg:max-w-[100%] lg:mx-auto">
           <div className="relative mx-auto max-w-7xl md:grid md:grid-cols-2 gap-8">
             <div className="flex flex-col justify-start pt-16 pb-6 md:py-20 md:justify-center md:h-full z-10">
-              <h1 className="text-5xl lg:text-7xl font-semibold mb-4 text-primary-text">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold mb-4 text-primary-text">
                 {t("hero.title_start")}
                 <br />
                 {t("hero.title_span")}

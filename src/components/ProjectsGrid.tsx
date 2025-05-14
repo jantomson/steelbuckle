@@ -157,7 +157,7 @@ const ProjectsGrid: React.FC = () => {
 
   if (error) {
     return (
-      <div className="w-full bg-white text-black p-16 text-center text-red-500">
+      <div className="w-full bg-white p-16 text-center text-red-500">
         {error}
       </div>
     );

@@ -142,17 +142,23 @@ const ProjectsUser = () => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!scrollContainerRef.current) return;
+
     setIsDragging(true);
     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
     setScrollLeft(scrollContainerRef.current.scrollLeft);
     setLastX(e.pageX);
     setLastTimestamp(Date.now());
     setVelocity(0);
-    scrollContainerRef.current.style.cursor = "grabbing";
+
+    // Add active cursor styling
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.cursor = "grabbing";
+    }
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!scrollContainerRef.current || e.touches.length !== 1) return;
+
     setIsDragging(true);
     setStartX(e.touches[0].pageX - scrollContainerRef.current.offsetLeft);
     setScrollLeft(scrollContainerRef.current.scrollLeft);
@@ -166,6 +172,8 @@ const ProjectsUser = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = "grab";
     }
+
+    // Apply inertia on release
     applyInertia();
   };
 
@@ -186,23 +194,29 @@ const ProjectsUser = () => {
 
   const applyInertia = () => {
     if (!scrollContainerRef.current || Math.abs(velocity) < 0.5) return;
+
     let currentVelocity = velocity;
     const decelerate = () => {
       if (Math.abs(currentVelocity) < 0.5 || !scrollContainerRef.current)
         return;
+
       scrollContainerRef.current.scrollLeft -= currentVelocity * 10;
       currentVelocity *= 0.95; // Deceleration factor
       requestAnimationFrame(decelerate);
     };
+
     requestAnimationFrame(decelerate);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !scrollContainerRef.current) return;
+
     e.preventDefault();
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 1.5; // Smooth scroll speed
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+
+    // Calculate velocity for inertia
     const now = Date.now();
     const dt = now - lastTimestamp;
     if (dt > 0) {
@@ -216,9 +230,12 @@ const ProjectsUser = () => {
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!isDragging || !scrollContainerRef.current || e.touches.length !== 1)
       return;
+
     const x = e.touches[0].pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 1.5;
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+
+    // Calculate velocity for inertia
     const now = Date.now();
     const dt = now - lastTimestamp;
     if (dt > 0) {
