@@ -18,7 +18,6 @@ const notoSerif = Noto_Serif({
 const CTA = () => {
   const { t, currentLang } = useTranslation();
   const [isClient, setIsClient] = useState(false);
-
   // Define the Cloudinary URLs directly as defaults
   const defaultGifUrl = "/giphy.gif";
   const defaultOverlayUrl = "/gif_overlay.svg";
@@ -35,6 +34,9 @@ const CTA = () => {
 
   // Use the hook with the updated default config
   const { getImageUrl, loading } = usePageMedia("cta", defaultConfig);
+
+  // Always use dark line - no dynamic switching
+  const lineSvg = "/line_dark.svg";
 
   // Set isClient to true after component mounts
   useEffect(() => {
@@ -85,16 +87,18 @@ const CTA = () => {
                   {t("cta.title_start")}
                   <br />
                   <div className="whitespace-nowrap mt-2 text-center mx-auto">
-                    <span
-                      className={`italic text-gray-400 inline-block ${notoSerif.className}`}
-                    >
-                      {t("cta.title_span")}
+                    <div className="flex flex-col items-center">
+                      <span
+                        className={`italic text-gray-400 ${notoSerif.className}`}
+                      >
+                        {t("cta.title_span")}
+                      </span>
                       <img
-                        src="/line_dark.svg"
+                        src={lineSvg}
                         alt="Underline"
-                        className="w-50 h-4 mb-2 mt-1 mx-auto"
+                        className="w-52 h-4 mt-1"
                       />
-                    </span>
+                    </div>
                   </div>
                   {t("cta.title_end")}
                 </h2>
@@ -172,17 +176,12 @@ const CTA = () => {
             <h2 className="text-4xl sm:text-4xl font-semibold text-black leading-tight mt-4 text-center">
               {t("cta.title_start")}
               <br />
-              <span
-                className={`italic text-gray-400 inline-block ${notoSerif.className}`}
-              >
-                {t("cta.title_span")}
-                <img
-                  src="/line_dark.svg"
-                  alt="Underline"
-                  className="w-50 h-3 mx-auto"
-                />
-              </span>{" "}
-              <br />
+              <div className="flex flex-col items-center mb-2">
+                <span className={`italic text-gray-400 ${notoSerif.className}`}>
+                  {t("cta.title_span")}
+                </span>
+                <img src={lineSvg} alt="Underline" className="w-48 h-3" />
+              </div>
               {t("cta.title_end")}
             </h2>
             <p className="text-gray-600 mt-6 mb-6 text-center">

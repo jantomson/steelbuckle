@@ -38,7 +38,12 @@ const ProjectsUser = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isScrolling, setIsScrolling] = useState(false);
+
+  // Enhanced touch handling for better mobile experience
+  const [touchStartTime, setTouchStartTime] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [hasMoved, setHasMoved] = useState(false);
+  const [isScrollingHorizontally, setIsScrollingHorizontally] = useState(false);
 
   // Default Cloudinary URLs for project placeholders
   const defaultProjectImage =
@@ -147,24 +152,76 @@ const ProjectsUser = () => {
     }
   }, [isMobile]);
 
-  // Mobile touch handlers - simplified for native scrolling
-  const handleTouchStart = useCallback(() => {
-    setIsScrolling(true);
-  }, []);
+  // Enhanced mobile touch handlers
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isMobile) return;
+
+      const touch = e.touches[0];
+      setTouchStartTime(Date.now());
+      setTouchStartX(touch.clientX);
+      setHasMoved(false);
+      setIsScrollingHorizontally(false);
+    },
+    [isMobile]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isMobile) return;
+
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - (e.touches[0]?.clientY || 0));
+
+      // Detect if user is scrolling horizontally
+      if (deltaX > 10) {
+        setHasMoved(true);
+        setIsScrollingHorizontally(true);
+      }
+
+      // If scrolling horizontally, don't prevent default (allow natural scroll)
+      // If scrolling vertically on the container, allow it
+      if (deltaY > deltaX && deltaY > 10) {
+        // This is vertical scrolling, allow it
+        setIsScrollingHorizontally(false);
+      }
+    },
+    [isMobile, touchStartX]
+  );
 
   const handleTouchEnd = useCallback(() => {
-    // Small delay to prevent modal opening immediately after scroll
-    setTimeout(() => {
-      setIsScrolling(false);
-    }, 100);
-  }, []);
+    if (!isMobile) return;
 
-  // Modal handlers
-  const openModal = (project: Project, e: React.MouseEvent) => {
-    if (isDragging || isScrolling) {
+    // Small delay to ensure touch interaction is complete
+    setTimeout(() => {
+      setHasMoved(false);
+      setIsScrollingHorizontally(false);
+    }, 50);
+  }, [isMobile]);
+
+  // Modal handlers with improved touch detection
+  const openModal = (
+    project: Project,
+    e: React.MouseEvent | React.TouchEvent
+  ) => {
+    // For desktop mouse events
+    if (e.type === "click" && isDragging) {
       e.preventDefault();
       return;
     }
+
+    // For mobile touch events - check if it was a scroll or quick tap
+    if (e.type === "click" && isMobile) {
+      const timeDiff = Date.now() - touchStartTime;
+
+      // If it was horizontal scrolling or took too long, don't open
+      if (isScrollingHorizontally || hasMoved || timeDiff > 300) {
+        e.preventDefault();
+        return;
+      }
+    }
+
     e.stopPropagation();
     const index = projects.findIndex((p) => p.id === project.id);
     setSelectedProject(project);
@@ -269,13 +326,14 @@ const ProjectsUser = () => {
               onMouseUp={!isMobile ? handleMouseUp : undefined}
               onMouseLeave={!isMobile ? handleMouseLeave : undefined}
               onTouchStart={isMobile ? handleTouchStart : undefined}
+              onTouchMove={isMobile ? handleTouchMove : undefined}
               onTouchEnd={isMobile ? handleTouchEnd : undefined}
               style={{
                 cursor: isMobile ? "default" : isDragging ? "grabbing" : "grab",
                 WebkitOverflowScrolling: "touch",
                 scrollBehavior: isMobile ? "auto" : "smooth",
                 userSelect: isDragging ? "none" : "auto",
-                touchAction: isMobile ? "pan-x" : "none",
+                touchAction: isMobile ? "pan-x pan-y" : "none", // FIXED: Allow both horizontal and vertical scrolling
                 overscrollBehaviorX: "contain",
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",

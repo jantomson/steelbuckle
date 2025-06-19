@@ -80,10 +80,10 @@ export function useTranslation() {
   // Listen for reload-translations events from the language selector
   useEffect(() => {
     const handleReloadTranslations = (event: CustomEvent) => {
-      console.log(
-        "useTranslation received reload-translations event",
-        event.detail
-      );
+      // console.log(
+      //   "useTranslation received reload-translations event",
+      //   event.detail
+      // );
 
       if (event.detail && event.detail.language) {
         setActiveEditingLanguage(event.detail.language);
@@ -124,9 +124,9 @@ export function useTranslation() {
         localStorage.getItem("adminLastEditedLanguage") ||
         currentLang;
 
-      console.log(
-        `useTranslation (admin mode): Setting editing language to ${adminLang}`
-      );
+      // console.log(
+      //   `useTranslation (admin mode): Setting editing language to ${adminLang}`
+      // );
       setActiveEditingLanguage(adminLang);
     }
   }, [isAdminMode, currentLang]);
@@ -157,16 +157,16 @@ export function useTranslation() {
             : currentLang;
 
         // Log the language being used for translation
-        console.log(
-          `useTranslation: Fetching translations for language: ${langToUse}`
-        );
+        // console.log(
+        //   `useTranslation: Fetching translations for language: ${langToUse}`
+        // );
 
         // Check for cached translations
         if (
           translationsCache[langToUse] &&
           cacheTimestamp === lastUpdateTimestamp
         ) {
-          console.log(`Using cached translations for ${langToUse}`);
+          // console.log(`Using cached translations for ${langToUse}`);
           if (isMounted.current) {
             setTranslations(translationsCache[langToUse].data);
             setIsLoading(false);
@@ -187,9 +187,9 @@ export function useTranslation() {
         }
 
         const data = await response.json();
-        console.log(
-          `useTranslation: Successfully loaded translations for ${langToUse}`
-        );
+        // console.log(
+        //   `useTranslation: Successfully loaded translations for ${langToUse}`
+        // );
 
         // Cache translations
         addToTranslationsCache(langToUse, data);

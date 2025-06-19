@@ -82,9 +82,9 @@ if (typeof window !== "undefined") {
       ) {
         const oldTimestamp = globalCacheBustTimestamp;
         globalCacheBustTimestamp = Number(storedTimestamp);
-        console.log(
-          `Media timestamp updated from ${oldTimestamp} to ${globalCacheBustTimestamp}`
-        );
+        // console.log(
+        //   `Media timestamp updated from ${oldTimestamp} to ${globalCacheBustTimestamp}`
+        // );
 
         // Dispatch event for components to refresh
         const event = new CustomEvent(MEDIA_UPDATED_EVENT, {
@@ -156,9 +156,9 @@ export function usePageMedia(
     if (isMounted.current) {
       setLoading(true);
       cacheTimestampRef.current = globalCacheBustTimestamp;
-      console.log(
-        `Forced media refresh for ${pagePrefix}, new timestamp: ${cacheTimestampRef.current}`
-      );
+      // console.log(
+      //   `Forced media refresh for ${pagePrefix}, new timestamp: ${cacheTimestampRef.current}`
+      // );
     }
   }, [cacheKey, pagePrefix]);
 
@@ -166,9 +166,9 @@ export function usePageMedia(
   useEffect(() => {
     // Define the event handler
     const handleMediaUpdate = (e: CustomEvent) => {
-      console.log(
-        `Media update event received in usePageMedia for ${pagePrefix}`
-      );
+      // console.log(
+      //   `Media update event received in usePageMedia for ${pagePrefix}`
+      // );
       // Only reload if the timestamp is newer than our current one
       if (e.detail && e.detail.timestamp > cacheTimestampRef.current) {
         cacheTimestampRef.current = e.detail.timestamp;
@@ -191,10 +191,10 @@ export function usePageMedia(
           storedTimestamp &&
           Number(storedTimestamp) > cacheTimestampRef.current
         ) {
-          console.log(
-            `Detected newer timestamp in localStorage for ${pagePrefix}:`,
-            storedTimestamp
-          );
+          // console.log(
+          //   `Detected newer timestamp in localStorage for ${pagePrefix}:`,
+          //   storedTimestamp
+          // );
           cacheTimestampRef.current = Number(storedTimestamp);
           forceRefreshRef.current = true;
           delete mediaCache[cacheKey]; // Clear this specific cache entry
@@ -231,13 +231,13 @@ export function usePageMedia(
     const loadMediaReferences = async () => {
       // Prevent multiple simultaneous fetches
       if (fetchingMedia.current || requestInProgressRef.current) {
-        console.log(`Skipping fetch for ${pagePrefix} - already in progress`);
+        // console.log(`Skipping fetch for ${pagePrefix} - already in progress`);
         return;
       }
 
       // Only abort previous requests if we're actually starting a new one
       if (abortControllerRef.current && requestInProgressRef.current) {
-        console.log(`Aborting previous request for ${pagePrefix}`);
+        // console.log(`Aborting previous request for ${pagePrefix}`);
         abortControllerRef.current.abort();
         requestInProgressRef.current = false;
       }
@@ -259,7 +259,7 @@ export function usePageMedia(
           cacheTimestampRef.current === globalCacheBustTimestamp;
 
         if (shouldUseCache) {
-          console.log(`Using cached media config for ${pagePrefix}`);
+          // console.log(`Using cached media config for ${pagePrefix}`);
           if (isMounted.current) {
             setMediaConfig({
               ...memoizedDefaults,
@@ -300,9 +300,9 @@ export function usePageMedia(
         }
 
         const keysString = allKeys.join(",");
-        console.log(
-          `Fetching media for ${pagePrefix} keys: ${keysString || "none"}`
-        );
+        // console.log(
+        //   `Fetching media for ${pagePrefix} keys: ${keysString || "none"}`
+        // );
 
         // Always try to fetch by keys first, even if keysString is empty
         let updatedConfig = { ...memoizedDefaults };
@@ -314,18 +314,18 @@ export function usePageMedia(
           }pageId=${encodeURIComponent(
             pagePrefix
           )}&_t=${globalCacheBustTimestamp}`;
-          console.log(`Fetching from URL: ${url}`);
+          // console.log(`Fetching from URL: ${url}`);
 
           const response = await fetch(url, { signal });
 
           if (response.ok) {
             const data = (await response.json()) as MediaApiResponse;
-            console.log(
-              `Received ${
-                Object.keys(data).length
-              } media items for ${pagePrefix}`,
-              data
-            );
+            // console.log(
+            //   `Received ${
+            //     Object.keys(data).length
+            //   } media items for ${pagePrefix}`,
+            //   data
+            // );
 
             // Process the response to match both formats of keys
             for (const [key, value] of Object.entries(data)) {
@@ -406,17 +406,17 @@ export function usePageMedia(
       const altKey = key.includes(".") ? key : `${pagePrefix}.${key}`;
 
       // Debug log keys being checked
-      console.log(
-        `Looking for image: ${key} -> trying ${fullKey} or ${altKey}`
-      );
-      console.log(`Available keys:`, Object.keys(mediaConfig));
+      // console.log(
+      //   `Looking for image: ${key} -> trying ${fullKey} or ${altKey}`
+      // );
+      // console.log(`Available keys:`, Object.keys(mediaConfig));
 
       // Check each possible format for a non-empty value
       let mediaUrl =
         mediaConfig[fullKey] || mediaConfig[altKey] || mediaConfig[key];
 
       // Log what we found
-      console.log(`Found URL for ${key}:`, mediaUrl);
+      // console.log(`Found URL for ${key}:`, mediaUrl);
 
       // If we have a Cloudinary URL from the database and size is provided, optimize it
       if (mediaUrl && isCloudinaryUrl(mediaUrl) && size) {
@@ -430,7 +430,7 @@ export function usePageMedia(
 
       // If defaultUrl is a Cloudinary URL, use it directly
       if (defaultUrl && isCloudinaryUrl(defaultUrl)) {
-        console.log(`Using Cloudinary default URL: ${defaultUrl}`);
+        // console.log(`Using Cloudinary default URL: ${defaultUrl}`);
         if (size) {
           return getOptimizedImageUrl(defaultUrl, size);
         }
@@ -438,7 +438,7 @@ export function usePageMedia(
       }
 
       // As a last resort, use the provided default URL
-      console.log(`Using default URL: ${defaultUrl}`);
+      // console.log(`Using default URL: ${defaultUrl}`);
       return defaultUrl;
     },
     [mediaConfig, pagePrefix]
@@ -506,7 +506,7 @@ export function clearMediaCache() {
 // Function to invalidate all cached media
 export function invalidateMediaCache() {
   globalCacheBustTimestamp = Date.now();
-  console.log(`Media cache invalidated at: ${globalCacheBustTimestamp}`);
+  // console.log(`Media cache invalidated at: ${globalCacheBustTimestamp}`);
 
   try {
     if (typeof window !== "undefined") {

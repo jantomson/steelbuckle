@@ -273,20 +273,6 @@ const AdminColorScheme = () => {
         <h3 className="text-xl font-medium text-gray-800">Värviskeemid</h3>
       </div>
 
-      <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
-        <p className="text-sm text-blue-800">
-          <strong>Tähtis:</strong> Valitud värviskeemid rakenduvad kogu
-          veebisaidil{" "}
-          {useGlobalSystem ? "kõigile külastajatele" : "brauseri sessioonile"}.
-          {useGlobalSystem &&
-            " Muudatused salvestatakse serveris ja on nähtavad ka teistele administraatoritele."}
-        </p>
-        <p className="text-xs text-blue-600 mt-2">
-          Saadaval: Kollane (vaikimisi), Sinine, Roheline • Süsteem:{" "}
-          {useGlobalSystem ? "Globaalne (Server)" : "Lokaalne (localStorage)"}
-        </p>
-      </div>
-
       <div className="space-y-4">
         {colorSchemes.map((scheme) => (
           <div
@@ -325,11 +311,8 @@ const AdminColorScheme = () => {
                     {scheme.name}
                   </span>
                   <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    Logo: {scheme.logoVariant === "dark" ? "Tume" : "Valge"}
+                    Logo: {scheme.logoVariant === "dark" ? "Tume" : "Hele"}
                   </span>
-                </div>
-                <div className="text-xs text-gray-400 mt-1">
-                  ID: {scheme.id} • Klass: {scheme.themeClass}
                 </div>
               </div>
             </div>
@@ -406,30 +389,6 @@ const AdminColorScheme = () => {
           </svg>
           Värviskeemi rakendamine{" "}
           {useGlobalSystem ? "kõigile kasutajatele" : ""}...
-        </div>
-      )}
-
-      {/* Current scheme info */}
-      {currentScheme && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">
-            Praegune aktiivne skeem:
-          </h4>
-          <div className="text-sm text-gray-600">
-            <span className="font-medium">{currentScheme.name}</span>
-            <span className="mx-2">•</span>
-            <span>
-              Logo: {currentScheme.logoVariant === "dark" ? "Tume" : "Valge"}
-            </span>
-            <span className="mx-2">•</span>
-            <span>Taust: {currentScheme.colors.background}</span>
-            {useGlobalSystem && (
-              <>
-                <span className="mx-2">•</span>
-                <span className="text-green-600 font-medium">Globaalne</span>
-              </>
-            )}
-          </div>
         </div>
       )}
     </div>

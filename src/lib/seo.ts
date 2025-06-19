@@ -71,7 +71,7 @@ export async function getSeoMetadata(
       pageKey = getSeoKeyFromPath(pageKeyOrPath, apiLang as SupportedLanguage);
     }
 
-    console.log(`Fetching SEO for page: ${pageKey}, language: ${apiLang}`);
+    // console.log(`Fetching SEO for page: ${pageKey}, language: ${apiLang}`);
     const response = await fetch(`/api/seo?pageKey=${pageKey}&lang=${apiLang}`);
 
     if (!response.ok) {

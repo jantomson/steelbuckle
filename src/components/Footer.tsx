@@ -23,6 +23,9 @@ const Footer: React.FC = () => {
     "dark"
   );
 
+  // State for handling Koda logo errors
+  const [kodaLogoError, setKodaLogoError] = useState(false);
+
   // Dynamic logo URL based on logoVariant
   const logoUrl = `/logo_${logoVariant}.svg`;
 
@@ -48,7 +51,7 @@ const Footer: React.FC = () => {
     if (colorScheme) {
       setLogoVariant(colorScheme.logoVariant);
       setKodaLogoVariant(colorScheme.logoVariant);
-      console.log(`Footer logo variants updated: ${colorScheme.logoVariant}`);
+      // console.log(`Footer logo variants updated: ${colorScheme.logoVariant}`);
     }
   }, [colorScheme]);
 
@@ -108,17 +111,66 @@ const Footer: React.FC = () => {
     const base = "Kaubanduskoda-liikmelogo";
     const variant = kodaLogoVariant === "dark" ? "dark" : "white";
 
+    // Improved logic with better fallbacks
+    let logoPath;
     switch (currentLanguage) {
       case "en":
-        return `/${base}_ENG_horiz_${variant}.png`;
+        logoPath = `/${base}_ENG_horiz_${variant}.png`;
+        break;
       case "ru":
-        return `/${base}_RUS_horiz_${variant}.png`;
+        logoPath = `/${base}_RUS_horiz_${variant}.png`;
+        break;
       case "lv":
-        return `/${base}_RUS_horiz_${variant}.png`;
+        // Use Estonian as fallback for Latvian since RUS version might not exist
+        logoPath = `/${base}_RUS_horiz_${variant}.png`;
+        break;
       default:
-        return `/${base}_EST_horiz_${variant}.png`;
+        logoPath = `/${base}_EST_horiz_${variant}.png`;
+    }
+
+    return logoPath;
+  };
+
+  // Debug logging for Koda logo
+  useEffect(() => {
+    if (isClient) {
+    }
+  }, [currentLanguage, kodaLogoVariant, isClient]);
+
+  // Function to handle Koda logo error
+  const [showKodaLogo, setShowKodaLogo] = useState(true);
+  const [kodaFallbackAttempted, setKodaFallbackAttempted] = useState(false);
+
+  // Replace the existing handleKodaLogoError function with this:
+  const handleKodaLogoError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error("Koda logo failed to load:", getKodaLogo());
+
+    if (!kodaFallbackAttempted) {
+      // First failure - try Estonian fallback
+      setKodaFallbackAttempted(true);
+      const fallbackLogo = `/Kaubanduskoda-liikmelogo_EST_horiz_${kodaLogoVariant}.png`;
+      // console.log("Attempting fallback logo:", fallbackLogo);
+      e.currentTarget.src = fallbackLogo;
+    } else {
+      // Fallback also failed - hide the logo completely
+      console.error("Koda logo fallback also failed, hiding logo");
+      setShowKodaLogo(false);
+      setKodaLogoError(true);
     }
   };
+
+  // Add this function to handle successful logo loads
+  const handleKodaLogoLoad = () => {
+    setKodaLogoError(false);
+    setShowKodaLogo(true);
+  };
+
+  // Reset states when logo variant or language changes
+  useEffect(() => {
+    setShowKodaLogo(true);
+    setKodaLogoError(false);
+    setKodaFallbackAttempted(false);
+  }, [kodaLogoVariant, currentLanguage]);
 
   // Function to handle navigation in edit mode
   const handleAdminNavigation = (
@@ -427,7 +479,7 @@ const Footer: React.FC = () => {
               onClick={() =>
                 isClient && window.scrollTo({ top: 0, behavior: "smooth" })
               }
-              className="w-10 h-10 bg-black rounded-full flex items-center justify-center mb-4"
+              className="w-10 h-10 bg-primary-text rounded-full flex items-center justify-center mb-4"
               aria-label="Scroll to top"
             >
               <svg
@@ -439,7 +491,7 @@ const Footer: React.FC = () => {
               >
                 <path
                   d="M7 14L12 9L17 14"
-                  stroke="white"
+                  stroke="#C0C0C0"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -465,10 +517,10 @@ const Footer: React.FC = () => {
             </AdminLink>
           </div>
 
-          {/* Contact and Kontor side by side on mobile */}
-          <div className="flex flex-row justify-between mb-8">
+          {/* Contact and Kontor side by side on mobile - Added gap */}
+          <div className="flex flex-row justify-between gap-4 mb-8">
             {/* Contact Column */}
-            <div className="max-w-1/3">
+            <div className="flex-8">
               <h3 className="font-bold text-lg mb-2">{t("footer.contact")}</h3>
               <div className="space-y-1">
                 {isClient && !isLoading && mainPhone && (
@@ -507,7 +559,7 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Office Column */}
-            <div>
+            <div className="flex-1">
               <h3 className="font-bold text-lg mb-2">{t("footer.office")}</h3>
               <div className="space-y-1">
                 {isClient && !isLoading && contactInfo.office && (
@@ -552,13 +604,15 @@ const Footer: React.FC = () => {
           {/* Logo and scroll button in a better aligned container */}
           <div className="flex flex-row items-center justify-between mt-10 mb-6">
             {/* Logo aligned on the left */}
-            {isClient && (
+            {isClient && showKodaLogo && (
               <a href="https://www.koda.ee">
                 <img
                   src={getKodaLogo()}
                   alt="Kaubanduskoja liikmelogo"
                   className="w-56"
-                  key={`koda-mobile-logo-${kodaLogoVariant}-${
+                  onError={handleKodaLogoError}
+                  onLoad={handleKodaLogoLoad}
+                  key={`koda-mobile-logo-${kodaLogoVariant}-${currentLanguage}-${
                     colorScheme?.id || "default"
                   }`}
                 />
@@ -570,7 +624,7 @@ const Footer: React.FC = () => {
               onClick={() =>
                 isClient && window.scrollTo({ top: 0, behavior: "smooth" })
               }
-              className="w-10 h-10 bg-black rounded-full flex items-center justify-center"
+              className="w-10 h-10 bg-primary-text rounded-full flex items-center justify-center"
               aria-label="Scroll to top"
             >
               <svg
@@ -582,7 +636,7 @@ const Footer: React.FC = () => {
               >
                 <path
                   d="M7 14L12 9L17 14"
-                  stroke="white"
+                  stroke="#C0C0C0"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -598,13 +652,15 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} Steel Buckle OÜ
           </p>
           {/* Logo appears only on desktop, aligned with copyright and right-aligned */}
-          {isClient && (
+          {isClient && showKodaLogo && (
             <a href="https://www.koda.ee" className="hidden md:block">
               <img
                 src={getKodaLogo()}
                 alt="Kaubanduskoja liikmelogo"
                 className="w-56"
-                key={`koda-desktop-logo-${kodaLogoVariant}-${
+                onError={handleKodaLogoError}
+                onLoad={handleKodaLogoLoad}
+                key={`koda-desktop-logo-${kodaLogoVariant}-${currentLanguage}-${
                   colorScheme?.id || "default"
                 }`}
               />

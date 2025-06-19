@@ -38,7 +38,7 @@ const Navbar = () => {
   useEffect(() => {
     if (colorScheme) {
       setLogoVariant(colorScheme.logoVariant);
-      console.log(`Navbar logo variant updated: ${colorScheme.logoVariant}`);
+      // console.log(`Navbar logo variant updated: ${colorScheme.logoVariant}`);
     }
   }, [colorScheme]);
 

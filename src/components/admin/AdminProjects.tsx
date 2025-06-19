@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useEdit } from "@/contexts/EditContext";
-import { useLanguage } from "@/contexts/LanguageContext"; // Add language context
+import { useLanguage } from "@/contexts/LanguageContext";
+import { usePathname } from "next/navigation";
+import { usePageMedia } from "@/hooks/usePageMedia";
 
 interface Project {
   id: string;
@@ -13,49 +15,102 @@ interface Project {
   description: string;
 }
 
-const Projects = () => {
-  const { t } = useTranslation();
-  // Use the edit context
-  const editContext = useEdit();
-  const isEditMode = editContext?.isEditMode;
-  const { currentLang, isLanguageLoaded } = useLanguage(); // Get language context with loading state
+// Helper to extract language from URL path
+function extractLanguageFromPath(path: string): string {
+  if (path.startsWith("/en")) return "en";
+  if (path.startsWith("/lv")) return "lv";
+  if (path.startsWith("/ru")) return "ru";
+  if (path.startsWith("/et")) return "et";
+  return "et";
+}
 
+const AdminProjects = () => {
+  const { t } = useTranslation();
+  const { currentLang, isLanguageLoaded } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const pathname = usePathname();
 
-  // Fetch projects from API
+  // Use the edit context
+  const editContext = useEdit();
+  const isEditMode = editContext?.isEditMode;
+
+  // Scrolling state
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Enhanced touch handling for better mobile experience
+  const [touchStartTime, setTouchStartTime] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [hasMoved, setHasMoved] = useState(false);
+  const [isScrollingHorizontally, setIsScrollingHorizontally] = useState(false);
+
+  // Default Cloudinary URLs for project placeholders
+  const defaultProjectImage =
+    "https://res.cloudinary.com/dxr4omqbd/image/upload/v1744754188/media/Skriveri_1.jpg";
+  const defaultImages = {
+    project_placeholder: defaultProjectImage,
+    "projects.project_placeholder": defaultProjectImage,
+    "projects.images.project_placeholder": defaultProjectImage,
+  };
+
+  const { getImageUrl, loading: mediaLoading } = usePageMedia(
+    "projects",
+    defaultImages
+  );
+
+  // Mobile detection
   useEffect(() => {
-    // Only fetch if language is loaded from localStorage
-    if (isLanguageLoaded) {
-      console.log(
-        "AdminProjects: Fetching projects with language:",
-        currentLang
-      );
-      const fetchProjects = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`/api/projects?lang=${currentLang}`);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || "ontouchstart" in window);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
-          if (!response.ok) {
-            throw new Error("Failed to fetch projects");
-          }
+  // Fetch projects
+  const fetchProjects = useCallback(
+    async (lang: string) => {
+      if (!isLanguageLoaded) return;
 
-          const data = await response.json();
-          console.log("AdminProjects: Fetched data:", data);
-          setProjects(data);
-          setError(null);
-        } catch (err) {
-          setError("Error loading projects. Please try again later.");
-          console.error("Error fetching projects:", err);
-        } finally {
-          setLoading(false);
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/projects?lang=${lang}&_t=${Date.now()}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch projects: ${response.status} ${response.statusText}`
+          );
         }
-      };
 
-      fetchProjects();
+        const data = await response.json();
+        setProjects(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+        setError("Error loading projects. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isLanguageLoaded]
+  );
+
+  useEffect(() => {
+    if (isLanguageLoaded && pathname) {
+      const lang = extractLanguageFromPath(pathname);
+      fetchProjects(lang);
     }
-  }, [currentLang, isLanguageLoaded]); // Add isLanguageLoaded as dependency
+  }, [pathname, isLanguageLoaded, fetchProjects]);
 
   // Function to get the right content - from edit context if in edit mode, otherwise from translations
   const getContent = (path: string) => {
@@ -89,170 +144,187 @@ const Projects = () => {
     );
   };
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [velocity, setVelocity] = useState(0);
-  const [lastX, setLastX] = useState(0);
-  const [lastTimestamp, setLastTimestamp] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  // Desktop mouse drag handlers
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isMobile || !scrollContainerRef.current) return;
 
-  // Check if we're on mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!scrollContainerRef.current) return;
-
-    setIsDragging(true);
-    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
-    setLastX(e.pageX);
-    setLastTimestamp(Date.now());
-    setVelocity(0);
-
-    // Add active cursor styling
-    if (scrollContainerRef.current) {
+      setIsDragging(true);
+      setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+      setScrollLeft(scrollContainerRef.current.scrollLeft);
       scrollContainerRef.current.style.cursor = "grabbing";
-    }
-  };
+      scrollContainerRef.current.style.userSelect = "none";
+    },
+    [isMobile]
+  );
 
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!scrollContainerRef.current || e.touches.length !== 1) return;
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isMobile || !isDragging || !scrollContainerRef.current) return;
 
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
-    setLastX(e.touches[0].pageX);
-    setLastTimestamp(Date.now());
-    setVelocity(0);
-  };
+      e.preventDefault();
+      const x = e.pageX - scrollContainerRef.current.offsetLeft;
+      const walk = (x - startX) * 2; // Scroll speed multiplier
+      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+    },
+    [isMobile, isDragging, startX, scrollLeft]
+  );
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
+    if (isMobile) return;
+
     setIsDragging(false);
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = "grab";
+      scrollContainerRef.current.style.userSelect = "";
     }
+  }, [isMobile]);
 
-    // Apply inertia on release
-    applyInertia();
-  };
+  const handleMouseLeave = useCallback(() => {
+    if (isMobile) return;
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    applyInertia();
-  };
-
-  const handleMouseLeave = () => {
-    if (isDragging) {
-      applyInertia();
-    }
     setIsDragging(false);
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = "grab";
+      scrollContainerRef.current.style.userSelect = "";
     }
-  };
+  }, [isMobile]);
 
-  const applyInertia = () => {
-    if (!scrollContainerRef.current || Math.abs(velocity) < 0.5) return;
+  // Enhanced mobile touch handlers
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isMobile) return;
 
-    let currentVelocity = velocity;
-    const decelerate = () => {
-      if (Math.abs(currentVelocity) < 0.5 || !scrollContainerRef.current)
+      const touch = e.touches[0];
+      setTouchStartTime(Date.now());
+      setTouchStartX(touch.clientX);
+      setHasMoved(false);
+      setIsScrollingHorizontally(false);
+    },
+    [isMobile]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isMobile) return;
+
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - (e.touches[0]?.clientY || 0));
+
+      // Detect if user is scrolling horizontally
+      if (deltaX > 10) {
+        setHasMoved(true);
+        setIsScrollingHorizontally(true);
+      }
+
+      // If scrolling horizontally, don't prevent default (allow natural scroll)
+      // If scrolling vertically on the container, allow it
+      if (deltaY > deltaX && deltaY > 10) {
+        // This is vertical scrolling, allow it
+        setIsScrollingHorizontally(false);
+      }
+    },
+    [isMobile, touchStartX]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isMobile) return;
+
+    // Small delay to ensure touch interaction is complete
+    setTimeout(() => {
+      setHasMoved(false);
+      setIsScrollingHorizontally(false);
+    }, 50);
+  }, [isMobile]);
+
+  // Modal handlers with improved touch detection
+  const openModal = (
+    project: Project,
+    e: React.MouseEvent | React.TouchEvent
+  ) => {
+    // For desktop mouse events
+    if (e.type === "click" && isDragging) {
+      e.preventDefault();
+      return;
+    }
+
+    // For mobile touch events - check if it was a scroll or quick tap
+    if (e.type === "click" && isMobile) {
+      const timeDiff = Date.now() - touchStartTime;
+
+      // If it was horizontal scrolling or took too long, don't open
+      if (isScrollingHorizontally || hasMoved || timeDiff > 300) {
+        e.preventDefault();
         return;
+      }
+    }
 
-      scrollContainerRef.current.scrollLeft -= currentVelocity * 10;
-      currentVelocity *= 0.95; // Deceleration factor
-      requestAnimationFrame(decelerate);
+    e.stopPropagation();
+    const index = projects.findIndex((p) => p.id === project.id);
+    setSelectedProject(project);
+    setSelectedIndex(index);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeModal = () => {
+    setSelectedProject(null);
+    setSelectedIndex(-1);
+    document.body.style.overflow = "auto";
+  };
+
+  const navigatePrevious = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedIndex > 0) {
+      const prevIndex = selectedIndex - 1;
+      setSelectedIndex(prevIndex);
+      setSelectedProject(projects[prevIndex]);
+    }
+  };
+
+  const navigateNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedIndex < projects.length - 1) {
+      const nextIndex = selectedIndex + 1;
+      setSelectedIndex(nextIndex);
+      setSelectedProject(projects[nextIndex]);
+    }
+  };
+
+  // Global event listeners for smooth dragging
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (!isMobile && isDragging) {
+        handleMouseUp();
+      }
     };
 
-    requestAnimationFrame(decelerate);
-  };
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isMobile && isDragging && scrollContainerRef.current) {
+        e.preventDefault();
+        const x = e.pageX - scrollContainerRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+      }
+    };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !scrollContainerRef.current) return;
-
-    e.preventDefault();
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // Smooth scroll speed
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-
-    // Calculate velocity for inertia
-    const now = Date.now();
-    const dt = now - lastTimestamp;
-    if (dt > 0) {
-      const dx = e.pageX - lastX;
-      setVelocity(dx / dt);
-    }
-    setLastX(e.pageX);
-    setLastTimestamp(now);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isDragging || !scrollContainerRef.current || e.touches.length !== 1)
-      return;
-
-    const x = e.touches[0].pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-
-    // Calculate velocity for inertia
-    const now = Date.now();
-    const dt = now - lastTimestamp;
-    if (dt > 0) {
-      const dx = e.touches[0].pageX - lastX;
-      setVelocity(dx / dt);
-    }
-    setLastX(e.touches[0].pageX);
-    setLastTimestamp(now);
-  };
-
-  const openImageOverlay = (image: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering drag events
-    setSelectedImage(image);
-  };
-
-  const closeImageOverlay = () => {
-    setSelectedImage(null);
-  };
-
-  useEffect(() => {
-    // Add event listeners to document to handle mouse up outside the container
-    document.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("touchend", handleTouchEnd);
-
-    // Lock scroll when overlay is open
-    if (selectedImage) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (isDragging) {
+      document.addEventListener("mouseup", handleGlobalMouseUp);
+      document.addEventListener("mousemove", handleGlobalMouseMove);
     }
 
     return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.removeEventListener("touchend", handleTouchEnd);
-      document.body.style.overflow = "";
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
+      document.body.style.overflow = "auto";
     };
-  }, [isDragging, selectedImage]);
+  }, [isDragging, isMobile, startX, scrollLeft, handleMouseUp]);
 
-  // If language is still loading or projects are loading, show loading indicator
-  if (!isLanguageLoaded || loading) {
+  if (!isLanguageLoaded || loading || mediaLoading) {
     return (
       <section className="relative py-16 bg-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">Loading projects...</div>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center">Laen projekte...</div>
         </div>
       </section>
     );
@@ -261,7 +333,7 @@ const Projects = () => {
   if (error) {
     return (
       <section className="relative py-16 bg-gray-100">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="text-center text-red-500">{error}</div>
         </div>
       </section>
@@ -269,66 +341,77 @@ const Projects = () => {
   }
 
   return (
-    <section className="relative py-16 bg-gray-100">
-      <div className="max-w-7xl mx-auto">
-        <div className="border-t border-gray-300 w-full mb-4 ml-4"></div>
-        {/* Title not editable */}
-        <h2 className="text-sm text-gray-500 mb-8 mt-10 pl-4">
-          {t("projects.title")}
-        </h2>
-        <div className="mb-8 max-w-md pl-4">
-          {/* Only this text is editable */}
-          <h3 className="text-2xl text-gray-800 mb-4">
-            <EditableText path="projects.text" />
-          </h3>
-        </div>
+    <>
+      <section className="relative py-16 bg-gray-100 w-full">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="border-t border-gray-300 w-full mb-4"></div>
 
-        <div className="relative overflow-hidden">
-          {/* Dynamic horizontal scroll container */}
-          <div
-            className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory pl-4"
-            ref={scrollContainerRef}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={handleMouseMove}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            onTouchMove={handleTouchMove}
-            style={{ cursor: "grab", WebkitOverflowScrolling: "touch" }}
-          >
-            {projects.length > 0 &&
-              projects.map((project) => (
+          <h2 className="text-sm text-gray-500 mb-8 mt-10">
+            {t("projects.title")}
+          </h2>
+          <div className="mb-8 max-w-md">
+            <h3 className="text-2xl text-gray-800 mb-4">
+              <EditableText path="projects.text" />
+            </h3>
+          </div>
+
+          <div className="relative -mx-4 px-4 overflow-hidden">
+            <div
+              className="flex overflow-x-scroll hide-scrollbar"
+              ref={scrollContainerRef}
+              onMouseDown={!isMobile ? handleMouseDown : undefined}
+              onMouseMove={!isMobile ? handleMouseMove : undefined}
+              onMouseUp={!isMobile ? handleMouseUp : undefined}
+              onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+              onTouchStart={isMobile ? handleTouchStart : undefined}
+              onTouchMove={isMobile ? handleTouchMove : undefined}
+              onTouchEnd={isMobile ? handleTouchEnd : undefined}
+              style={{
+                cursor: isMobile ? "default" : isDragging ? "grabbing" : "grab",
+                WebkitOverflowScrolling: "touch",
+                scrollBehavior: isMobile ? "auto" : "smooth",
+                userSelect: isDragging ? "none" : "auto",
+                touchAction: isMobile ? "pan-x pan-y" : "none",
+                overscrollBehaviorX: "contain",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {projects.map((project, index) => (
                 <div
                   key={project.id}
                   className={`group relative flex-shrink-0 ${
                     isMobile
-                      ? "w-[70vw]"
-                      : "w-[300px] md:w-[400px] lg:w-[450px]"
-                  } pr-4 pb-8 snap-center`}
+                      ? "w-[280px] min-w-[280px]"
+                      : "w-[300px] md:w-[400px] lg:w-[450px] min-w-[300px] md:min-w-[400px] lg:min-w-[450px]"
+                  } pr-4 pb-8 ${index === 0 ? "pl-4" : ""}`}
                 >
                   <div
-                    className="relative h-[500px] w-[95%] mb-4 cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
-                    onClick={(e) => openImageOverlay(project.image, e)}
+                    className="relative h-[500px] w-full mb-4 cursor-pointer transition-transform duration-300 hover:scale-[1.02] select-none"
+                    onClick={(e) => openModal(project, e)}
                   >
                     <Image
                       src={project.image}
                       alt={project.title}
                       fill
-                      className="object-cover rounded-lg"
+                      className="object-cover rounded-lg pointer-events-none"
+                      unoptimized={true}
+                      draggable={false}
+                      priority={index < 3}
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" />
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300 pointer-events-none" />
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                       <div className="w-12 h-12 flex items-center justify-center">
                         <img
                           src="/image_open.svg"
                           alt="Open"
                           className="w-10 h-10 transition-transform duration-300 group-hover:scale-110"
+                          draggable={false}
                         />
                       </div>
                     </div>
                   </div>
-                  <div className="mb-8 max-w-md">
+                  <div className="max-w-md select-none">
                     <h6 className="text-sm font-small text-gray-500">
                       {project.year}
                     </h6>
@@ -338,74 +421,151 @@ const Projects = () => {
                   </div>
                 </div>
               ))}
-          </div>
-
-          {/* Image Overlay */}
-          {selectedImage && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
-              onClick={closeImageOverlay}
-            >
-              <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-4xl max-h-[80vh]">
-                <div
-                  className="relative w-full"
-                  style={{ paddingBottom: "75%" }}
-                >
-                  <Image
-                    src={selectedImage}
-                    alt="Enlarged view"
-                    fill
-                    sizes="(max-width: 768px) 90vw, 80vw"
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-              </div>
-
-              {/* Completely separate close button with fixed position */}
-              <button
-                className="fixed top-8 right-8 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-40 transition-all"
-                onClick={closeImageOverlay}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+              {/* Add extra space at end for better scrolling */}
+              <div className="flex-shrink-0 w-8"></div>
             </div>
-          )}
-
-          <style jsx>{`
-            /* Hide scrollbar for Chrome, Safari and Opera */
-            .hide-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-
-            /* IE and Edge */
-            .hide-scrollbar {
-              -ms-overflow-style: none;
-            }
-
-            /* Firefox */
-            .hide-scrollbar {
-              scrollbar-width: none;
-            }
-          `}</style>
+          </div>
         </div>
-      </div>
-      <div className="absolute bottom-0 right-0 bg-white w-1/4 h-16"></div>
-    </section>
+        <div className="absolute bottom-0 right-0 bg-white w-1/4 h-16"></div>
+      </section>
+
+      {/* Fixed fullscreen modal */}
+      {selectedProject && (
+        <div
+          className="modal-fullscreen flex items-center justify-center"
+          onClick={closeModal}
+        >
+          <div className="absolute inset-0 bg-black opacity-70"></div>
+
+          {/* Close button */}
+          <button
+            className="fixed top-8 right-8 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-40 transition-all backdrop-blur-sm z-[10001]"
+            onClick={closeModal}
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          {/* Modal content container */}
+          <div
+            className="relative z-[10000] max-w-4xl w-full mx-4 max-h-[90vh] bg-transparent flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image container with navigation buttons */}
+            <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px]">
+              {/* Navigation buttons positioned relative to image */}
+              {selectedIndex > 0 && (
+                <button
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-40 transition-all z-[10001] backdrop-blur-sm"
+                  onClick={navigatePrevious}
+                  aria-label="Previous project"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              {selectedIndex < projects.length - 1 && (
+                <button
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-40 transition-all z-[10001] backdrop-blur-sm"
+                  onClick={navigateNext}
+                  aria-label="Next project"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              <Image
+                src={selectedProject.image}
+                alt={selectedProject.title}
+                fill
+                className="object-contain"
+                unoptimized={true}
+              />
+            </div>
+
+            {/* Info box matching ProjectsGrid */}
+            <div className="bg-white text-black p-6 w-full h-24 mt-0 flex flex-col justify-center">
+              <p className="text-sm text-gray-400">{selectedProject.year}</p>
+              <h2 className="md:text-md text-sm font-medium mt-1">
+                {selectedProject.title}
+              </h2>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          overflow: -moz-scrollbars-none !important;
+        }
+        @media (max-width: 768px) {
+          .hide-scrollbar {
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior-x: contain !important;
+            scroll-snap-type: none !important;
+          }
+        }
+        .hide-scrollbar * {
+          -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Force fullscreen modal positioning */
+        .modal-fullscreen {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          z-index: 9999 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+      `}</style>
+    </>
   );
 };
 
-export default Projects;
+export default AdminProjects;

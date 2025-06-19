@@ -5,19 +5,16 @@ import AdminSubpageHeader from "@/components/admin/AdminSubpageHeader";
 import AdminAbout from "@/components/admin/AdminAbout";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useEdit } from "@/contexts/EditContext";
-
-interface ColorSchemeEventDetail {
-  logoVariant: "dark" | "white";
-  lineVariant: "dark" | "white";
-}
+import { useGlobalColorScheme } from "@/components/admin/GlobalColorSchemeProvider";
 
 // Admin About Edit Component
 const AdminEditAbout = () => {
   const { t } = useTranslation();
   const editContext = useEdit();
   const isEditMode = editContext?.isEditMode;
+  const { colorScheme } = useGlobalColorScheme();
 
-  // State for logo variant
+  // State for logo variant - now gets from global color scheme
   const [logoVariant, setLogoVariant] = useState<"dark" | "white">("dark");
 
   // Dynamic logo URL based on logoVariant
@@ -45,33 +42,49 @@ const AdminEditAbout = () => {
     }
   }, []);
 
-  // Load logo variant from localStorage on component mount
+  // Update logo variant when global color scheme changes
   useEffect(() => {
-    const loadLogoVariant = () => {
-      const savedLogoVariant = localStorage.getItem("site.logoVariant");
-      if (savedLogoVariant === "dark" || savedLogoVariant === "white") {
-        setLogoVariant(savedLogoVariant);
-      }
-    };
+    if (colorScheme) {
+      setLogoVariant(colorScheme.logoVariant);
+      console.log(
+        `AdminEditAbout logo variant updated: ${colorScheme.logoVariant}`
+      );
+    }
+  }, [colorScheme]);
 
-    // Initial load
-    loadLogoVariant();
+  // Fallback: Load logo variant from localStorage if global system isn't available
+  useEffect(() => {
+    if (typeof window === "undefined" || colorScheme) return; // Skip if global scheme is available
 
-    // Listen for localStorage changes (from other tabs)
+    const savedLogoVariant = localStorage.getItem("site.logoVariant");
+    if (savedLogoVariant === "dark" || savedLogoVariant === "white") {
+      setLogoVariant(savedLogoVariant);
+    }
+
+    // Listen for changes to the color scheme
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "site.logoVariant") {
-        loadLogoVariant();
+        const updatedVariant = localStorage.getItem("site.logoVariant");
+        if (updatedVariant === "dark" || updatedVariant === "white") {
+          setLogoVariant(updatedVariant);
+        }
       }
     };
 
     // Listen for custom color scheme change events with payload
     const handleColorSchemeChange = (e: Event) => {
-      const customEvent = e as CustomEvent<ColorSchemeEventDetail>;
+      const customEvent = e as CustomEvent<{
+        logoVariant: "dark" | "white";
+        lineVariant: "dark" | "white";
+      }>;
       if (customEvent.detail && customEvent.detail.logoVariant) {
         setLogoVariant(customEvent.detail.logoVariant);
       } else {
         // Fallback to localStorage if the event doesn't have the expected data
-        loadLogoVariant();
+        const savedVariant = localStorage.getItem("site.logoVariant");
+        if (savedVariant === "dark" || savedVariant === "white") {
+          setLogoVariant(savedVariant);
+        }
       }
     };
 
@@ -88,7 +101,7 @@ const AdminEditAbout = () => {
         handleColorSchemeChange as EventListener
       );
     };
-  }, []);
+  }, [colorScheme]);
 
   // This component should only be used in admin mode where editContext is available
   if (!isEditMode) {
@@ -115,7 +128,9 @@ const AdminEditAbout = () => {
                   src={logoUrl}
                   alt="Steel Buckle"
                   className="w-24 h-24"
-                  key={`admin-about-logo-${logoVariant}`}
+                  key={`admin-about-logo-${logoVariant}-${
+                    colorScheme?.id || "default"
+                  }`}
                 />
               </div>
 

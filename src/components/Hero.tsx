@@ -65,7 +65,7 @@ const Hero = () => {
   useEffect(() => {
     if (colorScheme) {
       setLineVariant(colorScheme.lineVariant);
-      console.log(`Hero line variant updated: ${colorScheme.lineVariant}`);
+      // console.log(`Hero line variant updated: ${colorScheme.lineVariant}`);
     }
   }, [colorScheme]);
 
@@ -117,14 +117,25 @@ const Hero = () => {
   const openVideo = () => {
     setIsVideoOpen(true);
     if (isClient) {
-      document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
     }
   };
 
   const closeVideo = () => {
     setIsVideoOpen(false);
     if (isClient) {
-      document.body.style.overflow = "unset"; // Re-enable scrolling
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, parseInt(scrollY || "0") * -1);
     }
   };
 
@@ -254,18 +265,19 @@ const Hero = () => {
       {/* Video Modal Overlay - Click anywhere to close */}
       {isVideoOpen && isClient && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
           onClick={closeVideo}
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }} // Ensure full coverage
         >
           {/* Video container with responsive sizing */}
           <div
-            className="relative w-[95vw] h-[95vh] md:w-[800px] md:h-[450px] lg:w-[1000px] lg:h-[562px] mx-auto"
+            className="relative w-full h-full max-w-[95vw] max-h-[95vh] md:w-[800px] md:h-[450px] lg:w-[1000px] lg:h-[562px] mx-auto flex flex-col"
             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking on the video itself
           >
-            {/* Close Button */}
+            {/* Close Button - Better positioning for mobile */}
             <button
               onClick={closeVideo}
-              className="absolute top-0 md:-top-12 right-0 w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-40 transition-all z-10"
+              className="absolute -top-2 -right-2 md:-top-12 md:-right-2 w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-40 transition-all z-10 backdrop-blur-sm"
               aria-label="Close video"
             >
               <svg
@@ -283,11 +295,11 @@ const Hero = () => {
               </svg>
             </button>
 
-            {/* Video Container with fixed dimensions */}
-            <div className="w-full h-full">
+            {/* Video Container with better mobile handling */}
+            <div className="w-full h-full flex-1 min-h-0">
               <iframe
                 src={videoEmbedUrl}
-                className="w-full h-full"
+                className="w-full h-full rounded-lg md:rounded-none"
                 allow="autoplay; fullscreen; picture-in-picture"
                 allowFullScreen
                 title="Promotional video"

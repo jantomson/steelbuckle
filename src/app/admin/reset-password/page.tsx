@@ -153,7 +153,7 @@ export default function resetPassword() {
         <div>
           <Link href="/" className="block text-center">
             <img
-              src="/logo_white.svg"
+              src="/logo_dark.svg"
               alt="Steel Buckle"
               className="w-20 h-20 sm:w-24 sm:h-24 mx-auto"
             />

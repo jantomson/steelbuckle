@@ -36,9 +36,9 @@ export default function SEOMetadata({
         // Determine which page key to use - either explicit, or derived from path
         const effectivePageKey = explicitPageKey || pathname;
 
-        console.log(
-          `Fetching SEO data: page=${effectivePageKey}, lang=${effectiveLang}`
-        );
+        // console.log(
+        //   `Fetching SEO data: page=${effectivePageKey}, lang=${effectiveLang}`
+        // );
         const data = await getSeoMetadata(effectivePageKey, effectiveLang);
         setSeo(data);
 

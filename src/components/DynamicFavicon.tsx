@@ -1,40 +1,43 @@
 "use client";
 
 import { useEffect } from "react";
+import { useGlobalColorScheme } from "@/components/admin/GlobalColorSchemeProvider";
 
 /**
  * DynamicFavicon component that changes the favicon based on the current theme
- * - For blue theme (dark background): uses dark favicon variant
- * - For yellow and green themes (light backgrounds): uses light favicon variant
+ * Now integrated with GlobalColorSchemeProvider for consistent theme management
  */
 const DynamicFavicon = () => {
+  const { colorScheme, isLoading } = useGlobalColorScheme();
+
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return; // Skip during SSR
+    if (typeof window === "undefined" || isLoading) {
+      return; // Skip during SSR or while loading
     }
 
     // Function to determine and set the correct favicon based on theme
     const updateFavicon = () => {
       try {
-        // Get the current color scheme from localStorage (set by AdminColorScheme.tsx)
-        const currentScheme =
-          localStorage.getItem("site.colorScheme") || "default";
-        console.log("Current color scheme:", currentScheme);
+        if (!colorScheme) {
+          // console.log("No color scheme available yet");
+          return;
+        }
 
-        // Determine favicon variant based on theme
+        // console.log("Current color scheme:", colorScheme.id);
+
+        // Use the logoVariant from the color scheme to determine favicon
+        // logoVariant is either "dark" or "white", map this to your favicon naming
         let faviconVariant;
 
-        // Only blue theme uses dark favicon, other themes use light favicon
-        if (currentScheme === "blue") {
-          faviconVariant = "dark";
-        } else {
-          // For default (yellow) and green themes
+        if (colorScheme.logoVariant === "dark") {
           faviconVariant = "light";
+        } else {
+          faviconVariant = "dark"; // Map "white" logoVariant to "light" favicon
         }
 
         // Use the actual filenames with underscores and .ico extension
         const faviconPath = `/favicon_${faviconVariant}.ico`;
-        console.log("Setting favicon to:", faviconPath);
+        // console.log("Setting favicon to:", faviconPath);
 
         // Get all existing favicon links
         const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
@@ -58,13 +61,24 @@ const DynamicFavicon = () => {
         shortcutLink.href = faviconPath;
         document.head.appendChild(shortcutLink);
 
-        console.log("Favicon updated successfully to", faviconPath);
+        // Update theme-color meta tag based on the background color
+        let themeColor = document.querySelector(
+          'meta[name="theme-color"]'
+        ) as HTMLMetaElement;
+        if (!themeColor) {
+          themeColor = document.createElement("meta");
+          themeColor.name = "theme-color";
+          document.head.appendChild(themeColor);
+        }
+        themeColor.content = colorScheme.colors.background;
+
+        // console.log("Favicon updated successfully to", faviconPath);
       } catch (error) {
         console.error("Error updating favicon:", error);
       }
     };
 
-    // Run immediately and then again after a delay to ensure it takes effect
+    // Update favicon when color scheme changes
     updateFavicon();
 
     // Also run after a delay to make sure it works after page fully loads
@@ -72,32 +86,11 @@ const DynamicFavicon = () => {
       updateFavicon();
     }, 500);
 
-    // Listen for color scheme changes from AdminColorScheme component
-    const handleColorSchemeChange = () => {
-      console.log("Color scheme changed event detected");
-      updateFavicon();
-    };
-
-    // Add event listener for theme changes
-    window.addEventListener("colorSchemeChanged", handleColorSchemeChange);
-
-    // Listen for storage changes (when theme is changed in another tab)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "site.colorScheme") {
-        console.log("Color scheme storage change detected");
-        updateFavicon();
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    // Clean up event listeners on component unmount
+    // Clean up timeout on component unmount or dependency change
     return () => {
       clearTimeout(initialTimeout);
-      window.removeEventListener("colorSchemeChanged", handleColorSchemeChange);
-      window.removeEventListener("storage", handleStorageChange);
     };
-  }, []);
+  }, [colorScheme, isLoading]); // React to changes in colorScheme
 
   // This component doesn't render anything visible
   return null;
