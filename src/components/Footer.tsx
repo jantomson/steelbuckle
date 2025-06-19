@@ -491,7 +491,7 @@ const Footer: React.FC = () => {
               >
                 <path
                   d="M7 14L12 9L17 14"
-                  stroke="#C0C0C0"
+                  stroke="#A9A9A9"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -518,9 +518,9 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Contact and Kontor side by side on mobile - Added gap */}
-          <div className="flex flex-row justify-between gap-4 mb-8">
-            {/* Contact Column */}
-            <div className="flex-8">
+          <div className="flex justify-between gap-4 mb-8">
+            {/* Contact Column - at the start */}
+            <div className="flex-1 max-w-[60%]">
               <h3 className="font-bold text-lg mb-2">{t("footer.contact")}</h3>
               <div className="space-y-1">
                 {isClient && !isLoading && mainPhone && (
@@ -553,20 +553,22 @@ const Footer: React.FC = () => {
                     </>
                   )}
                 {isClient && !isLoading && contactInfo.email && (
-                  <p className="text-sm">{contactInfo.email}</p>
+                  <p className="text-sm break-all">{contactInfo.email}</p>
                 )}
               </div>
             </div>
 
-            {/* Office Column */}
-            <div className="flex-1">
+            {/* Office Column - at the end */}
+            <div className="flex-shrink-0 min-w-[35%]">
               <h3 className="font-bold text-lg mb-2">{t("footer.office")}</h3>
               <div className="space-y-1">
                 {isClient && !isLoading && contactInfo.office && (
                   <>
                     <p className="text-sm">{contactInfo.office.city}</p>
                     <p className="text-sm">{contactInfo.office.postal}</p>
-                    <p className="text-sm">{contactInfo.office.street}</p>
+                    <p className="text-sm break-words">
+                      {contactInfo.office.street}
+                    </p>
                     <p className="text-sm">{contactInfo.office.room}</p>
                   </>
                 )}
@@ -636,7 +638,7 @@ const Footer: React.FC = () => {
               >
                 <path
                   d="M7 14L12 9L17 14"
-                  stroke="#C0C0C0"
+                  stroke="#A9A9A9"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"

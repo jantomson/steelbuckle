@@ -15,6 +15,23 @@ const notoSerif = Noto_Serif({
   style: ["italic"],
 });
 
+// Inline SVG Component for the underline
+const LineUnderline = ({ className = "w-52 h-4 mt-1" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 251 14"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      opacity="0.4"
+      d="M32.5539 4.26925C89.6109 2.30931 146.668 1.00084 203.776 1.00084C204.332 1.00084 202.649 0.984946 202.109 1.09163C198.664 1.77222 195.381 3.41128 191.939 4.22385C181.814 6.6147 171.171 7.0319 160.683 7.49226C138.701 8.45708 116.671 8.48106 94.6649 8.76331C65.7723 9.13388 37.0246 8.92454 8.47942 11.5778C7.20228 11.6965 5.91037 11.5726 4.62981 11.6232C3.80827 11.6556 2.98427 11.7985 2.21662 12.0317C-4.05983 13.9389 15.6593 12.4403 22.384 12.4403C86.4485 12.4403 150.513 12.4403 214.578 12.4403C226.643 12.4403 238.709 12.4403 250.775 12.4403"
+      stroke="black"
+      strokeWidth="1.6"
+    />
+  </svg>
+);
+
 const CTA = () => {
   const { t, currentLang } = useTranslation();
   const [isClient, setIsClient] = useState(false);
@@ -34,9 +51,6 @@ const CTA = () => {
 
   // Use the hook with the updated default config
   const { getImageUrl, loading } = usePageMedia("cta", defaultConfig);
-
-  // Always use dark line - no dynamic switching
-  const lineSvg = "/line_dark.svg";
 
   // Set isClient to true after component mounts
   useEffect(() => {
@@ -93,11 +107,7 @@ const CTA = () => {
                       >
                         {t("cta.title_span")}
                       </span>
-                      <img
-                        src={lineSvg}
-                        alt="Underline"
-                        className="w-52 h-4 mt-1"
-                      />
+                      <LineUnderline />
                     </div>
                   </div>
                   {t("cta.title_end")}
@@ -180,7 +190,7 @@ const CTA = () => {
                 <span className={`italic text-gray-400 ${notoSerif.className}`}>
                   {t("cta.title_span")}
                 </span>
-                <img src={lineSvg} alt="Underline" className="w-48 h-3" />
+                <LineUnderline className="w-48 h-3" />
               </div>
               {t("cta.title_end")}
             </h2>
