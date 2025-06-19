@@ -1,0 +1,16 @@
+{
+  "colorScheme": {
+    "id": "blue",
+    "name": "Sinine",
+    "themeClass": "theme-blue",
+    "logoVariant": "white",
+    "lineVariant": "white",
+    "colors": {
+      "background": "#000957",
+      "text": "#ffffff",
+      "accent": "#577BC1",
+      "border": "#ffffff",
+      "line": "#ffffff"
+    }
+  }
+}

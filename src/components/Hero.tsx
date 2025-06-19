@@ -1,3 +1,4 @@
+// components/Hero.tsx - Updated to use global color scheme
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,6 +8,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
 import { Noto_Serif } from "next/font/google";
+import { useGlobalColorScheme } from "@/components/admin/GlobalColorSchemeProvider";
 
 const notoSerif = Noto_Serif({
   subsets: ["latin", "cyrillic"],
@@ -14,20 +16,17 @@ const notoSerif = Noto_Serif({
   style: ["italic"],
 });
 
-interface ColorSchemeEventDetail {
-  logoVariant: "dark" | "white";
-  lineVariant: "dark" | "white";
-}
-
 const Hero = () => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const { t, currentLang } = useTranslation();
+  const { colorScheme } = useGlobalColorScheme();
 
   // Add isClient state to handle hydration issues
   const [isClient, setIsClient] = useState(false);
 
-  // State for line variant
+  // State for line variant - now gets from global color scheme
   const [lineVariant, setLineVariant] = useState<"dark" | "white">("dark");
+
   // Simplified - use a fixed text color based on line variant
   const ctaTextColor = lineVariant === "dark" ? "white" : "black";
 
@@ -60,11 +59,19 @@ const Hero = () => {
         t("hero.youtube_embed") ||
         "https://player.vimeo.com/video/1073950156?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
     );
-  }, [t]); // Note: getMediaUrlSafe is a function created within the component and won't change
+  }, [t]);
 
-  // Load line variant from localStorage on component mount
+  // Update line variant when global color scheme changes
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (colorScheme) {
+      setLineVariant(colorScheme.lineVariant);
+      console.log(`Hero line variant updated: ${colorScheme.lineVariant}`);
+    }
+  }, [colorScheme]);
+
+  // Fallback: Load line variant from localStorage if global system isn't available
+  useEffect(() => {
+    if (typeof window === "undefined" || colorScheme) return; // Skip if global scheme is available
 
     const savedLineVariant = localStorage.getItem("site.lineVariant");
     if (savedLineVariant === "dark" || savedLineVariant === "white") {
@@ -84,7 +91,10 @@ const Hero = () => {
 
     // Listen for custom color scheme change events with payload
     const handleColorSchemeChange = (e: Event) => {
-      const customEvent = e as CustomEvent<ColorSchemeEventDetail>;
+      const customEvent = e as CustomEvent<{
+        logoVariant: "dark" | "white";
+        lineVariant: "dark" | "white";
+      }>;
       if (customEvent.detail && customEvent.detail.lineVariant) {
         setLineVariant(customEvent.detail.lineVariant);
       }
@@ -102,7 +112,7 @@ const Hero = () => {
         handleColorSchemeChange as EventListener
       );
     };
-  }, [isClient]);
+  }, [isClient, colorScheme]);
 
   const openVideo = () => {
     setIsVideoOpen(true);
@@ -152,7 +162,9 @@ const Hero = () => {
                   src={lineSvg}
                   alt="Underline"
                   className="w-64 md:w-80 h-3.5 md:h-4 mt-1"
-                  key={`hero-line-${lineVariant}`}
+                  key={`hero-line-${lineVariant}-${
+                    colorScheme?.id || "default"
+                  }`}
                 />
               </h1>
               <p className="text-primary-text mb-8 mt-5 md:max-w-md">

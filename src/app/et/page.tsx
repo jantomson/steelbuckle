@@ -52,10 +52,7 @@ export default function Home() {
             <About />
           </AnimatedSection>
 
-          {/* Animate Projects with left-to-right animation */}
-          <AnimatedSection animation="left" delay={150} duration={1000}>
-            <Projects />
-          </AnimatedSection>
+          <Projects />
 
           {/* Animate Benefits with right-to-left animation */}
           <AnimatedSection animation="right" delay={150} duration={1000}>

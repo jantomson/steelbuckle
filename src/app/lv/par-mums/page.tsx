@@ -1,3 +1,4 @@
+// app/ettevottest/page.tsx (or wherever your about page is) - Updated to use global color scheme
 "use client";
 
 import Footer from "@/components/Footer";
@@ -6,23 +7,32 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import SubpageHeader from "@/components/SubpageHeader";
 import SEOMetadata from "@/components/SEOMetadata";
-
-interface ColorSchemeEventDetail {
-  logoVariant: "dark" | "white";
-  lineVariant: "dark" | "white";
-}
+import { useGlobalColorScheme } from "@/components/admin/GlobalColorSchemeProvider";
 
 export default function About() {
   const { t } = useTranslation();
+  const { colorScheme } = useGlobalColorScheme();
 
-  // State for logo variant
+  // State for logo variant - now gets from global color scheme
   const [logoVariant, setLogoVariant] = useState<"dark" | "white">("dark");
 
   // Dynamic logo URL based on logoVariant
   const logoUrl = `/logo_${logoVariant}.svg`;
 
-  // Load logo variant from localStorage on component mount
+  // Update logo variant when global color scheme changes
   useEffect(() => {
+    if (colorScheme) {
+      setLogoVariant(colorScheme.logoVariant);
+      console.log(
+        `About page logo variant updated: ${colorScheme.logoVariant}`
+      );
+    }
+  }, [colorScheme]);
+
+  // Fallback: Load logo variant from localStorage if global system isn't available
+  useEffect(() => {
+    if (colorScheme) return; // Skip if global scheme is available
+
     const loadLogoVariant = () => {
       const savedLogoVariant = localStorage.getItem("site.logoVariant");
       if (savedLogoVariant === "dark" || savedLogoVariant === "white") {
@@ -42,7 +52,10 @@ export default function About() {
 
     // Listen for custom color scheme change events with payload
     const handleColorSchemeChange = (e: Event) => {
-      const customEvent = e as CustomEvent<ColorSchemeEventDetail>;
+      const customEvent = e as CustomEvent<{
+        logoVariant: "dark" | "white";
+        lineVariant: "dark" | "white";
+      }>;
       if (customEvent.detail && customEvent.detail.logoVariant) {
         setLogoVariant(customEvent.detail.logoVariant);
       } else {
@@ -64,7 +77,7 @@ export default function About() {
         handleColorSchemeChange as EventListener
       );
     };
-  }, []);
+  }, [colorScheme]);
 
   // Add this useEffect to ensure the page fills the viewport
   useEffect(() => {
@@ -120,7 +133,9 @@ export default function About() {
                   src={logoUrl}
                   alt="Steel Buckle OÜ"
                   className="w-20 h-20"
-                  key={`about-logo-${logoVariant}`}
+                  key={`about-logo-${logoVariant}-${
+                    colorScheme?.id || "default"
+                  }`}
                 />
               </div>
 

@@ -1,3 +1,4 @@
+// components/Navbar.tsx - Updated to use global color scheme
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,11 +9,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
-
-interface ColorSchemeEventDetail {
-  logoVariant: "dark" | "white";
-  lineVariant: "dark" | "white";
-}
+import { useGlobalColorScheme } from "@/components/admin/GlobalColorSchemeProvider";
 
 const Navbar = () => {
   const router = useRouter();
@@ -21,8 +18,9 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { contactInfo, isLoading, getMainPhone } = useContactInfo();
   const [isClient, setIsClient] = useState(false);
+  const { colorScheme } = useGlobalColorScheme();
 
-  // State for logo variant
+  // State for logo variant - now gets from global color scheme
   const [logoVariant, setLogoVariant] = useState<"dark" | "white">("dark");
 
   // Get the main phone number
@@ -36,9 +34,17 @@ const Navbar = () => {
     setIsClient(true);
   }, []);
 
-  // Load logo variant from localStorage on component mount
+  // Update logo variant when global color scheme changes
   useEffect(() => {
-    if (!isClient) return;
+    if (colorScheme) {
+      setLogoVariant(colorScheme.logoVariant);
+      console.log(`Navbar logo variant updated: ${colorScheme.logoVariant}`);
+    }
+  }, [colorScheme]);
+
+  // Fallback: Load logo variant from localStorage if global system isn't available
+  useEffect(() => {
+    if (!isClient || colorScheme) return; // Skip if global scheme is available
 
     const loadLogoVariant = () => {
       const savedLogoVariant = localStorage.getItem("site.logoVariant");
@@ -59,7 +65,10 @@ const Navbar = () => {
 
     // Listen for custom color scheme change events with payload
     const handleColorSchemeChange = (e: Event) => {
-      const customEvent = e as CustomEvent<ColorSchemeEventDetail>;
+      const customEvent = e as CustomEvent<{
+        logoVariant: "dark" | "white";
+        lineVariant: "dark" | "white";
+      }>;
       if (customEvent.detail && customEvent.detail.logoVariant) {
         setLogoVariant(customEvent.detail.logoVariant);
       } else {
@@ -81,7 +90,7 @@ const Navbar = () => {
         handleColorSchemeChange as EventListener
       );
     };
-  }, [isClient]);
+  }, [isClient, colorScheme]);
 
   const toggleTeenused = () => {
     setIsTeenusedOpen(!isTeenusedOpen);
@@ -288,7 +297,7 @@ const Navbar = () => {
               src={logoUrl}
               alt="Steel Buckle"
               className="w-12 h-12"
-              key={`mobile-logo-${logoVariant}`}
+              key={`mobile-logo-${logoVariant}-${colorScheme?.id || "default"}`}
             />
           </AdminLink>
 
@@ -351,7 +360,9 @@ const Navbar = () => {
                   src={logoUrl}
                   alt="Steel Buckle"
                   className="w-12 h-12"
-                  key={`mobile-menu-logo-${logoVariant}`}
+                  key={`mobile-menu-logo-${logoVariant}-${
+                    colorScheme?.id || "default"
+                  }`}
                 />
               </AdminLink>
 
@@ -551,7 +562,9 @@ const Navbar = () => {
                   src={logoUrl}
                   alt="Steel Buckle"
                   className="w-19 h-19"
-                  key={`desktop-logo-${logoVariant}`}
+                  key={`desktop-logo-${logoVariant}-${
+                    colorScheme?.id || "default"
+                  }`}
                 />
               </AdminLink>
             </div>

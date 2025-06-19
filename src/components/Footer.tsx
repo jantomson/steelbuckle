@@ -1,3 +1,4 @@
+// components/Footer.tsx - Updated to use global color scheme
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -7,19 +8,16 @@ import { useRouter } from "next/navigation";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { buildLocalizedUrl } from "@/config/routeTranslations";
 import { SupportedLanguage } from "@/config/routeTranslations";
-
-interface ColorSchemeEventDetail {
-  logoVariant: "dark" | "white";
-  lineVariant: "dark" | "white";
-}
+import { useGlobalColorScheme } from "@/components/admin/GlobalColorSchemeProvider";
 
 const Footer: React.FC = () => {
   const { t, currentLang: currentLanguage } = useTranslation();
   const router = useRouter();
   const { contactInfo, isLoading, getPhoneByLabel } = useContactInfo();
   const [isClient, setIsClient] = useState(false);
+  const { colorScheme } = useGlobalColorScheme();
 
-  // State for logo variant
+  // State for logo variant - now gets from global color scheme
   const [logoVariant, setLogoVariant] = useState<"dark" | "white">("dark");
   const [kodaLogoVariant, setKodaLogoVariant] = useState<"dark" | "white">(
     "dark"
@@ -45,15 +43,24 @@ const Footer: React.FC = () => {
     setMainPhone(phone);
   }, [getPhoneByLabel, contactInfo.phones]);
 
-  // Load logo variant from localStorage on component mount
+  // Update logo variants when global color scheme changes
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (colorScheme) {
+      setLogoVariant(colorScheme.logoVariant);
+      setKodaLogoVariant(colorScheme.logoVariant);
+      console.log(`Footer logo variants updated: ${colorScheme.logoVariant}`);
+    }
+  }, [colorScheme]);
+
+  // Fallback: Load logo variant from localStorage if global system isn't available
+  useEffect(() => {
+    if (typeof window === "undefined" || colorScheme) return; // Skip if global scheme is available
 
     const loadLogoVariant = () => {
       const savedLogoVariant = localStorage.getItem("site.logoVariant");
       if (savedLogoVariant === "dark" || savedLogoVariant === "white") {
         setLogoVariant(savedLogoVariant);
-        setKodaLogoVariant(savedLogoVariant); // also apply for Koda logo
+        setKodaLogoVariant(savedLogoVariant);
       }
     };
 
@@ -69,7 +76,10 @@ const Footer: React.FC = () => {
 
     // Listen for custom color scheme change events with payload
     const handleColorSchemeChange = (e: Event) => {
-      const customEvent = e as CustomEvent<ColorSchemeEventDetail>;
+      const customEvent = e as CustomEvent<{
+        logoVariant: "dark" | "white";
+        lineVariant: "dark" | "white";
+      }>;
       if (customEvent.detail && customEvent.detail.logoVariant) {
         setLogoVariant(customEvent.detail.logoVariant);
         setKodaLogoVariant(customEvent.detail.logoVariant);
@@ -92,11 +102,11 @@ const Footer: React.FC = () => {
         handleColorSchemeChange as EventListener
       );
     };
-  }, []);
+  }, [colorScheme]);
 
   const getKodaLogo = () => {
     const base = "Kaubanduskoda-liikmelogo";
-    const variant = kodaLogoVariant === "dark" ? "dark" : "white"; // logo color on opposite background
+    const variant = kodaLogoVariant === "dark" ? "dark" : "white";
 
     switch (currentLanguage) {
       case "en":
@@ -322,7 +332,9 @@ const Footer: React.FC = () => {
                 src={logoUrl}
                 alt="Steel Buckle"
                 className="w-19 h-19"
-                key={`footer-desktop-logo-${logoVariant}`}
+                key={`footer-desktop-logo-${logoVariant}-${
+                  colorScheme?.id || "default"
+                }`}
               />
             </AdminLink>
           </div>
@@ -446,7 +458,9 @@ const Footer: React.FC = () => {
                 src={logoUrl}
                 alt="Steel Buckle"
                 className="w-14 h-14"
-                key={`footer-mobile-logo-${logoVariant}`}
+                key={`footer-mobile-logo-${logoVariant}-${
+                  colorScheme?.id || "default"
+                }`}
               />
             </AdminLink>
           </div>
@@ -544,7 +558,9 @@ const Footer: React.FC = () => {
                   src={getKodaLogo()}
                   alt="Kaubanduskoja liikmelogo"
                   className="w-56"
-                  key={`koda-mobile-logo-${kodaLogoVariant}`}
+                  key={`koda-mobile-logo-${kodaLogoVariant}-${
+                    colorScheme?.id || "default"
+                  }`}
                 />
               </a>
             )}
@@ -588,7 +604,9 @@ const Footer: React.FC = () => {
                 src={getKodaLogo()}
                 alt="Kaubanduskoja liikmelogo"
                 className="w-56"
-                key={`koda-desktop-logo-${kodaLogoVariant}`}
+                key={`koda-desktop-logo-${kodaLogoVariant}-${
+                  colorScheme?.id || "default"
+                }`}
               />
             </a>
           )}

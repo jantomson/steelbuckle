@@ -37,7 +37,7 @@ const AdminServicesSlider = () => {
     defaultImages
   );
 
-  // Directly fetch all slide images from API to avoid cache issues
+  // Improved fetchSlideImages with better error handling
   const fetchSlideImages = async () => {
     if (hasFetchedRef.current) return;
 
@@ -52,30 +52,51 @@ const AdminServicesSlider = () => {
         .map((key) => `services_slider.${key}`)
         .join(",");
 
+      console.log("Attempting to fetch slide images with keys:", keys);
+
       const response = await fetch(
         `/api/media?keys=${encodeURIComponent(
           keys
-        )}&pageId=services_slider&_t=${Date.now()}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        const images: Record<string, string> = {};
-
-        // Process the response data
-        Object.entries(data).forEach(([key, url]) => {
-          if (url && typeof url === "string") {
-            images[key] = url;
-          }
-        });
-
-        if (Object.keys(images).length > 0) {
-          console.log("Fetched slide images:", images);
-          setSlideImages(images);
-          hasFetchedRef.current = true;
+        )}&pageId=services_slider&_t=${Date.now()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
+      );
+
+      console.log("API response status:", response.status);
+
+      if (!response.ok) {
+        throw new Error(
+          `API returned ${response.status}: ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("API response data:", data);
+
+      const images: Record<string, string> = {};
+
+      // Process the response data
+      Object.entries(data).forEach(([key, url]) => {
+        if (url && typeof url === "string") {
+          images[key] = url;
+        }
+      });
+
+      if (Object.keys(images).length > 0) {
+        console.log("Successfully fetched slide images:", images);
+        setSlideImages(images);
+        hasFetchedRef.current = true;
+      } else {
+        console.log("No images returned from API, using defaults");
       }
     } catch (error) {
       console.error("Error fetching slide images directly:", error);
+      // Don't throw the error, just log it and continue with fallbacks
+      // This prevents the component from breaking if the API is unavailable
     }
   };
 
@@ -85,12 +106,16 @@ const AdminServicesSlider = () => {
     clearMediaCache();
     // Force a refresh
     forceMediaRefresh();
-    // Fetch directly from API on initial load
-    fetchSlideImages();
+    // Only try to fetch directly from API if we're in a browser environment
+    if (typeof window !== "undefined") {
+      fetchSlideImages();
+    }
   }, [forceMediaRefresh]);
 
   // Listen for media updates
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const handleMediaUpdate = () => {
       console.log("AdminServicesSlider: Media update detected");
       // Clear the entire cache
@@ -363,6 +388,18 @@ const AdminServicesSlider = () => {
                     sizes="(max-width: 768px) 100vw, 40vw"
                     unoptimized={isEditMode} // Only disable optimization in edit mode
                     key={`${imageKey}-${currentSlide}`} // Force re-render when key or slide changes
+                    onError={(e) => {
+                      console.error("Image failed to load, using fallback");
+                      // Use the default image as fallback
+                      const target = e.currentTarget as HTMLImageElement;
+                      const fallbackUrl =
+                        defaultImages[
+                          slides[currentSlide].slideImageKey as DefaultImageKeys
+                        ] || "/naissaare.png";
+                      if (target.src !== fallbackUrl) {
+                        target.src = fallbackUrl;
+                      }
+                    }}
                   />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center bg-gray-100">
