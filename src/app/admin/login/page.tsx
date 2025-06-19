@@ -66,7 +66,7 @@ export default function AdminLogin() {
         <div>
           <Link href="/" className="block text-center">
             <img
-              src="/logo_dark.svg"
+              src="/logo_white.svg"
               alt="Steel Buckle"
               className="w-20 h-20 sm:w-24 sm:h-24 mx-auto"
             />

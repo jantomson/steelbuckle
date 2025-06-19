@@ -164,18 +164,6 @@ export default function AdminDashboard() {
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl sm:text-2xl font-semibold">Töölaud</h2>
-              <div className="hidden sm:flex items-center gap-4">
-                <button
-                  onClick={handleResetButtonClick}
-                  className="flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                  disabled={!csrfToken || isLoading}
-                >
-                  <RefreshCw size={16} />
-                  <span className="text-sm font-medium">
-                    Taasta algsätetele
-                  </span>
-                </button>
-              </div>
             </div>
 
             {message && (
