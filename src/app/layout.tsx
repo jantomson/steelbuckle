@@ -1,4 +1,4 @@
-// app/layout.tsx - Corrected version with proper async handling
+// app/layout.tsx - Force dynamic rendering and disable caching
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -7,6 +7,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import DynamicFavicon from "@/components/DynamicFavicon";
 import { getServerConfig } from "@/lib/config";
 import { GlobalColorSchemeProvider } from "@/components/admin/GlobalColorSchemeProvider";
+import type { ColorScheme } from "@/lib/config";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,23 +25,40 @@ export const metadata = {
     "raudtee-ehitus, raudtee hooldus, raudtee remont, Eesti, Läti, Leedu",
 };
 
+// CRITICAL: These exports force dynamic rendering and disable all caching
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+export const runtime = "nodejs";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Get initial color scheme on server-side (now properly awaited)
-  const config = await getServerConfig();
-  const initialColorScheme = config?.colorScheme || null;
+  let initialColorScheme: ColorScheme | undefined = undefined;
+
+  try {
+    // Add cache-busting timestamp to ensure fresh data
+    const config = await getServerConfig();
+    initialColorScheme = config?.colorScheme || undefined;
+    console.log(
+      `Layout loaded with scheme: ${
+        initialColorScheme?.id
+      } at ${new Date().toISOString()}`
+    );
+  } catch (error) {
+    console.error("Failed to get server config:", error);
+  }
 
   return (
     <html
       lang="en"
       suppressHydrationWarning
       className={initialColorScheme?.themeClass || "theme-blue"}
+      key={`theme-${initialColorScheme?.id || "blue"}-${Date.now()}`}
     >
       <head>
-        {/* Add initial CSS variables to prevent flash */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -57,7 +75,6 @@ export default async function RootLayout({
               };
               --primary-line: ${initialColorScheme?.colors.line || "#ffffff"};
             }
-            /* Ensure theme classes work properly */
             .theme-default, .theme-kollane {
               --primary-background: #fde047;
               --primary-text: #000000;
@@ -82,13 +99,17 @@ export default async function RootLayout({
           `,
           }}
         />
+        <meta
+          httpEquiv="Cache-Control"
+          content="no-cache, no-store, must-revalidate"
+        />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
       </head>
       <body className={inter.className}>
-        {/* Wrap everything in the GlobalColorSchemeProvider */}
         <GlobalColorSchemeProvider initialColorScheme={initialColorScheme}>
           <ThemeProvider />
           <DynamicFavicon />
-          {/* Main application */}
           <LanguageProvider>{children}</LanguageProvider>
         </GlobalColorSchemeProvider>
       </body>

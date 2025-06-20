@@ -1,7 +1,5 @@
-// lib/config.ts - Fixed version with better error handling
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+// lib/config.ts - Updated with better error handling and caching
+import { prisma } from "./prisma";
 
 export type ColorScheme = {
   id: string;
@@ -63,69 +61,50 @@ const COLOR_SCHEMES = {
   },
 } as const;
 
+let configCache: { colorScheme: ColorScheme } | null = null;
+let cacheTime = 0;
+const CACHE_DURATION = 5000; // 5 seconds cache
+
 export const getServerConfig = async () => {
   try {
-    console.log("getServerConfig: Attempting to read from database...");
+    // Use cache for frequent requests
+    if (configCache && Date.now() - cacheTime < CACHE_DURATION) {
+      return configCache;
+    }
+
+    console.log("getServerConfig: Reading from database...");
 
     const setting = await prisma.siteSettings.findUnique({
       where: { key: "site.colorScheme" },
     });
 
-    console.log("getServerConfig: Database result:", setting);
-
     if (setting?.value) {
       try {
         const savedScheme = JSON.parse(setting.value);
-        console.log("getServerConfig: Parsed scheme:", savedScheme);
-
         const fullScheme =
           COLOR_SCHEMES[savedScheme.id as keyof typeof COLOR_SCHEMES];
 
         if (fullScheme) {
-          console.log("getServerConfig: Found valid scheme:", fullScheme.name);
-          return { colorScheme: fullScheme };
+          configCache = { colorScheme: fullScheme };
+          cacheTime = Date.now();
+          return configCache;
         }
       } catch (parseError) {
-        console.error(
-          "getServerConfig: Error parsing saved scheme:",
-          parseError
-        );
+        console.error("Error parsing saved scheme:", parseError);
       }
     }
 
-    // If no setting exists or parsing failed, create default
-    console.log("getServerConfig: Creating default setting...");
-
-    try {
-      await prisma.siteSettings.upsert({
-        where: { key: "site.colorScheme" },
-        update: {
-          value: JSON.stringify({ id: "blue" }),
-        },
-        create: {
-          key: "site.colorScheme",
-          value: JSON.stringify({ id: "blue" }),
-          description: "Current active color scheme for the site",
-        },
-      });
-      console.log("getServerConfig: Created default setting");
-    } catch (createError) {
-      console.error(
-        "getServerConfig: Error creating default setting:",
-        createError
-      );
-    }
-
-    // Return default blue theme
-    console.log("getServerConfig: Returning default blue theme");
-    return {
-      colorScheme: COLOR_SCHEMES.blue,
-    };
+    // Default fallback
+    configCache = { colorScheme: COLOR_SCHEMES.blue };
+    cacheTime = Date.now();
+    return configCache;
   } catch (error) {
-    console.error("getServerConfig: Error reading server config:", error);
-    // Return default on error
-    return {
-      colorScheme: COLOR_SCHEMES.blue,
-    };
+    console.error("Error reading server config:", error);
+    return { colorScheme: COLOR_SCHEMES.blue };
   }
+};
+
+export const invalidateConfigCache = () => {
+  configCache = null;
+  cacheTime = 0;
 };

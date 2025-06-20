@@ -1,5 +1,39 @@
 {
   "buildCommand": "npm run build:full",
   "installCommand": "npm install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {
+    "app/api/color-scheme/route.ts": {
+      "maxDuration": 15
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/color-scheme",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        },
+        {
+          "key": "Vary",
+          "value": "*"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/color-scheme",
+      "destination": "/api/color-scheme"
+    }
+  ]
 }
