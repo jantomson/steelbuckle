@@ -75,12 +75,3 @@ img[src^="/line"] {
 .font-mona {
   font-family: var(--font-mona), sans-serif;
 }
-
-body {
-  background-color: var(--primary-background) !important;
-  color: var(--primary-text) !important;
-}
-
-* {
-  border-color: var(--primary-border) !important;
-}

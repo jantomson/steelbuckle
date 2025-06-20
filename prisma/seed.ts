@@ -1057,6 +1057,28 @@ async function seedProjects() {
   }
 }
 
+async function seedSiteSettings() {
+  console.log("Seeding site settings...");
+
+  try {
+    // Delete existing site settings to start fresh
+    await prisma.siteSettings.deleteMany({});
+
+    // Set default color scheme to blue (matching your DEFAULT_CONFIG)
+    await prisma.siteSettings.create({
+      data: {
+        key: "site.colorScheme",
+        value: JSON.stringify({ id: "blue" }),
+        description: "Current active color scheme for the site",
+      },
+    });
+
+    console.log("Site settings seeded successfully with blue color scheme");
+  } catch (error) {
+    console.error("Error seeding site settings:", error);
+  }
+}
+
 // Add this function to your seed.ts file
 
 // async function seedSiteSettings() {
@@ -1154,6 +1176,8 @@ async function main() {
 
     // Seed SEO metadata
     await seedSeoMetadata();
+
+    await seedSiteSettings();
 
     //await seedSiteSettings();
     console.log("Database seeding completed!");
