@@ -1,4 +1,4 @@
-// app/layout.tsx - Updated to integrate with your existing setup
+// app/layout.tsx - Corrected version with proper async handling
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -24,13 +24,13 @@ export const metadata = {
     "raudtee-ehitus, raudtee hooldus, raudtee remont, Eesti, Läti, Leedu",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Get initial color scheme on server-side
-  const config = getServerConfig();
+  // Get initial color scheme on server-side (now properly awaited)
+  const config = await getServerConfig();
   const initialColorScheme = config?.colorScheme || null;
 
   return (
